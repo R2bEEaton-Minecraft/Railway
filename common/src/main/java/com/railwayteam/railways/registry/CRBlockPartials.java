@@ -24,7 +24,7 @@ import com.zurrtum.create.content.trains.track.TrackShape;
 import com.zurrtum.create.client.flywheel.lib.model.baked.PartialModel;
 import com.zurrtum.create.catnip.data.Couple;
 import com.zurrtum.create.client.catnip.lang.Lang;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.DyeColor;
 import org.jetbrains.annotations.NotNull;
 
@@ -45,9 +45,9 @@ public class CRBlockPartials {
     public static final Map<DyeColor, PartialModel> CONDUCTOR_WHISTLE_FLAGS = new EnumMap<>(DyeColor.class);
     public static final Map<String, PartialModel> CUSTOM_CONDUCTOR_CAPS = new HashMap<>();
     public static final Map<String, PartialModel> CUSTOM_CONDUCTOR_ONLY_CAPS = new HashMap<>();
-    public static final Map<String, Identifier> CUSTOM_CONDUCTOR_SKINS = new HashMap<>();
+    public static final Map<String, ResourceLocation> CUSTOM_CONDUCTOR_SKINS = new HashMap<>();
     public static final Set<String> NO_TILT_CAPS = new HashSet<>();
-    public static final Map<String, Identifier> CUSTOM_CONDUCTOR_SKINS_FOR_NAME = new HashMap<>(); // for if a conductor is renamed, rather than the cap
+    public static final Map<String, ResourceLocation> CUSTOM_CONDUCTOR_SKINS_FOR_NAME = new HashMap<>(); // for if a conductor is renamed, rather than the cap
 
     public static void registerCustomCap(String itemName, String modelLoc) {
         CUSTOM_CONDUCTOR_CAPS.put(itemName, PartialModel.of(Railways.asResource("item/dev_caps/"+modelLoc)));
@@ -117,7 +117,7 @@ public class CRBlockPartials {
         public final List<ModelTransform> additionalTransforms = new ArrayList<>();
 
         private TrackCasingSpec altSpec;
-        private final Map<Identifier, TrackCasingSpec> specsByIdentifier = new HashMap<>();
+        private final Map<ResourceLocation, TrackCasingSpec> specsByIdentifier = new HashMap<>();
         private final int topSurfacePixelHeight;
 
         private double xShift = 0; // for track pads
@@ -135,7 +135,7 @@ public class CRBlockPartials {
             this.topSurfacePixelHeight = topSurfacePixelHeight;
         }
 
-        public TrackCasingSpec getFor(@Nullable Identifier type) {
+        public TrackCasingSpec getFor(@Nullable ResourceLocation type) {
             if (type == null || !specsByIdentifier.containsKey(type))
                 return this;
             return specsByIdentifier.get(type);
@@ -164,7 +164,7 @@ public class CRBlockPartials {
         }
 
         @Nullable
-        public TrackCasingSpec getAltSpec(@Nullable Identifier type) {
+        public TrackCasingSpec getAltSpec(@Nullable ResourceLocation type) {
             if (type == null) {
                 return getAltSpec();
             } else if (altSpec != null && altSpec.specsByIdentifier.containsKey(type)) {
@@ -176,14 +176,14 @@ public class CRBlockPartials {
             }
         }
 
-        public TrackCasingSpec getNonNullAltSpec(@Nullable Identifier type) {
+        public TrackCasingSpec getNonNullAltSpec(@Nullable ResourceLocation type) {
             TrackCasingSpec spec = getAltSpec(type);
             if (spec == null)
                 spec = getAltSpec();
             return spec;
         }
 
-        public int getTopSurfacePixelHeight(@Nullable Identifier type, boolean alt) {
+        public int getTopSurfacePixelHeight(@Nullable ResourceLocation type, boolean alt) {
             if (type == null)
                 return getTopSurfacePixelHeight(alt);
             TrackCasingSpec altSpec;
@@ -194,7 +194,7 @@ public class CRBlockPartials {
             }
         }
 
-        public TrackCasingSpec withTrackType(@NotNull Identifier type, @Nullable TrackCasingSpec spec) {
+        public TrackCasingSpec withTrackType(@NotNull ResourceLocation type, @Nullable TrackCasingSpec spec) {
             if (spec == null) {
                 specsByIdentifier.remove(type);
             } else {
@@ -218,11 +218,11 @@ public class CRBlockPartials {
             return zShift;
         }
 
-        public double getXShift(@Nullable Identifier type) {
+        public double getXShift(@Nullable ResourceLocation type) {
             return getFor(type).shiftSet ? getFor(type).getXShift() : getXShift();
         }
 
-        public double getZShift(@Nullable Identifier type) {
+        public double getZShift(@Nullable ResourceLocation type) {
             return getFor(type).shiftSet ? getFor(type).getZShift() : getZShift();
         }
 
@@ -546,7 +546,7 @@ public class CRBlockPartials {
     );
 
     private static PartialModel createBlock(String path) {
-        return PartialModel.of(Identifier.fromNamespaceAndPath("create", "block/" + path));
+        return PartialModel.of(ResourceLocation.fromNamespaceAndPath("create", "block/" + path));
     }
 
     private static PartialModel block(String path) {

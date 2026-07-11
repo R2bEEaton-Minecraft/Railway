@@ -18,11 +18,16 @@
 
 package com.railwayteam.railways.util.packet;
 
+import com.railwayteam.railways.content.distant_signals.IOverridableSignal;
 import com.railwayteam.railways.multiloader.S2CPacket;
 import com.zurrtum.create.content.trains.signal.SignalBlockEntity;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import org.jetbrains.annotations.Nullable;
 
 public class OverridableSignalPacket implements S2CPacket {
@@ -63,7 +68,17 @@ public class OverridableSignalPacket implements S2CPacket {
         buffer.writeInt(ticks);
         buffer.writeBoolean(distantSignal);
     }
+    @Environment(EnvType.CLIENT)
     public void handle(Minecraft mc) {
-        ClientPacketHandlers.handleOverridableSignal(mc, blockPos, signalPos, signalState, ticks, distantSignal);
+        Level level = mc.level;
+        if (level != null) {
+            BlockEntity te = level.getBlockEntity(blockPos);
+            if (te instanceof IOverridableSignal overridableSignal) {
+                SignalBlockEntity signalBE = null;
+                if (signalPos != null && level.getBlockEntity(signalPos) instanceof SignalBlockEntity signal)
+                    signalBE = signal;
+                overridableSignal.railways$refresh(signalBE, signalState, ticks, distantSignal);
+            }
+        }
     }
 }

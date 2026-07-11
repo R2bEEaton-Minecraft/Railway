@@ -27,7 +27,7 @@ import dev.architectury.injectables.annotations.ExpectPlatform;
 import com.zurrtum.create.catnip.platform.CatnipServices;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.recipes.RecipeProvider;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ItemLike;
 import org.jetbrains.annotations.NotNull;
@@ -124,11 +124,11 @@ public abstract class RailwaysMechanicalCraftingRecipeGen extends RailwaysRecipe
             return this;
         }
 
-        private static Identifier clean(Identifier loc) {
+        private static ResourceLocation clean(ResourceLocation loc) {
             String path = loc.getPath();
             while (path.contains("//"))
                 path = path.replaceAll("//", "/");
-            return new Identifier(loc.getNamespace(), path);
+            return ResourceLocation.fromNamespaceAndPath(loc.getNamespace(), path);
         }
 
 
@@ -137,7 +137,7 @@ public abstract class RailwaysMechanicalCraftingRecipeGen extends RailwaysRecipe
             return register(consumer -> {
                 MechanicalCraftingRecipeBuilder b =
                     builder.apply(MechanicalCraftingRecipeBuilder.shapedRecipe(result.get(), amount));
-                Identifier location = clean(Railways.asResource("mechanical_crafting/" + CatnipServices.REGISTRIES.getKeyOrThrow(result.get()
+                ResourceLocation location = clean(Railways.asResource("mechanical_crafting/" + CatnipServices.REGISTRIES.getKeyOrThrow(result.get()
                         .asItem())
                     .getPath() + suffix));
                 if (addToEmiDefaults) {

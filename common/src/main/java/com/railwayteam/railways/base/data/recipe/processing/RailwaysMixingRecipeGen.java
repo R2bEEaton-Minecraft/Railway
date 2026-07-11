@@ -37,7 +37,7 @@ import com.zurrtum.create.foundation.fluid.FluidIngredient;
 import com.zurrtum.create.catnip.platform.CatnipServices;
 import net.minecraft.data.PackOutput;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.FluidTags;
 
 import java.util.function.Supplier;
@@ -47,7 +47,7 @@ public class RailwaysMixingRecipeGen extends RailwaysProcessingRecipeGen {
     StyledList<DyedOnlyPalettesRecipeList> LOCOMETAL_DYEING = new StyledList<>(style -> new DyedOnlyPalettesRecipeList(
         color -> createWithDeferredId(
             () -> {
-                Identifier loc = Railways.asResource("palettes/dyeing/" + CatnipServices.REGISTRIES.getKeyOrThrow(style.get(color).asItem()).getPath());
+                ResourceLocation loc = Railways.asResource("palettes/dyeing/" + CatnipServices.REGISTRIES.getKeyOrThrow(style.get(color).asItem()).getPath());
                 if (style != CRPalettes.Styles.FLYWHEEL) {
                     EmiRecipeDefaultsGen.DEFAULT_RECIPES.add(Railways.asResource(getRecipeType().getId().getPath() + "/" + loc.getPath()));
                 }
@@ -114,9 +114,9 @@ public class RailwaysMixingRecipeGen extends RailwaysProcessingRecipeGen {
         return AllRecipeTypes.MIXING;
     }
 
-    private Supplier<Identifier> paintLoc(PalettesColor color) {
+    private Supplier<ResourceLocation> paintLoc(PalettesColor color) {
         return () -> {
-            Identifier loc = Railways.asResource("palettes/dye/" + color.getSerializedName());
+            ResourceLocation loc = Railways.asResource("palettes/dye/" + color.getSerializedName());
             EmiRecipeDefaultsGen.DEFAULT_RECIPES.add(Railways.asResource(getRecipeType().getId().getPath() + "/" + loc.getPath()));
             return loc;
         };
@@ -139,7 +139,7 @@ public class RailwaysMixingRecipeGen extends RailwaysProcessingRecipeGen {
     private GeneratedRecipe paintMix(PalettesColor result, PalettesColor colorA, PalettesColor colorB, boolean makeDefault) {
         return createWithDeferredId(
             () -> {
-                Identifier loc = Railways.asResource(
+                ResourceLocation loc = Railways.asResource(
                     "palettes/dye/"
                         + result.getSerializedName()
                         + "_from_"

@@ -26,7 +26,7 @@ import com.railwayteam.railways.registry.CRBlockPartials;
 import com.zurrtum.create.content.trains.track.BezierConnection;
 import com.zurrtum.create.content.trains.track.TrackBlock;
 import com.zurrtum.create.content.trains.track.TrackBlockEntity;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import com.zurrtum.create.content.trains.track.TrackShape;
 import com.zurrtum.create.content.trains.track.TrackShape;
 import com.zurrtum.create.client.content.trains.track.TrackVisual;
@@ -140,7 +140,7 @@ public abstract class MixinTrackVisual extends AbstractVisual implements BlockEn
                             .rotateZDegrees((float) angle);
                     }
                 }
-                Identifier trackType = null;
+                ResourceLocation trackType = null;
                 if (state.getBlock() instanceof TrackBlock trackBlock)
                     trackType = CRTrackMaterials.getType(trackBlock.getMaterial());
 
@@ -207,7 +207,7 @@ public abstract class MixinTrackVisual extends AbstractVisual implements BlockEn
                             BlockPos relativePos = segments.lightPosition[i].offset(this.pos);
                             casingData.add(Pair.of(casingInstance, relativePos));
 
-                            Identifier trackType = CRTrackMaterials.getType(bc.getMaterial());
+                            ResourceLocation trackType = CRTrackMaterials.getType(bc.getMaterial());
                             if (trackType == WIDE_GAUGE) {
                                 for (boolean first : Iterate.trueAndFalse) {
                                     for (boolean inner : Iterate.trueAndFalse) {

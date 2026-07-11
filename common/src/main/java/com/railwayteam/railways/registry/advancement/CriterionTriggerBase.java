@@ -22,9 +22,9 @@ import com.google.common.collect.Maps;
 import com.railwayteam.railways.Railways;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.advancements.CriterionTrigger;
-import net.minecraft.advancements.criterion.AbstractCriterionTriggerInstance;
-import net.minecraft.advancements.criterion.ContextAwarePredicate;
-import net.minecraft.resources.Identifier;
+import net.minecraft.advancements.critereon.AbstractCriterionTriggerInstance;
+import net.minecraft.advancements.critereon.ContextAwarePredicate;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.PlayerAdvancements;
 import net.minecraft.server.level.ServerPlayer;
 
@@ -41,7 +41,7 @@ public abstract class CriterionTriggerBase<T extends CriterionTriggerBase.Instan
 		this.id = Railways.asResource(id);
 	}
 
-	private final Identifier id;
+	private final ResourceLocation id;
 	protected final Map<PlayerAdvancements, Set<Listener<T>>> listeners = Maps.newHashMap();
 	public void addPlayerListener(PlayerAdvancements playerAdvancementsIn, Listener<T> listener) {
 		Set<Listener<T>> playerListeners = this.listeners.computeIfAbsent(playerAdvancementsIn, k -> new HashSet<>());
@@ -60,7 +60,7 @@ public abstract class CriterionTriggerBase<T extends CriterionTriggerBase.Instan
 	public void removePlayerListeners(PlayerAdvancements playerAdvancementsIn) {
 		this.listeners.remove(playerAdvancementsIn);
 	}
-	public Identifier getId() {
+	public ResourceLocation getId() {
 		return id;
 	}
 
@@ -84,7 +84,7 @@ public abstract class CriterionTriggerBase<T extends CriterionTriggerBase.Instan
 
 	public abstract static class Instance extends AbstractCriterionTriggerInstance {
 
-		public Instance(Identifier idIn, ContextAwarePredicate predicate) {
+		public Instance(ResourceLocation idIn, ContextAwarePredicate predicate) {
 			super(idIn, predicate);
 		}
 

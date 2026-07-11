@@ -46,6 +46,8 @@ public class BogeyMenuHandlerServer {
     }
 
     public static Pair<BogeyStyle, @Nullable BogeySize> getStyle(UUID uuid) {
-        return selectedStyles.getOrDefault(uuid, Pair.of(AllBogeyStyles.STANDARD, AllBogeySizes.SMALL));
+        if (selectedStyles.containsKey(uuid))
+            return selectedStyles.get(uuid);
+        return Pair.of(AllBogeyStyles.STANDARD, AllBogeySizes.SMALL);
     }
 }

@@ -18,18 +18,22 @@
 
 package com.railwayteam.railways.content.smokestack.block.be;
 
+import com.railwayteam.railways.Railways;
 import com.railwayteam.railways.content.smokestack.SmokeEmissionParams;
 import com.railwayteam.railways.content.smokestack.block.SmokeStackBlock;
 import com.railwayteam.railways.content.smokestack.block.variable.SmokeStackExtenderBlock;
 import com.railwayteam.railways.content.smokestack.block.variable.VariableSmokeStackBlock;
 import com.railwayteam.railways.util.ColorUtils;
+import com.zurrtum.create.client.api.goggles.IHaveGoggleInformation;
 import com.zurrtum.create.foundation.blockEntity.SmartBlockEntity;
 import com.zurrtum.create.api.behaviour.BlockEntityBehaviour;
+import com.zurrtum.create.client.catnip.lang.Lang;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.BlockPos.MutableBlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.world.level.storage.ValueInput;
-import net.minecraft.world.level.storage.ValueOutput;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
@@ -41,7 +45,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public class SmokeStackBlockEntity extends SmartBlockEntity {
+public class SmokeStackBlockEntity extends SmartBlockEntity implements IHaveGoggleInformation {
     protected @Nullable DyeColor color = null;
     protected boolean isSoul = false;
     protected int height = 0;
@@ -73,22 +77,43 @@ public class SmokeStackBlockEntity extends SmartBlockEntity {
         notifyUpdate();
     }
 
-    protected void read(ValueInput input, boolean clientPacket) {
-        super.read(input, clientPacket);
-        color = input.getInt("color").map(DyeColor::byId).orElse(null);
-        isSoul = input.getBooleanOr("isSoul", false);
-        height = Math.max(0, input.getIntOr("height", 0));
+        protected void read(CompoundTag tag, boolean clientPacket) {
+
+        if (tag.contains("color")) {
+            int colorOrdinal = tag.getInt("color").orElse(0);
+            color = DyeColor.byId(colorOrdinal);
+        } else {
+            color = null;
+        }
+        isSoul = tag.getBoolean("isSoul").orElse(false);
+
+        height = Math.max(0, tag.getInt("height").orElse(0));
     }
 
-    protected void write(ValueOutput output, boolean clientPacket) {
-        super.write(output, clientPacket);
+        protected void write(CompoundTag tag, boolean clientPacket) {
+
         if (color != null) {
-            output.putInt("color", color.getId());
+            tag.putInt("color", color.getId());
         }
-        output.putBoolean("isSoul", isSoul());
+        tag.putBoolean("isSoul", isSoul());
+
         if (height > 0) {
-            output.putInt("height", height);
+            tag.putInt("height", height);
         }
+    }
+    public boolean addToGoggleTooltip(List<Component> tooltip, boolean isPlayerSneaking) {
+        if (isSoul) {
+            Lang.builder(Railways.MOD_ID)
+                .translate("smokestack.goggle.tooltip", Component.translatable("railways.smokestack.goggle.tooltip.style.soul"))
+                .forGoggles(tooltip);
+        } else {
+            DyeColor color = this.color != null ? this.color : DyeColor.BLACK;
+            Lang.builder(Railways.MOD_ID)
+                .translate("smokestack.goggle.tooltip.color", Component.translatable("color.minecraft." + color.getName()))
+                .forGoggles(tooltip);
+        }
+
+        return true;
     }
     public ItemStack getIcon(boolean isPlayerSneaking) {
         if (color != null)

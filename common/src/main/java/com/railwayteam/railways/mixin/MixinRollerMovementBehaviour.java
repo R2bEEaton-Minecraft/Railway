@@ -42,7 +42,6 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -57,17 +56,10 @@ public abstract class MixinRollerMovementBehaviour {
     @Unique
     private final List<BlockPos> railways$trackPositions = new ArrayList<>();
 
-    @Inject(method = "getPositionsToBreak", at = @At("HEAD"), cancellable = true)
-    private void skipVanillaBreakingForTrackReplace(MovementContext context, BlockPos visitedPos,
-                                                    CallbackInfoReturnable<List<BlockPos>> cir) {
-        if (context.blockEntityData.getInt("ScrollValue").orElse(0) == 3)
-            cir.setReturnValue(List.of());
-    }
-
     @Inject(method = "triggerPaver", at = @At("HEAD"), cancellable = true)
     private void skipTracksAndPaveTracks(MovementContext context, BlockPos pos, CallbackInfo ci) {
         BlockState stateToPaveWith = getStateToPaveWith(context);
-        int mode = context.blockEntityData.getInt("ScrollValue").orElse(0);
+        int mode = context.blockEntityData.getInt("ScrollValue");
         if (mode == 3) { // TRACK_REPLACE
             ci.cancel();
             TrackReplacePaver.pave(context, pos, stateToPaveWith, createHeightProfileForTracks(context));
@@ -76,14 +68,14 @@ public abstract class MixinRollerMovementBehaviour {
         }
     }
 
-    @WrapOperation(method = "testBreakerTarget", at = @At(value = "INVOKE", target = "Lcom/zurrtum/create/content/contraptions/actors/roller/RollerMovementBehaviour;canBreak(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;)Z"))
+    @WrapOperation(method = "testBreakerTarget", at = @At(value = "INVOKE", target = "Lcom/simibubi/create/content/contraptions/actors/roller/RollerMovementBehaviour;canBreak(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;)Z"))
     private boolean storeTrackPosition(RollerMovementBehaviour instance, Level world, BlockPos breakingPos, BlockState state, Operation<Boolean> original) {
         if (state.getBlock() instanceof TrackBlock && CRConfigs.server().rollersClearSnow.get())
             railways$trackPositions.add(breakingPos);
         return original.call(instance, world, breakingPos, state);
     }
 
-    @WrapOperation(method = "visitNewPosition", at = @At(value = "INVOKE", target = "Lcom/zurrtum/create/content/contraptions/actors/roller/RollerMovementBehaviour;getPositionsToBreak(Lcom/zurrtum/create/content/contraptions/behaviour/MovementContext;Lnet/minecraft/core/BlockPos;)Ljava/util/List;"))
+    @WrapOperation(method = "visitNewPosition", at = @At(value = "INVOKE", target = "Lcom/simibubi/create/content/contraptions/actors/roller/RollerMovementBehaviour;getPositionsToBreak(Lcom/simibubi/create/content/contraptions/behaviour/MovementContext;Lnet/minecraft/core/BlockPos;)Ljava/util/List;"))
     private List<BlockPos> breakSnow(RollerMovementBehaviour instance, MovementContext context, BlockPos visitedPos, Operation<List<BlockPos>> original) {
         railways$trackPositions.clear();
         List<BlockPos> ret = original.call(instance, context, visitedPos);
@@ -107,7 +99,7 @@ public abstract class MixinRollerMovementBehaviour {
         return ret;
     }
 
-    @WrapOperation(method = "createHeightProfileForTracks", at = @At(value = "INVOKE", target = "Lcom/zurrtum/create/content/contraptions/actors/roller/PaveTask;put(IIF)V"), remap = false)
+    @WrapOperation(method = "createHeightProfileForTracks", at = @At(value = "INVOKE", target = "Lcom/simibubi/create/content/contraptions/actors/roller/PaveTask;put(IIF)V"), remap = false)
     private void setUpsideDown(PaveTask instance, int x, int z, float y, Operation<Void> original, @Local(name = "point") TravellingPoint point) {
         if(point.upsideDown)
             y -= 2;

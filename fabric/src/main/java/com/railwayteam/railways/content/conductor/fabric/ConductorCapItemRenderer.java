@@ -19,20 +19,15 @@
 package com.railwayteam.railways.content.conductor.fabric;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.railwayteam.railways.content.conductor.ConductorCapLayer;
 import com.railwayteam.railways.content.conductor.ConductorCapItem;
 import com.railwayteam.railways.content.conductor.ConductorCapModel;
 import com.railwayteam.railways.registry.CRItems;
 import com.tterrag.registrate.util.entry.ItemEntry;
 import net.fabricmc.fabric.api.client.rendering.v1.ArmorRenderer;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.model.Model;
 import net.minecraft.client.model.HumanoidModel;
-import net.minecraft.client.renderer.SubmitNodeCollector;
-import net.minecraft.client.renderer.entity.LivingEntityRenderer;
-import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
-import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 
 public class ConductorCapItemRenderer implements ArmorRenderer {
@@ -43,27 +38,11 @@ public class ConductorCapItemRenderer implements ArmorRenderer {
 			ArmorRenderer.register(renderer, item);
 		}
 	}
-
-	@Override
-	@SuppressWarnings({"rawtypes", "unchecked"})
-	public void render(PoseStack matrices, SubmitNodeCollector submitter, ItemStack stack, HumanoidRenderState state,
-					   EquipmentSlot slot, int light, HumanoidModel<HumanoidRenderState> contextModel) {
+	public void render(PoseStack matrices, MultiBufferSource vertexConsumers, ItemStack stack, LivingEntity entity,
+					   EquipmentSlot slot, int light, HumanoidModel<LivingEntity> contextModel) {
 		if (!(stack.getItem() instanceof ConductorCapItem cap))
 			return;
-
-		ConductorCapModel<?> model = new ConductorCapModel<>(
-			Minecraft.getInstance().getEntityModels().bakeLayer(ConductorCapModel.LAYER_LOCATION));
-		matrices.pushPose();
-		contextModel.getHead().translateAndRotate(matrices);
-		// Match the conductor entity cap: render in head-local space so pitch, yaw, and roll all follow the head.
-		matrices.translate(0.0F, 0.0F, -0.25F / 16.0F);
-		submitter.submitModel((Model) model, state, matrices, ConductorCapLayer.entityCutoutNoCull(cap.textureId),
-			light, LivingEntityRenderer.getOverlayCoords(state, 0), -1, null);
-		matrices.popPose();
-	}
-
-	@Override
-	public boolean shouldRenderDefaultHeadItem(LivingEntity entity, ItemStack stack) {
-		return false;
+		ConductorCapModel<?> model = ConductorCapModel.of(stack, contextModel, entity);
+		ArmorRenderer.renderPart(matrices, vertexConsumers, light, stack, model, cap.textureId);
 	}
 }

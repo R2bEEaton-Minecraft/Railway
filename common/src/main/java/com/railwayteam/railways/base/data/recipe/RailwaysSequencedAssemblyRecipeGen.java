@@ -22,7 +22,6 @@ import com.railwayteam.railways.Railways;
 import com.railwayteam.railways.mixin.AccessorIngredient$TagValue;
 import com.railwayteam.railways.registry.CRItems;
 import com.railwayteam.railways.registry.CRTrackMaterials;
-import com.zurrtum.create.AllItems;
 import com.zurrtum.create.AllTags;
 import com.zurrtum.create.content.kinetics.deployer.DeployerApplicationRecipe;
 import com.zurrtum.create.content.kinetics.press.PressingRecipe;
@@ -33,12 +32,12 @@ import com.zurrtum.create.foundation.data.recipe.CommonMetal;
 import net.minecraft.data.PackOutput;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 import static com.railwayteam.railways.compat.tracks.TrackCompatUtils.TRACK_COMPAT_MODS;
 
@@ -65,8 +64,8 @@ public class RailwaysSequencedAssemblyRecipeGen extends RailwaysRecipeProvider {
                 .addOutput(CRItems.ITEM_CONDUCTOR_CAP.get(color).get(), 1)
                 .loops(1)
                 .addStep(CuttingRecipe::new, rb -> rb)
-                .addStep(DeployerApplicationRecipe::new, rb -> rb.require(AllItems.PRECISION_MECHANISM))
-                .addStep(DeployerApplicationRecipe::new, rb -> rb.require(Items.STRING))
+                .addStep(DeployerApplicationRecipe::new, rb -> rb.require(Ingredients.precisionMechanism()))
+                .addStep(DeployerApplicationRecipe::new, rb -> rb.require(Ingredients.string()))
             ));
         }
 
@@ -119,7 +118,9 @@ public class RailwaysSequencedAssemblyRecipeGen extends RailwaysRecipeProvider {
                             && (((AccessorIngredient$TagValue)tagValue).getTag().equals(CommonMetal.IRON.nuggets)
                             || ((AccessorIngredient$TagValue)tagValue).getTag().equals(CommonMetal.ZINC.nuggets));
                     })) {
-                        railsIngredient = Ingredient.of(AllTags.AllItemTags.TRACK_NUGGETS.tag);
+                        railsIngredient = Ingredient.fromValues(Stream.of(
+                            AccessorIngredient$TagValue.railways$create(Ingredients.ironNugget()),
+                            AccessorIngredient$TagValue.railways$create(Ingredients.zincNugget())));
                     }
 
                     Ingredient finalRailsIngredient = railsIngredient;
@@ -144,7 +145,9 @@ public class RailwaysSequencedAssemblyRecipeGen extends RailwaysRecipeProvider {
                     && (((AccessorIngredient$TagValue) tagValue).getTag().equals(CommonMetal.ZINC.nuggets)
                     || ((AccessorIngredient$TagValue) tagValue).getTag().equals(CommonMetal.IRON.nuggets));
             })) {
-                railsIngredient = Ingredient.of(AllTags.AllItemTags.TRACK_NUGGETS.tag);
+                railsIngredient = Ingredient.fromValues(Stream.of(
+                    AccessorIngredient$TagValue.railways$create(Ingredients.ironNugget()),
+                    AccessorIngredient$TagValue.railways$create(Ingredients.zincNugget())));
             }
 
             Ingredient finalRailsIngredient = railsIngredient;
@@ -166,8 +169,8 @@ public class RailwaysSequencedAssemblyRecipeGen extends RailwaysRecipeProvider {
             .transitionTo(CRItems.ITEM_INCOMPLETE_TRACK.get(CRTrackMaterials.PHANTOM).get())
             .addOutput(new ItemStack(CRTrackMaterials.PHANTOM.getBlock(), 32), 1)
             .loops(1)
-            .addStep(DeployerApplicationRecipe::new, rb -> rb.require(Items.IRON_INGOT))
-            .addStep(DeployerApplicationRecipe::new, rb -> rb.require(Items.IRON_INGOT))
+            .addStep(DeployerApplicationRecipe::new, rb -> rb.require(Ingredients.ironIngot()))
+            .addStep(DeployerApplicationRecipe::new, rb -> rb.require(Ingredients.ironIngot()))
             .addStep(PressingRecipe::new, rb -> rb)
         ));
 
@@ -175,8 +178,8 @@ public class RailwaysSequencedAssemblyRecipeGen extends RailwaysRecipeProvider {
             .transitionTo(CRItems.ITEM_INCOMPLETE_TRACK.get(CRTrackMaterials.MONORAIL).get())
             .addOutput(new ItemStack(CRTrackMaterials.MONORAIL.getBlock(), 6), 1)
             .loops(1)
-            .addStep(DeployerApplicationRecipe::new, rb -> rb.require(AllItems.METAL_BRACKET))
-            .addStep(DeployerApplicationRecipe::new, rb -> rb.require(AllItems.IRON_SHEET))
+            .addStep(DeployerApplicationRecipe::new, rb -> rb.require(Ingredients.metalBracket()))
+            .addStep(DeployerApplicationRecipe::new, rb -> rb.require(Ingredients.ironSheet()))
             .addStep(PressingRecipe::new, rb -> rb)
         ));
     }

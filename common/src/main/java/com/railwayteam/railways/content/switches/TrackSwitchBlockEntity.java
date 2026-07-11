@@ -26,6 +26,7 @@ import com.railwayteam.railways.registry.CRBlockPartials;
 import com.railwayteam.railways.registry.CREdgePointTypes;
 import com.railwayteam.railways.registry.CRIcons;
 import com.zurrtum.create.api.contraption.transformable.TransformableBlockEntity;
+import com.zurrtum.create.client.api.goggles.IHaveGoggleInformation;
 import com.zurrtum.create.content.contraptions.StructureTransform;
 import com.zurrtum.create.content.trains.graph.TrackEdge;
 import com.zurrtum.create.content.trains.graph.TrackGraph;
@@ -34,24 +35,28 @@ import com.zurrtum.create.content.trains.graph.TrackNodeLocation;
 import com.zurrtum.create.content.trains.track.TrackTargetingBehaviour;
 import com.zurrtum.create.foundation.blockEntity.SmartBlockEntity;
 import com.zurrtum.create.api.behaviour.BlockEntityBehaviour;
+import com.zurrtum.create.client.foundation.blockEntity.behaviour.ValueBoxTransform;
 import com.zurrtum.create.client.foundation.blockEntity.behaviour.scrollValue.INamedIconOptions;
 import com.zurrtum.create.client.foundation.blockEntity.behaviour.scrollValue.ScrollOptionBehaviour;
 import com.zurrtum.create.client.foundation.gui.AllIcons;
 import com.zurrtum.create.client.flywheel.lib.model.baked.PartialModel;
 import com.zurrtum.create.client.flywheel.lib.transform.TransformStack;
 import com.zurrtum.create.catnip.animation.LerpedFloat;
+import com.zurrtum.create.client.catnip.lang.Lang;
+import com.zurrtum.create.client.catnip.lang.LangBuilder;
 import com.zurrtum.create.catnip.math.AngleHelper;
 import com.zurrtum.create.catnip.math.VecHelper;
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.storage.ValueInput;
-import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.ApiStatus;
@@ -69,7 +74,7 @@ import static java.util.stream.Collectors.toSet;
 import static net.minecraft.world.level.block.HorizontalDirectionalBlock.FACING;
 
 
-public class TrackSwitchBlockEntity extends SmartBlockEntity implements TransformableBlockEntity {
+public class TrackSwitchBlockEntity extends SmartBlockEntity implements TransformableBlockEntity, IHaveGoggleInformation {
     public TrackTargetingBehaviour<TrackSwitch> edgePoint;
     private SwitchState state;
     private int lastAnalogOutput = 0;
@@ -112,7 +117,7 @@ public class TrackSwitchBlockEntity extends SmartBlockEntity implements Transfor
 
         AutoMode(AllIcons icon) {
             this.icon = icon;
-            this.translationKey = "railways.switch.auto_mode." + name().toLowerCase(Locale.ROOT);
+            this.translationKey = "railways.switch.auto_mode." + Lang.asId(name());
         }
         public AllIcons getIcon() {
             return icon;
@@ -245,11 +250,26 @@ public class TrackSwitchBlockEntity extends SmartBlockEntity implements Transfor
                 .map(e -> e.node2.getLocation())
                 .collect(toSet());
 
-        if (Math.abs(loc.position - (edge.getLength() - 0.5)) > 0.5) {
+        if (Math.abs(loc.position - (edge.getLength()-0.5)) > 0.5) {
             exits = Set.of();
         }
 
         sw.updateExits(edge.node2.getLocation(), exits);
+    }
+
+    private static LangBuilder b() {
+        return Lang.builder(Railways.MOD_ID);
+    }
+    public boolean addToGoggleTooltip(List<Component> tooltip, boolean isPlayerSneaking) {
+        b().translate("tooltip.switch.header").forGoggles(tooltip);
+        b().translate("tooltip.switch.state")
+                .style(ChatFormatting.YELLOW)
+                .forGoggles(tooltip);
+        b().translate("switch.state." + getState().getSerializedName())
+                .style(ChatFormatting.YELLOW)
+                .forGoggles(tooltip);
+
+        return true;
     }
 
     private final int clientLazyTickRate = 10;
@@ -264,7 +284,7 @@ public class TrackSwitchBlockEntity extends SmartBlockEntity implements Transfor
             }
             if (level.isClientSide()) {
                 if (sw != null) {
-                    sw.setSwitchState(getState());
+                    sw.setSwitchState(state);
                     exitCount = sw.getExits().size();
                 }
                 lerpedAngle.tickChaser();
@@ -448,34 +468,30 @@ public class TrackSwitchBlockEntity extends SmartBlockEntity implements Transfor
         }
     }
 
-    @Override
-    protected void write(ValueOutput output, boolean clientPacket) {
-        super.write(output, clientPacket);
+        protected void write(CompoundTag tag, boolean clientPacket) {
 
         if (clientPacket)
-            output.putString("SwitchState", (state == null ? SwitchState.NORMAL : state).getSerializedName());
-        output.putInt("AnalogOutput", lastAnalogOutput);
+            tag.putString("SwitchState", (state == null ? SwitchState.NORMAL : state).getSerializedName());
+        tag.putInt("AnalogOutput", lastAnalogOutput);
         byte previousPowerState = 0;
         for (int i = 0; i < 6; i++) {
             previousPowerState |= (previousPower[i] ? 1 : 0) << i;
         }
-        output.putByte("PreviousPowerState", previousPowerState);
+        tag.putByte("PreviousPowerState", previousPowerState);
     }
 
-    @Override
-    protected void read(ValueInput input, boolean clientPacket) {
-        super.read(input, clientPacket);
+        protected void read(CompoundTag tag, boolean clientPacket) {
 
         if (clientPacket) {
-            String switchState = input.getStringOr("SwitchState", "").toUpperCase(Locale.ROOT);
+            String switchState = tag.getString("SwitchState").orElse("").toUpperCase(Locale.ROOT);
             try {
                 state = SwitchState.valueOf(switchState);
             } catch (IllegalArgumentException e) {
                 Railways.LOGGER.error("Failed to read SwitchState", e);
             }
         }
-        lastAnalogOutput = input.getIntOr("AnalogOutput", 0);
-        byte previousPowerState = input.getByteOr("PreviousPowerState", (byte) 0);
+        lastAnalogOutput = tag.getInt("AnalogOutput").orElse(0);
+        byte previousPowerState = tag.getByte("PreviousPowerState").orElse((byte) 0);
         for (int i = 0; i < 6; i++) {
             previousPower[i] = (previousPowerState & (1 << i)) != 0;
         }

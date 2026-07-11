@@ -10,11 +10,13 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
  * Rendering is intentionally no-op until these renderers are ported to submit/render states.
  */
 public abstract class SmartBlockEntityRenderer<T extends SmartBlockEntity>
-    extends com.zurrtum.create.client.foundation.blockEntity.renderer.SmartBlockEntityRenderer<T, com.zurrtum.create.client.foundation.blockEntity.renderer.SmartBlockEntityRenderer.SmartRenderState> {
+    extends com.zurrtum.create.client.foundation.blockEntity.renderer.SmartBlockEntityRenderer<T> {
     protected SmartBlockEntityRenderer(BlockEntityRendererProvider.Context context) {
         super(context);
     }
 
-    protected void renderSafe(T blockEntity, float partialTicks, PoseStack poseStack, MultiBufferSource buffer, int light, int overlay) {
+    @Override
+    protected void renderSafe(T blockEntity, float partialTicks, PoseStack poseStack,
+                              MultiBufferSource buffer, int light, int overlay) {
     }
 }

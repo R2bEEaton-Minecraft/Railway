@@ -36,7 +36,6 @@ import com.railwayteam.railways.content.custom_bogeys.special.monobogey.MonoBoge
 import com.railwayteam.railways.content.custom_tracks.casing.CasingCollisionBlock;
 import com.railwayteam.railways.content.custom_tracks.generic_crossing.GenericCrossingBlock;
 import com.railwayteam.railways.content.handcar.HandcarBlock;
-import com.railwayteam.railways.multiloader.Env;
 import com.railwayteam.railways.content.palettes.PalettesColor;
 import com.railwayteam.railways.content.palettes.RotatedPillarWindowBlock;
 import com.railwayteam.railways.content.palettes.boiler.BoilerBlock;
@@ -72,11 +71,11 @@ import com.tterrag.registrate.util.nullness.NonNullBiConsumer;
 import com.tterrag.registrate.util.nullness.NonNullUnaryOperator;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import com.zurrtum.create.catnip.data.Couple;
-import net.minecraft.advancements.criterion.StatePropertiesPredicate;
+import net.minecraft.advancements.critereon.StatePropertiesPredicate;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
@@ -128,8 +127,7 @@ public class BuilderTransformers {
             .properties(p -> p.sound(SoundType.NETHERITE_BLOCK))
             .properties(BlockBehaviour.Properties::noOcclusion)
             .transform(pickaxeOnly())
-            .tag(AllTags.AllBlockTags.SAFE_NBT.tag)
-            .loot((p, l) -> p.dropOther(l, Blocks.ANDESITE));
+            .tag(AllTags.AllBlockTags.SAFE_NBT.tag);
     }
 
     @ExpectPlatform
@@ -188,23 +186,7 @@ public class BuilderTransformers {
     }
 
     public static <B extends Block, P> NonNullUnaryOperator<BlockBuilder<B, P>> smokestackLoot(@NotNull FusedSupplier<BlockStateBlockItemGroup<SmokestackStyle.Context, SmokestackStyle>> cycleGroupSupplier) {
-        return bb -> bb
-            .loot((t, b) -> {
-                LootTable.Builder table = LootTable.lootTable();
-                for (SmokestackStyle style : SmokestackStyle.values()) {
-                    var pool = LootPool.lootPool()
-                        .when(LootItemBlockStatePropertyCondition.hasBlockStateProperties(b)
-                            .setProperties(StatePropertiesPredicate.Builder.properties()
-                                .hasProperty(VariableSmokeStackBlock.STYLE, style)
-                            )
-                        )
-                        .setRolls(ConstantValue.exactly(1.0F))
-                        .add(LootItem.lootTableItem(cycleGroupSupplier.get().get(style)));
-                    table.withPool(t.applyExplosionCondition(b, pool));
-                }
-
-                t.add(b, table);
-            });
+        return bb -> bb;
     }
 
     @ExpectPlatform
@@ -270,10 +252,7 @@ public class BuilderTransformers {
             .tag(CRTags.AllBlockTags.LOCOMETAL_BOILERS.tag)
             .tag(AllTags.AllBlockTags.COPYCAT_DENY.tag)
             .transform(pickaxeOnly())
-            .onRegisterAfter(Registries.ITEM, v -> {
-                if (Env.CLIENT.isCurrent())
-                    ItemDescription.useKey(v, "block.railways.boiler");
-            });
+            .onRegisterAfter(Registries.ITEM, v -> ItemDescription.useKey(v, "block.railways.boiler"));
     }
 
     public static <B extends DoorBlock, P> NonNullUnaryOperator<BlockBuilder<B, P>> locometalDoor(PalettesColor color, String type, TagKey<Item>[] itemTags, TagKey<Block>[] blockTags) {
@@ -286,7 +265,6 @@ public class BuilderTransformers {
             .tag(BlockTags.DOORS)
             .tag(BlockTags.WOODEN_DOORS) // for villager AI
             .tag(blockTags)
-            .loot((lr, block) -> lr.add(block, lr.createDoorTable(block)))
             .item()
             .tag(ItemTags.DOORS)
             .tag(itemTags)
@@ -363,7 +341,7 @@ public class BuilderTransformers {
     }
 
     @ExpectPlatform
-    public static <B extends TrackBufferBlock<?>, P> NonNullUnaryOperator<BlockBuilder<B, P>> bufferBlockState(Function<BlockState, Identifier> modelFunc, Function<BlockState, Direction> facingFunc) {
+    public static <B extends TrackBufferBlock<?>, P> NonNullUnaryOperator<BlockBuilder<B, P>> bufferBlockState(Function<BlockState, ResourceLocation> modelFunc, Function<BlockState, Direction> facingFunc) {
         throw new AssertionError();
     }
 

@@ -20,19 +20,19 @@ package com.railwayteam.railways.compat.tracks;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 
 /**
  * Represents a special ingredient for datagen - it references an item that does not necessarily exist
  */
 public class SoftIngredient {
-    public final Identifier item;
-    public SoftIngredient(Identifier item) {
+    public final ResourceLocation item;
+    public SoftIngredient(ResourceLocation item) {
         this.item = item;
     }
 
-    public static SoftIngredient of(Identifier item) {
+    public static SoftIngredient of(ResourceLocation item) {
         return new SoftIngredient(item);
     }
 

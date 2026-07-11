@@ -28,7 +28,7 @@ loom {
 
             name = "Minecraft Data"
             vmArg("-Dfabric-api.datagen")
-            vmArg("-Dfabric-api.datagen.output-dir=${layout.buildDirectory.dir("generated/datagen").get().asFile}")
+            vmArg("-Dfabric-api.datagen.output-dir=${common.file("src/generated/resources")}")
             vmArg("-Dfabric-api.datagen.modid=railways")
             vmArg("-Dporting_lib.datagen.existing_resources=${common.file("src/main/resources")}")
 
@@ -42,17 +42,23 @@ dependencies {
     modImplementation("net.fabricmc.fabric-api:fabric-api:${"fabric_api_version"()}")
 
     // Create - dependencies are added transitively
-    modImplementation(rootProject.extra["patchedCreateFlyFiles"]!!)
-    compileOnly("com.tterrag.registrate:Registrate:MC1.20-1.3.11")
+    modImplementation(rootProject.extra["patchedCreateFlyDependency"] as String)
+    modImplementation(rootProject.extra["patchedRegistrateDependency"] as String)
+    modImplementation("io.github.fabricators_of_create.Porting-Lib:model_generators:2.1.1090+1.20") { isTransitive = false }
+    modImplementation("io.github.fabricators_of_create.Porting-Lib:data:2.1.1090+1.20") { isTransitive = false }
     compileOnly("com.google.code.findbugs:jsr305:3.0.2")
 
-    modCompileOnly("dev.emi:emi-fabric:${"emi_version"()}:api") { isTransitive = false }
-    modCompileOnly("maven.modrinth:jei:${"jei_fabric_version"()}")
-
-    // JEI (recipe viewer) - dev runtime only, for testing recipe-viewer compatibility
-    if ("enable_jei"().toBoolean()) {
-        modLocalRuntime("maven.modrinth:jei:${"jei_fabric_version"()}")
+    // Fabric ASM (enum extension etc)
+    modImplementation("com.github.Chocohead:Fabric-ASM:v2.3") {
+        exclude (group = "net.fabricmc.fabric-api")
     }
+
+    include("com.github.Chocohead:Fabric-ASM:v2.3")
+
+    // Development QOL
+    modLocalRuntime("com.terraformersmc:modmenu:${"modmenu_version"()}")
+
+    modCompileOnly("dev.emi:emi-fabric:${"emi_version"()}:api") { isTransitive = false }
 
     modCompileOnly("de.maxhenkel.voicechat:voicechat-api:${"voicechat_api_version"()}")
 
@@ -102,8 +108,8 @@ sourceSets.main {
     java {
         exclude("com/railwayteam/railways/base/data/fabric/CRTagGenImpl.java")
         exclude("com/railwayteam/railways/base/data/fabric/GeneratedEntriesProvider.java")
-        exclude("com/railwayteam/railways/compat/emi/fabric/**")
         exclude("com/railwayteam/railways/base/data/recipe/fabric/**")
+        exclude("com/railwayteam/railways/compat/emi/fabric/**")
         exclude("com/railwayteam/railways/content/buffer/fabric/BufferModel.java")
         exclude("com/railwayteam/railways/content/buffer/headstock/fabric/CopycatHeadstockBarsModel.java")
         exclude("com/railwayteam/railways/content/buffer/headstock/fabric/CopycatHeadstockModel.java")
@@ -114,8 +120,10 @@ sourceSets.main {
         exclude("com/railwayteam/railways/content/palettes/boiler/fabric/BoilerBlockPlacementHelperImpl.java")
         exclude("com/railwayteam/railways/content/palettes/boiler/fabric/ObjModelBuilder.java")
         exclude("com/railwayteam/railways/content/palettes/painting/fabric/PaintPitcherFluidStorage.java")
-        exclude("com/railwayteam/railways/fabric/events/ClientEventsFabric.java")
+        exclude("com/railwayteam/railways/content/conductor/fabric/ConductorCapItemRenderer.java")
         exclude("com/railwayteam/railways/fabric/mixin/**")
+        exclude("com/railwayteam/railways/fabric/ConductorFakePlayerFabric.java")
+        exclude("com/railwayteam/railways/fabric/RailwaysDataFabric.java")
     }
 }
 

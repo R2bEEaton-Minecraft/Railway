@@ -32,7 +32,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ServerGamePacketListener;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.ApiStatus.Internal;
 
@@ -51,8 +51,8 @@ public abstract class PacketSet {
 	public final String id;
 	public final int version;
 
-	public final Identifier c2sPacket;
-	public final Identifier s2cPacket;
+	public final ResourceLocation c2sPacket;
+	public final ResourceLocation s2cPacket;
 
 	private final List<Function<FriendlyByteBuf, S2CPacket>> s2cPackets;
 	private final Object2IntMap<Class<? extends S2CPacket>> s2cTypes;
@@ -73,8 +73,8 @@ public abstract class PacketSet {
 		this.c2sPackets = c2sPackets;
 		this.c2sTypes = c2sTypes;
 
-		c2sPacket = Identifier.fromNamespaceAndPath(id, "c2s");
-		s2cPacket = Identifier.fromNamespaceAndPath(id, "s2c");
+		c2sPacket = ResourceLocation.fromNamespaceAndPath(id, "c2s");
+		s2cPacket = ResourceLocation.fromNamespaceAndPath(id, "s2c");
 	}
 
 	/**
@@ -146,29 +146,8 @@ public abstract class PacketSet {
 			return;
 		}
 		Function<FriendlyByteBuf, S2CPacket> factory = s2cPackets.get(i);
-		S2CPacket packet;
-		try {
-			packet = factory.apply(buf);
-		} catch (Throwable t) {
-			Railways.LOGGER.error("S2C Packet #{} ({}) failed to decode, readableBytes was {}", i, s2cTypeName(i), buf.readableBytes(), t);
-			throw t;
-		}
-		mc.execute(() -> {
-			try {
-				packet.handle(mc);
-			} catch (Throwable t) {
-				Railways.LOGGER.error("S2C Packet #{} ({}) threw during handle()", i, s2cTypeName(i), t);
-				throw t;
-			}
-		});
-	}
-
-	private String s2cTypeName(int i) {
-		for (var entry : s2cTypes.object2IntEntrySet()) {
-			if (entry.getIntValue() == i)
-				return entry.getKey().getName();
-		}
-		return "unknown";
+		S2CPacket packet = factory.apply(buf);
+		mc.execute(() -> packet.handle(mc));
 	}
 
 	@Internal

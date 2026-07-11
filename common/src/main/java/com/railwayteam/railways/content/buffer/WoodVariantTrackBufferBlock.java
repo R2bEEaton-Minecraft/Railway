@@ -53,6 +53,6 @@ public abstract class WoodVariantTrackBufferBlock extends TrackBufferBlock<WoodV
         InteractionResult result = onBlockEntityUse(pLevel, pPos, be -> be.applyMaterialIfValid(pPlayer.getItemInHand(pHand)));
         if (result.consumesAction())
             return result;
-        return super.use(pState, pLevel, pPos, pPlayer, pHand, pHit);
+        return InteractionResult.PASS;
     }
 }

@@ -66,7 +66,7 @@ public class MixinTrackRenderer {
                     }
                 }
 
-                Identifier trackType = null;
+                ResourceLocation trackType = null;
                 if (te.getBlockState().getBlock() instanceof TrackBlock trackBlock)
                     trackType = CRTrackMaterials.getType(trackBlock.getMaterial());
 

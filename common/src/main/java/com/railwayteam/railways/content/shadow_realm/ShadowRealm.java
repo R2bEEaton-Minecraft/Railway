@@ -6,7 +6,7 @@ import com.zurrtum.create.content.trains.RailwaySavedData;
 import com.zurrtum.create.content.trains.entity.Train;
 import com.zurrtum.create.infrastructure.component.BezierTrackPointLocation;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
@@ -26,7 +26,7 @@ public class ShadowRealm {
     @ApiStatus.Internal
     public static Train clientShadowRestoringTrain;
 
-    public static void banishTrain(Train train, Identifier shadowKey) throws CommandSyntaxException {
+    public static void banishTrain(Train train, ResourceLocation shadowKey) throws CommandSyntaxException {
     }
 
     public static void handleTrainRelocationPacket(ServerPlayer sender, UUID trainId, RestorationTarget target, CallbackInfo ci) {

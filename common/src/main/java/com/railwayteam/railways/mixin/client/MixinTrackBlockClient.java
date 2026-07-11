@@ -28,7 +28,7 @@ import com.zurrtum.create.content.trains.track.BezierConnection;
 import com.zurrtum.create.infrastructure.component.BezierTrackPointLocation;
 import com.zurrtum.create.content.trains.track.TrackBlock;
 import com.zurrtum.create.content.trains.track.TrackBlockEntity;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import com.zurrtum.create.content.trains.track.TrackShape;
 import com.zurrtum.create.content.trains.track.TrackTargetingBehaviour.RenderedTrackOverlayType;
 import com.zurrtum.create.client.flywheel.lib.model.baked.PartialModel;
@@ -80,7 +80,7 @@ public class MixinTrackBlockClient {
             TrackShape shape = state.getValue(TrackBlock.SHAPE);
             if (casingTE.railways$getTrackCasing() != null) {
                 CRBlockPartials.TrackCasingSpec spec = CRBlockPartials.TRACK_CASINGS.get(shape);
-                Identifier trackType = CRTrackMaterials.getType(trackBlock.getMaterial());
+                ResourceLocation trackType = CRTrackMaterials.getType(trackBlock.getMaterial());
                 if (spec != null)
                     affine.translate(
                         spec.getXShift(trackType),

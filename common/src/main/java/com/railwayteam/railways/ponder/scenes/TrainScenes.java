@@ -31,23 +31,23 @@ import com.zurrtum.create.AllItems;
 import com.zurrtum.create.content.redstone.nixieTube.NixieTubeBlockEntity;
 import com.zurrtum.create.content.trains.signal.SignalBlock;
 import com.zurrtum.create.content.trains.signal.SignalBlockEntity;
-import com.zurrtum.create.client.foundation.ponder.CreateSceneBuilder;
+import com.zurrtum.create.foundation.ponder.CreateSceneBuilder;
 import com.zurrtum.create.catnip.math.Pointing;
-import com.zurrtum.create.client.ponder.api.PonderPalette;
-import com.zurrtum.create.client.ponder.api.element.ElementLink;
-import com.zurrtum.create.client.ponder.api.element.ParrotElement;
-import com.zurrtum.create.client.ponder.api.element.ParrotPose;
-import com.zurrtum.create.client.ponder.api.element.WorldSectionElement;
-import com.zurrtum.create.client.ponder.api.level.PonderLevel;
-import com.zurrtum.create.client.ponder.api.scene.SceneBuilder;
-import com.zurrtum.create.client.ponder.api.scene.SceneBuildingUtil;
-import com.zurrtum.create.client.ponder.api.scene.Selection;
-import com.zurrtum.create.client.ponder.foundation.PonderScene;
-import com.zurrtum.create.client.ponder.foundation.instruction.PonderInstruction;
+import net.createmod.ponder.api.PonderPalette;
+import net.createmod.ponder.api.element.ElementLink;
+import net.createmod.ponder.api.element.ParrotElement;
+import net.createmod.ponder.api.element.ParrotPose;
+import net.createmod.ponder.api.element.WorldSectionElement;
+import net.createmod.ponder.api.level.PonderLevel;
+import net.createmod.ponder.api.scene.SceneBuilder;
+import net.createmod.ponder.api.scene.SceneBuildingUtil;
+import net.createmod.ponder.api.scene.Selection;
+import net.createmod.ponder.foundation.PonderScene;
+import net.createmod.ponder.foundation.instruction.PonderInstruction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.world.entity.projectile.arrow.Arrow;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.NbtUtils;
+import net.minecraft.world.entity.projectile.Arrow;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.ButtonBlock;
 import net.minecraft.world.level.block.ComparatorBlock;
@@ -144,7 +144,7 @@ public class TrainScenes {
         scene.idle(10);
         scene.special().movePointOfInterest(new Vec3(0,3,8));
 
-        ElementLink<WorldSectionElement> trainElement = scene.world().showIndependentSection(train1, Direction.DOWN);
+        ElementLink<WorldSectionElement> trainElement = scene.world().showIndependentSection(train1, null);
         ElementLink<ParrotElement> birb1 =
                 scene.special().createBirb(util.vector().centerOf(18, 3, 7), ParrotPose.FacePointOfInterestPose::new);
         scene.world().moveSection(trainElement, util.vector().of(4, 0, 0), 0);
@@ -160,7 +160,7 @@ public class TrainScenes {
 
         scene.idle(35);
 
-        ElementLink<WorldSectionElement> trainElement2 = scene.world().showIndependentSection(train3, Direction.DOWN);
+        ElementLink<WorldSectionElement> trainElement2 = scene.world().showIndependentSection(train3, null);
         ElementLink<ParrotElement> birb2 =
                 scene.special().createBirb(util.vector().centerOf(18, 3, 7), ParrotPose.FacePointOfInterestPose::new);
         scene.world().moveSection(trainElement2, util.vector().of(4, 0, 6), 0);
@@ -189,8 +189,8 @@ public class TrainScenes {
         scene.world().changeSignalState(signal4, SignalBlockEntity.SignalState.RED);
         scene.idle(5);
 
-        scene.world().hideIndependentSection(trainElement, Direction.UP);
-        scene.special().hideElement(birb1, Direction.UP);
+        scene.world().hideIndependentSection(trainElement, null);
+        scene.special().hideElement(birb1, null);
         scene.idle(10);
 
         scene.world().moveSection(trainElement2, util.vector().of(-11.5, 0, 0), 40);
@@ -212,7 +212,7 @@ public class TrainScenes {
 
         scene.overlay().showControls(util.vector().blockSurface(signal1, Direction.EAST), Pointing.RIGHT, 40)
                 .rightClick()
-                .withItem(new ItemStack(AllItems.WRENCH));
+                .withItem(AllItems.WRENCH.asStack());
         scene.idle(6);
         scene.world().cycleBlockProperty(signal1, SignalBlock.TYPE);
         scene.idle(15);
@@ -319,7 +319,7 @@ public class TrainScenes {
 
         scene.idle(30);
 
-        ElementLink<WorldSectionElement> trainElement3 = scene.world().showIndependentSection(train2, Direction.DOWN);
+        ElementLink<WorldSectionElement> trainElement3 = scene.world().showIndependentSection(train2, null);
         scene.world().rotateSection(trainElement3, 0, 45, 0, 0);
         scene.world().moveSection(trainElement3, util.vector().of(4, 0, -6), 0);
         scene.world().moveSection(trainElement3, util.vector().of(-14, 0, 14), 40);
@@ -369,7 +369,7 @@ public class TrainScenes {
                 .text("When 2 semaphores are placed on a non-brass signal, they both close simultaneously");
         scene.idle(80);
 
-        trainElement = scene.world().showIndependentSection(train1, Direction.DOWN);
+        trainElement = scene.world().showIndependentSection(train1, null);
         scene.world().rotateSection(trainElement, 0, 45, 0, 0);
         scene.world().moveSection(trainElement, util.vector().of(4, 0, -9), 0);
         scene.world().moveSection(trainElement, util.vector().of(-9, 0, 9), 40);
@@ -566,7 +566,7 @@ public class TrainScenes {
         scene.idle(20);
 
         for (int i = 0; i < 3; i++) {
-            scene.world().createEntity((level) -> new Arrow(level, switchPos.getX() + 0.5, 30.0, switchPos.getZ() + 0.5, ItemStack.EMPTY, ItemStack.EMPTY) {
+            scene.world().createEntity((level) -> new Arrow(level, switchPos.getX() + 0.5, 30, switchPos.getZ() + 0.5) {
                 protected void onHitBlock(@NotNull BlockHitResult result) {
                     super.onHitBlock(result);
                     if (level.getBlockEntity(result.getBlockPos()) instanceof TrackSwitchBlockEntity switchBE) {
@@ -613,7 +613,7 @@ public class TrainScenes {
             }
 
             private Optional<TrackSwitchBlockEntity> getSwitch(PonderScene scene) {
-                if (scene.getLevel().getBlockEntity(switchPos) instanceof TrackSwitchBlockEntity switchBE)
+                if (scene.getWorld().getBlockEntity(switchPos) instanceof TrackSwitchBlockEntity switchBE)
                     return Optional.of(switchBE);
                 return Optional.empty();
             }
@@ -634,7 +634,7 @@ public class TrainScenes {
             }
 
             private Optional<TrackSwitchBlockEntity> getSwitch(PonderScene scene) {
-                if (scene.getLevel().getBlockEntity(switchPos) instanceof TrackSwitchBlockEntity switchBE)
+                if (scene.getWorld().getBlockEntity(switchPos) instanceof TrackSwitchBlockEntity switchBE)
                     return Optional.of(switchBE);
                 return Optional.empty();
             }
@@ -655,7 +655,7 @@ public class TrainScenes {
             }
 
             private Optional<TrackSwitchBlockEntity> getSwitch(PonderScene scene) {
-                if (scene.getLevel().getBlockEntity(switchPos) instanceof TrackSwitchBlockEntity switchBE)
+                if (scene.getWorld().getBlockEntity(switchPos) instanceof TrackSwitchBlockEntity switchBE)
                     return Optional.of(switchBE);
                 return Optional.empty();
             }
@@ -753,7 +753,7 @@ public class TrainScenes {
 
         scene.overlay().showControls(couplerTop, Pointing.DOWN, 60)
                 .scroll()
-                .withItem(new ItemStack(AllItems.WRENCH));
+                .withItem(AllItems.WRENCH.asStack());
         scene.overlay().showScrollInput(couplerTop, Direction.DOWN, 60);
         scene.idle(5);
 
@@ -781,7 +781,7 @@ public class TrainScenes {
 
         scene.overlay().showControls(couplerTop, Pointing.DOWN, 60)
                 .rightClick()
-                .withItem(new ItemStack(AllItems.WRENCH));
+                .withItem(AllItems.WRENCH.asStack());
         scene.idle(5);
 
         scene.overlay().showText(70)
@@ -996,15 +996,14 @@ public class TrainScenes {
 
     // Coupler Ponder only code
     public static void movePlate(SceneBuilder scene, SceneBuildingUtil util, BlockPos couplerPos, BlockPos plate, int idleTicks) {
-        scene.world().modifyBlockEntityNBT(util.select().position(couplerPos), TrackCouplerBlockEntity.class, nbt ->
-            BlockPos.CODEC.encodeStart(net.minecraft.nbt.NbtOps.INSTANCE, plate).ifSuccess(tag -> nbt.put("SecondaryTargetTrack", tag)));
+        scene.world().modifyBlockEntityNBT(util.select().position(couplerPos), TrackCouplerBlockEntity.class, nbt -> nbt.put("SecondaryTargetTrack", NbtUtils.writeBlockPos(plate)));
         scene.idle(idleTicks);
     }
 
     public static void coupleTrain(SceneBuilder scene, BlockPos pos, double distance, Direction direction) {
         scene.addInstruction(PonderInstruction.simple(ponderScene -> {
-            PonderLevel world = ponderScene.getLevel();
-            world.getBlockEntity(pos, AllBlockEntityTypes.BOGEY).ifPresent(sbte -> {
+            PonderLevel world = ponderScene.getWorld();
+            world.getBlockEntity(pos, AllBlockEntityTypes.BOGEY.get()).ifPresent(sbte -> {
                 if (sbte instanceof IStandardBogeyTEVirtualCoupling virtualCoupling) {
                     virtualCoupling.setCouplingDistance(distance);
                     virtualCoupling.setCouplingDirection(direction);
@@ -1015,8 +1014,8 @@ public class TrainScenes {
 
     public static void decoupleTrain(SceneBuilder scene, BlockPos pos) {
         scene.addInstruction(PonderInstruction.simple(ponderScene -> {
-            PonderLevel world = ponderScene.getLevel();
-            world.getBlockEntity(pos, AllBlockEntityTypes.BOGEY).ifPresent(sbte -> {
+            PonderLevel world = ponderScene.getWorld();
+            world.getBlockEntity(pos, AllBlockEntityTypes.BOGEY.get()).ifPresent(sbte -> {
                 if (sbte instanceof IStandardBogeyTEVirtualCoupling virtualCoupling) {
                     virtualCoupling.setCouplingDistance(-1);
                     virtualCoupling.setCouplingDirection(Direction.UP);

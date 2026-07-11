@@ -21,13 +21,10 @@ package com.railwayteam.railways.content.smokestack.particles.puffs;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
-import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.railwayteam.railways.registry.CRParticleTypes;
 import com.zurrtum.create.foundation.particle.ICustomParticleDataWithSprite;
 import net.minecraft.client.particle.ParticleEngine;
-import net.minecraft.client.particle.ParticleProvider;
-import net.minecraft.client.particle.SpriteSet;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.network.FriendlyByteBuf;
@@ -45,8 +42,8 @@ public abstract class PuffSmokeParticleData<T extends PuffSmokeParticleData<T>> 
 		T create(boolean stationary, float red, float green, float blue);
 	}
 
-	protected static <T extends PuffSmokeParticleData<T>> MapCodec<T> makeCodec(Constructor<T> constructor) {
-		return RecordCodecBuilder.mapCodec(i -> i
+	protected static <T extends PuffSmokeParticleData<T>> Codec<T> makeCodec(Constructor<T> constructor) {
+		return RecordCodecBuilder.create(i -> i
 			.group(Codec.BOOL.fieldOf("stationary")
 					.forGetter(p -> p.stationary),
 				Codec.FLOAT.fieldOf("red") // -1, -1, -1 indicates un-dyed
@@ -125,8 +122,8 @@ public abstract class PuffSmokeParticleData<T extends PuffSmokeParticleData<T>> 
 
 	@SuppressWarnings("deprecation")
 	public abstract Deserializer<T> getDeserializer();
-	public abstract MapCodec<T> getCodec(ParticleType<T> type);
-	public abstract java.util.function.Function<SpriteSet, ParticleProvider<T>> getMetaFactory();
+	public abstract Codec<T> getCodec(ParticleType<T> type);
+	public abstract Object getMetaFactory();
 
 	public abstract float getQuadSize();
 
@@ -152,7 +149,7 @@ public abstract class PuffSmokeParticleData<T extends PuffSmokeParticleData<T>> 
 	}
 
 	public static class Small extends PuffSmokeParticleData<Small> {
-		public static final MapCodec<Small> CODEC = makeCodec(Small::new);
+		public static final Codec<Small> CODEC = makeCodec(Small::new);
 
 		@SuppressWarnings("deprecation")
 		public static final Deserializer<Small> DESERIALIZER = makeDeserializer(Small::new);
@@ -182,11 +179,11 @@ public abstract class PuffSmokeParticleData<T extends PuffSmokeParticleData<T>> 
 		public Deserializer<Small> getDeserializer() {
 			return DESERIALIZER;
 		}
-		public MapCodec<Small> getCodec(ParticleType<Small> type) {
+		public Codec<Small> getCodec(ParticleType<Small> type) {
 			return CODEC;
 		}
-		public java.util.function.Function<SpriteSet, ParticleProvider<Small>> getMetaFactory() {
-			return PuffSmokeParticle.Factory::new;
+		public Object getMetaFactory() {
+			return null;
 		}
 		public float getQuadSize() {
 			return 0.5f;
@@ -194,7 +191,7 @@ public abstract class PuffSmokeParticleData<T extends PuffSmokeParticleData<T>> 
 	}
 
 	public static class Medium extends PuffSmokeParticleData<Medium> {
-		public static final MapCodec<Medium> CODEC = makeCodec(Medium::new);
+		public static final Codec<Medium> CODEC = makeCodec(Medium::new);
 
 		@SuppressWarnings("deprecation")
 		public static final Deserializer<Medium> DESERIALIZER = makeDeserializer(Medium::new);
@@ -224,11 +221,11 @@ public abstract class PuffSmokeParticleData<T extends PuffSmokeParticleData<T>> 
 		public Deserializer<Medium> getDeserializer() {
 			return DESERIALIZER;
 		}
-		public MapCodec<Medium> getCodec(ParticleType<Medium> type) {
+		public Codec<Medium> getCodec(ParticleType<Medium> type) {
 			return CODEC;
 		}
-		public java.util.function.Function<SpriteSet, ParticleProvider<Medium>> getMetaFactory() {
-			return PuffSmokeParticle.Factory::new;
+		public Object getMetaFactory() {
+			return null;
 		}
 		public float getQuadSize() {
 			return 1;

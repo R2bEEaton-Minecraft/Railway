@@ -58,7 +58,7 @@ import com.zurrtum.create.catnip.data.Pair;
 import com.zurrtum.create.catnip.nbt.NBTHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.Containers;
 import net.minecraft.world.entity.player.Player;
@@ -100,7 +100,7 @@ public abstract class MixinTrain implements IOccupiedCouplers, IIndexedSchedule,
     @Unique protected int railways$controlBlockedTicks = -1;
     @Unique protected int railways$controlBlockedSign = 0;
     @Unique protected boolean railways$skipRealismSpeedLimit = false;
-    @Unique protected @Nullable Identifier railways$shadowKey = null;
+    @Unique protected @Nullable ResourceLocation railways$shadowKey = null;
     public boolean railways$isControlBlocked() {
         return railways$controlBlockedTicks > 0;
     }
@@ -255,7 +255,7 @@ public abstract class MixinTrain implements IOccupiedCouplers, IIndexedSchedule,
         ((IHandcarTrain) train).railways$setHandcar(tag.getBoolean("IsHandcar").orElse(false));
 
         if (tag.contains("ShadowKey")) {
-            ((IShadowTrain) train).railways$setShadow(new Identifier(tag.getString("ShadowKey").orElse("")));
+            ((IShadowTrain) train).railways$setShadow(new ResourceLocation(tag.getString("ShadowKey").orElse("")));
         } else {
             ((IShadowTrain) train).railways$clearShadow();
         }
@@ -352,13 +352,13 @@ public abstract class MixinTrain implements IOccupiedCouplers, IIndexedSchedule,
         if (backwardsDriver != null)
             AllAdvancements.TRAIN_CRASH_BACKWARDS.awardTo(backwardsDriver);
     }
-    public void railways$setShadow(@NotNull Identifier shadowKey) {
+    public void railways$setShadow(@NotNull ResourceLocation shadowKey) {
         railways$shadowKey = shadowKey;
     }
     public void railways$clearShadow() {
         railways$shadowKey = null;
     }
-    public @Nullable Identifier railways$getShadowKey() {
+    public @Nullable ResourceLocation railways$getShadowKey() {
         return railways$shadowKey;
     }
 }

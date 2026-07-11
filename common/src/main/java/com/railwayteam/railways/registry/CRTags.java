@@ -20,10 +20,11 @@ package com.railwayteam.railways.registry;
 
 import com.railwayteam.railways.Railways;
 import com.railwayteam.railways.util.TextUtils;
+import com.zurrtum.create.client.catnip.lang.Lang;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
@@ -31,7 +32,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 
-import java.util.Locale;
 import java.util.function.BiConsumer;
 
 import static com.railwayteam.railways.registry.CRTags.NameSpace.MOD;
@@ -87,7 +87,7 @@ public class CRTags {
     }
 
     AllBlockTags(NameSpace namespace, String path, boolean optional, boolean alwaysDatagen) {
-      Identifier id = Identifier.fromNamespaceAndPath(namespace.id, path == null ? name().toLowerCase(Locale.ROOT) : path);
+      ResourceLocation id = ResourceLocation.fromNamespaceAndPath(namespace.id, path == null ? Lang.asId(name()) : path);
       if (optional) {
         tag = optionalTag(BuiltInRegistries.BLOCK, id);
       } else {
@@ -154,7 +154,7 @@ public class CRTags {
     }
 
     AllItemTags(NameSpace namespace, String path, boolean optional, boolean alwaysDatagen) {
-      Identifier id = Identifier.fromNamespaceAndPath(namespace.id, path == null ? name().toLowerCase(Locale.ROOT) : path);
+      ResourceLocation id = ResourceLocation.fromNamespaceAndPath(namespace.id, path == null ? Lang.asId(name()) : path);
       if (optional) {
         tag = optionalTag(BuiltInRegistries.ITEM, id);
       } else {
@@ -176,7 +176,7 @@ public class CRTags {
     public static void register() { }
   }
 
-  public static <T> TagKey<T> optionalTag(Registry<T> registry, Identifier id) {
+  public static <T> TagKey<T> optionalTag(Registry<T> registry, ResourceLocation id) {
     return TagKey.create(registry.key(), id);
   }
 
@@ -188,7 +188,7 @@ public class CRTags {
 
   public static void provideLangEntries(BiConsumer<String, String> consumer) {
     for (AllBlockTags blockTag : AllBlockTags.values()) {
-      Identifier loc = blockTag.tag.location();
+      ResourceLocation loc = blockTag.tag.location();
       consumer.accept("tag.block." + loc.getNamespace() + "." + loc.getPath().replace('/', '.'),
           TextUtils.titleCaseConversion(blockTag.name()).replace('_', ' '));
     }
@@ -197,7 +197,7 @@ public class CRTags {
       if (itemTag == AllItemTags.LONG_STACK)
         continue;
 
-      Identifier loc = itemTag.tag.location();
+      ResourceLocation loc = itemTag.tag.location();
       consumer.accept("tag.item." + loc.getNamespace() + "." + loc.getPath().replace('/', '.'),
           TextUtils.titleCaseConversion(itemTag.name().replace('_', ' ')));
     }

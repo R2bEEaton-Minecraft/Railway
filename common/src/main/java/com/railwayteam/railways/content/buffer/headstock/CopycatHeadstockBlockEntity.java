@@ -22,6 +22,7 @@ import com.railwayteam.railways.content.buffer.IDyedBuffer;
 import com.railwayteam.railways.util.BlockStateUtils;
 import com.zurrtum.create.content.decoration.copycat.CopycatBlockEntity;
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.DyeItem;
@@ -30,8 +31,6 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.LevelEvent;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.storage.ValueInput;
-import net.minecraft.world.level.storage.ValueOutput;
 import org.jetbrains.annotations.Nullable;
 
 public class CopycatHeadstockBlockEntity extends CopycatBlockEntity implements IDyedBuffer {
@@ -41,26 +40,22 @@ public class CopycatHeadstockBlockEntity extends CopycatBlockEntity implements I
     public CopycatHeadstockBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(pos, state);
     }
-
     public @Nullable DyeColor getColor() {
         return color;
     }
 
-    @Override
-    protected void write(ValueOutput output, boolean clientPacket) {
-        super.write(output, clientPacket);
+        protected void write(CompoundTag tag, boolean clientPacket) {
 
         if (color != null)
-            output.putInt("Color", color.getId());
+            tag.putInt("Color", color.getId());
     }
 
-    @Override
-    protected void read(ValueInput input, boolean clientPacket) {
-        super.read(input, clientPacket);
+        protected void read(CompoundTag tag, boolean clientPacket) {
+
         DyeColor prevColor = color;
 
-        if (input.getInt("Color").isPresent())
-            color = DyeColor.byId(input.getInt("Color").orElse(0));
+        if (tag.contains("Color"))
+            color = DyeColor.byId(tag.getInt("Color").orElse(0));
         else
             color = null;
 

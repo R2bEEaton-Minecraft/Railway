@@ -33,7 +33,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class MixinTrainHUD {
     @Inject(method = "tick", at = @At("HEAD"))
     private static void tickHook(CallbackInfo ci) {
-        TrainHUDSwitchExtension.tickAnimation();
+        TrainHUDSwitchExtension.tick();
     }
 
     @WrapOperation(method = "tick", at = @At(value = "INVOKE", target = "Lcom/simibubi/create/content/trains/entity/Train;maxSpeed()F"))

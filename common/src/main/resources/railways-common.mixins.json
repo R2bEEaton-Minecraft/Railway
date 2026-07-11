@@ -1,34 +1,17 @@
 {
   "required": true,
   "minVersion": "0.8",
-  "package": "com.railwayteam.railways.mixin",
+  "package": "com.railwayteam.railways.mixincompat",
   "plugin": "com.railwayteam.railways.mixin.CRMixinPlugin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
-    "AccessorAbstractContraptionEntity",
-    "AccessorBlockEntity",
-    "AccessorBlockEntityType",
-    "AccessorBlockSetType",
-    "AccessorCarriage",
-    "AccessorCarriageBogey",
-    "AccessorCarriageContraptionEntity",
-    "AccessorCreativeModeTabs",
-    "AccessorDataFixTypes",
-    "AccessorGlobalRailwayManager",
-    "AccessorNavigation",
-    "AccessorOrientedContraptionEntity",
-    "AccessorPortableStorageInterfaceBlockEntity",
-    "AccessorScheduleRuntime",
-    "AccessorToolboxBlockEntity",
-    "AccessorToolboxInventory",
-    "AccessorTrackMaterialFactory",
-    "AccessorTrackPlacement$PlacementInfo",
     "AccessorTrackTargetingBehavior",
-    "AccessorTrain",
-    "NbtUtilsMixin"
+    "AccessorBlockEntityType"
   ],
   "client": [
-    "updatecount.MixinCarriageContraptionEntity"
+    "BlockElementDeserializerMixin",
+    "AccessorItemBlockRenderTypes",
+    "ClientLanguageMixin"
   ],
   "injectors": {
     "defaultRequire": 1,

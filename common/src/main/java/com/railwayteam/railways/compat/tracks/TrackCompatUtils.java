@@ -38,7 +38,7 @@ import com.tterrag.registrate.providers.RegistrateBlockstateProvider;
 import com.tterrag.registrate.util.entry.BlockEntry;
 import com.tterrag.registrate.util.nullness.NonNullBiConsumer;
 import com.tterrag.registrate.util.nullness.NonNullConsumer;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.level.block.Block;
@@ -78,10 +78,10 @@ public abstract class TrackCompatUtils {
     }
 
     @ApiStatus.Internal
-    public static boolean mixinSkipLootLoading(Identifier Identifier) {
-        if (Identifier.getNamespace().equals(Railways.MOD_ID)) {
+    public static boolean mixinSkipLootLoading(ResourceLocation ResourceLocation) {
+        if (ResourceLocation.getNamespace().equals(Railways.MOD_ID)) {
             for (String compatMod : TRACK_COMPAT_MODS) {
-                if (Identifier.getPath().startsWith("blocks/track_"+compatMod)) {
+                if (ResourceLocation.getPath().startsWith("blocks/track_"+compatMod)) {
                     return !GenericTrackCompat.get(compatMod).shouldRegisterMissing();
                 }
             }
@@ -135,7 +135,7 @@ public abstract class TrackCompatUtils {
             .lang(CRTrackMaterials.langName(material) + " Train Track")
             .onRegister(onRegister)
             .item(TrackBlockItem::new)
-            .removeTab(hideInCreativeTabs ? null : CreativeModeTabs.SEARCH)
+            .removeTab(null)
             .build()
             .register();
     }

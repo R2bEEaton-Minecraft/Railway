@@ -18,6 +18,8 @@
 
 package com.railwayteam.railways.registry;
 
+import com.railwayteam.railways.mixincompat.AccessorBlockEntityType;
+import com.zurrtum.create.AllBlockEntityTypes;
 import com.railwayteam.railways.Railways;
 import com.railwayteam.railways.content.custom_tracks.NoCollisionCustomTrackBlock;
 import com.railwayteam.railways.content.custom_tracks.monorail.MonorailTrackBlock;
@@ -27,42 +29,46 @@ import com.railwayteam.railways.content.custom_tracks.wide_gauge.WideGaugeTrackB
 import com.zurrtum.create.AllTrackMaterials;
 import com.zurrtum.create.content.trains.track.TrackBlock;
 import com.zurrtum.create.content.trains.track.TrackMaterial;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import static com.zurrtum.create.content.trains.track.TrackMaterialFactory.make;
 
 public class CRTrackMaterials {
-    private static final Map<TrackMaterial, Identifier> TYPES = new HashMap<>();
-    private static final Map<TrackMaterial, Identifier> PARTICLES = new HashMap<>();
+    private static final Set<Block> PENDING_TRACK_BLOCKS = new HashSet<>();
+    private static final Map<TrackMaterial, ResourceLocation> TYPES = new HashMap<>();
+    private static final Map<TrackMaterial, ResourceLocation> PARTICLES = new HashMap<>();
     private static final Map<TrackMaterial, String> LANG_NAMES = new HashMap<>();
 
     public static final TrackMaterial
         ACACIA = make(Railways.asResource("acacia"))
             .lang("Acacia")
             .block(() -> CRBlocks.ACACIA_TRACK)
-            .particle(Identifier.parse("block/acacia_planks"))
+            .particle(ResourceLocation.parse("block/acacia_planks"))
             .sleeper(Blocks.ACACIA_SLAB)
             .standardModels()
             .build(),
         BIRCH = make(Railways.asResource("birch"))
             .lang("Birch")
             .block(() -> CRBlocks.BIRCH_TRACK)
-            .particle(Identifier.parse("block/birch_planks"))
+            .particle(ResourceLocation.parse("block/birch_planks"))
             .sleeper(Blocks.BIRCH_SLAB)
             .standardModels()
             .build(),
         CRIMSON = make(Railways.asResource("crimson"))
             .lang("Crimson")
             .block(() -> CRBlocks.CRIMSON_TRACK)
-            .particle(Identifier.parse("block/crimson_planks"))
+            .particle(ResourceLocation.parse("block/crimson_planks"))
             .sleeper(Blocks.CRIMSON_SLAB)
             .rails(Items.GOLD_NUGGET)
             .standardModels()
@@ -70,35 +76,35 @@ public class CRTrackMaterials {
         DARK_OAK = make(Railways.asResource("dark_oak"))
             .lang("Dark Oak")
             .block(() -> CRBlocks.DARK_OAK_TRACK)
-            .particle(Identifier.parse("block/dark_oak_planks"))
+            .particle(ResourceLocation.parse("block/dark_oak_planks"))
             .sleeper(Blocks.DARK_OAK_SLAB)
             .standardModels()
             .build(),
         JUNGLE = make(Railways.asResource("jungle"))
             .lang("Jungle")
             .block(() -> CRBlocks.JUNGLE_TRACK)
-            .particle(Identifier.parse("block/jungle_planks"))
+            .particle(ResourceLocation.parse("block/jungle_planks"))
             .sleeper(Blocks.JUNGLE_SLAB)
             .standardModels()
             .build(),
         OAK = make(Railways.asResource("oak"))
             .lang("Oak")
             .block(() -> CRBlocks.OAK_TRACK)
-            .particle(Identifier.parse("block/oak_planks"))
+            .particle(ResourceLocation.parse("block/oak_planks"))
             .sleeper(Blocks.OAK_SLAB)
             .standardModels()
             .build(),
         SPRUCE = make(Railways.asResource("spruce"))
             .lang("Spruce")
             .block(() -> CRBlocks.SPRUCE_TRACK)
-            .particle(Identifier.parse("block/spruce_planks"))
+            .particle(ResourceLocation.parse("block/spruce_planks"))
             .sleeper(Blocks.SPRUCE_SLAB)
             .standardModels()
             .build(),
         WARPED = make(Railways.asResource("warped"))
             .lang("Warped")
             .block(() -> CRBlocks.WARPED_TRACK)
-            .particle(Identifier.parse("block/warped_planks"))
+            .particle(ResourceLocation.parse("block/warped_planks"))
             .sleeper(Blocks.WARPED_SLAB)
             .rails(Items.GOLD_NUGGET)
             .standardModels()
@@ -106,7 +112,7 @@ public class CRTrackMaterials {
         BLACKSTONE = make(Railways.asResource("blackstone"))
             .lang("Blackstone")
             .block(() -> CRBlocks.BLACKSTONE_TRACK)
-            .particle(Identifier.parse("block/blackstone"))
+            .particle(ResourceLocation.parse("block/blackstone"))
             .sleeper(Blocks.BLACKSTONE_SLAB)
             .rails(Items.GOLD_NUGGET)
             .standardModels()
@@ -114,28 +120,28 @@ public class CRTrackMaterials {
         MANGROVE = make(Railways.asResource("mangrove"))
             .lang("Mangrove")
             .block(() -> CRBlocks.MANGROVE_TRACK)
-            .particle(Identifier.parse("block/mangrove_planks"))
+            .particle(ResourceLocation.parse("block/mangrove_planks"))
             .sleeper(Blocks.MANGROVE_SLAB)
             .standardModels()
             .build(),
         CHERRY = make(Railways.asResource("cherry"))
             .lang("Cherry")
             .block(() -> CRBlocks.CHERRY_TRACK)
-            .particle(Identifier.parse("block/cherry_planks"))
+            .particle(ResourceLocation.parse("block/cherry_planks"))
             .sleeper(Blocks.CHERRY_SLAB)
             .standardModels()
             .build(),
         BAMBOO = make(Railways.asResource("bamboo"))
             .lang("Bamboo")
             .block(() -> CRBlocks.BAMBOO_TRACK)
-            .particle(Identifier.parse("block/bamboo_block"))
+            .particle(ResourceLocation.parse("block/bamboo_block"))
             .sleeper(Items.BAMBOO)
             .standardModels()
             .build(),
         STRIPPED_BAMBOO = make(Railways.asResource("stripped_bamboo"))
             .lang("Stripped Bamboo")
             .block(() -> CRBlocks.STRIPPED_BAMBOO_TRACK)
-            .particle(Identifier.parse("block/bamboo_planks"))
+            .particle(ResourceLocation.parse("block/bamboo_planks"))
             .sleeper(Blocks.BAMBOO_SLAB)
             .standardModels()
             .build(),
@@ -149,14 +155,14 @@ public class CRTrackMaterials {
         ENDER = make(Railways.asResource("ender"))
             .lang("Ender")
             .block(() -> CRBlocks.ENDER_TRACK)
-            .particle(Identifier.parse("block/end_stone"))
+            .particle(ResourceLocation.parse("block/end_stone"))
             .sleeper(Blocks.END_STONE_BRICK_SLAB)
             .standardModels()
             .build(),
         TIELESS = make(Railways.asResource("tieless"))
             .lang("Tieless")
             .block(() -> CRBlocks.TIELESS_TRACK)
-            .particle(Identifier.parse("block/glass"))
+            .particle(ResourceLocation.parse("block/glass"))
             .sleeper(Blocks.GLASS_PANE)
             .customBlockFactory(NoCollisionCustomTrackBlock::new)
             .standardModels()
@@ -164,7 +170,7 @@ public class CRTrackMaterials {
         PHANTOM = make(Railways.asResource("phantom"))
             .lang("Phantom")
             .block(() -> CRBlocks.PHANTOM_TRACK)
-            .particle(Identifier.parse("block/glass"))
+            .particle(ResourceLocation.parse("block/glass"))
             .noRecipeGen()
             .trackType(CRTrackType.UNIVERSAL)
             .customBlockFactory(PhantomTrackBlock::new)
@@ -181,7 +187,7 @@ public class CRTrackMaterials {
     public static final Map<TrackMaterial, TrackMaterial> NARROW_GAUGE_REVERSE = new HashMap<>();
 
     static {
-        registerMeta(AllTrackMaterials.ANDESITE, CRTrackMaterials.CRTrackType.STANDARD, Identifier.fromNamespaceAndPath("create", "block/track/andesite"), "Andesite");
+        registerMeta(AllTrackMaterials.ANDESITE, CRTrackMaterials.CRTrackType.STANDARD, ResourceLocation.fromNamespaceAndPath("create", "block/track/andesite"), "Andesite");
 
         WIDE_GAUGE.put(AllTrackMaterials.ANDESITE, WIDE_GAUGE_ANDESITE);
         WIDE_GAUGE_REVERSE.put(WIDE_GAUGE_ANDESITE, AllTrackMaterials.ANDESITE);
@@ -258,7 +264,7 @@ public class CRTrackMaterials {
             .build();
     }
 
-    public static Identifier id(TrackMaterial material) {
+    public static ResourceLocation id(TrackMaterial material) {
         return material.getId();
     }
 
@@ -275,7 +281,7 @@ public class CRTrackMaterials {
         });
     }
 
-    public static Identifier particle(TrackMaterial material) {
+    public static ResourceLocation particle(TrackMaterial material) {
         return PARTICLES.computeIfAbsent(material, m -> id(m).withPrefix("block/track/"));
     }
 
@@ -283,7 +289,7 @@ public class CRTrackMaterials {
         return id(material).getPath();
     }
 
-    public static Identifier getType(TrackMaterial material) {
+    public static ResourceLocation getType(TrackMaterial material) {
         return TYPES.getOrDefault(material, CRTrackMaterials.CRTrackType.STANDARD);
     }
 
@@ -293,23 +299,31 @@ public class CRTrackMaterials {
             .toList();
     }
 
-    public static void registerMeta(TrackMaterial material, Identifier type, Identifier particle, String langName) {
+    public static void registerMeta(TrackMaterial material, ResourceLocation type, ResourceLocation particle, String langName) {
         TYPES.put(material, type);
         PARTICLES.put(material, particle);
         LANG_NAMES.put(material, langName);
     }
 
     public static class CRTrackType {
-        public static final Identifier STANDARD = AllTrackMaterials.ANDESITE.getId();
-        public static final Identifier MONORAIL = Railways.asResource("monorail");
-        public static final Identifier WIDE_GAUGE = Railways.asResource("wide_gauge");
-        public static final Identifier NARROW_GAUGE = Railways.asResource("narrow_gauge");
-        public static final Identifier UNIVERSAL = Railways.asResource("universal");
+        public static final ResourceLocation STANDARD = AllTrackMaterials.ANDESITE.getId();
+        public static final ResourceLocation MONORAIL = Railways.asResource("monorail");
+        public static final ResourceLocation WIDE_GAUGE = Railways.asResource("wide_gauge");
+        public static final ResourceLocation NARROW_GAUGE = Railways.asResource("narrow_gauge");
+        public static final ResourceLocation UNIVERSAL = Railways.asResource("universal");
     }
 
     public static void register() {}
 
     public static void addToBlockEntityType(TrackBlock block) {
-        // Create Fly handles its track block entity registration internally on 1.21.11.
+        PENDING_TRACK_BLOCKS.add(block);
+    }
+
+    public static void finalizeBlockEntityType() {
+        AccessorBlockEntityType accessor = (AccessorBlockEntityType) (Object) AllBlockEntityTypes.TRACK;
+        Set<Block> validBlocks = new HashSet<>(accessor.getValidBlocks());
+        validBlocks.addAll(PENDING_TRACK_BLOCKS);
+        accessor.setValidBlocks(Set.copyOf(validBlocks));
+        PENDING_TRACK_BLOCKS.clear();
     }
 }

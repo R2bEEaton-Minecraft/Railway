@@ -92,7 +92,7 @@ public abstract class MixinStationBlockEntity extends SmartBlockEntity {
         Pair<BogeyStyle, BogeySize> styleData = BogeyMenuHandlerServer.getStyle(player.getUUID());
         BogeyStyle style = styleData.getFirst();
 
-        Identifier trackType = CRTrackMaterials.getType(track.getMaterial());
+        ResourceLocation trackType = CRTrackMaterials.getType(track.getMaterial());
 
         Optional<BogeyStyle> mappedStyleOptional = CRBogeyStyles.getMapped(style, trackType, true);
         if (mappedStyleOptional.isPresent())

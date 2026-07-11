@@ -24,7 +24,7 @@ import com.railwayteam.railways.registry.CRTrackMaterials.CRTrackType;
 import com.zurrtum.create.content.trains.bogey.AllBogeySizes;
 import com.zurrtum.create.content.trains.bogey.BogeySize;
 import com.zurrtum.create.content.trains.bogey.BogeyStyle;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import com.tterrag.registrate.util.nullness.NonNullFunction;
 import net.minecraft.world.phys.Vec3;
 
@@ -40,7 +40,7 @@ public class WideGaugeBogeyBlock extends CRBogeyBlock {
     protected WideGaugeBogeyBlock(Properties props, BogeyStyle style, BogeySize size) {
         super(props, style, size);
     }
-    public Identifier getTrackType(BogeyStyle style) {
+    public ResourceLocation getTrackType(BogeyStyle style) {
         return CRTrackType.WIDE_GAUGE;
     }
     public Vec3 getConnectorAnchorOffset() {

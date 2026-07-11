@@ -27,7 +27,7 @@ import com.zurrtum.create.content.trains.track.TrackMaterial;
 import net.fabricmc.fabric.api.resource.conditions.v1.ConditionJsonProvider;
 import net.fabricmc.fabric.api.resource.conditions.v1.DefaultResourceConditions;
 import net.minecraft.data.recipes.FinishedRecipe;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -36,7 +36,7 @@ import java.util.function.Consumer;
  * Extends Create's Fabric recipe builder with Forge conditional recipe support as well.
  */
 public class RailwaysSequencedAssemblyRecipeBuilder extends SequencedAssemblyRecipeBuilder {
-    public RailwaysSequencedAssemblyRecipeBuilder(Identifier id) {
+    public RailwaysSequencedAssemblyRecipeBuilder(ResourceLocation id) {
         super(id);
     }
 
@@ -64,32 +64,12 @@ public class RailwaysSequencedAssemblyRecipeBuilder extends SequencedAssemblyRec
         }
         public void serializeRecipeData(JsonObject json) {
             super.serializeRecipeData(json);
-            normalizeSequencePlaceholders(json);
             if (recipeConditions.isEmpty())
                 return;
 
             JsonArray conds = new JsonArray();
             recipeConditions.forEach(c -> conds.add(toForgeJson(c)));
             json.add("conditions", conds);
-        }
-
-        private void normalizeSequencePlaceholders(JsonObject json) {
-            if (!json.has("sequence"))
-                return;
-
-            for (var stepElement : json.getAsJsonArray("sequence")) {
-                JsonObject step = stepElement.getAsJsonObject();
-
-                JsonArray results = new JsonArray();
-                results.add("$result");
-                step.add("results", results);
-
-                if (step.has("target")) {
-                    step.addProperty("target", "$ingredient");
-                } else if (step.has("ingredient")) {
-                    step.addProperty("ingredient", "$ingredient");
-                }
-            }
         }
 
         /**

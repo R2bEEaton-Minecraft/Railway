@@ -21,7 +21,6 @@ package com.railwayteam.railways.content.smokestack.particles.legacy;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
-import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.railwayteam.railways.registry.CRParticleTypes;
 import com.zurrtum.create.foundation.particle.ICustomParticleDataWithSprite;
@@ -34,7 +33,7 @@ import java.util.Locale;
 
 public class SmokeParticleData implements ParticleOptions, ICustomParticleDataWithSprite<SmokeParticleData> {
 
-	public static final MapCodec<SmokeParticleData> CODEC = RecordCodecBuilder.mapCodec(i -> i
+	public static final Codec<SmokeParticleData> CODEC = RecordCodecBuilder.create(i -> i
 		.group(Codec.BOOL.fieldOf("stationary")
 			.forGetter(p -> p.stationary),
 			Codec.FLOAT.fieldOf("red")
@@ -108,10 +107,10 @@ public class SmokeParticleData implements ParticleOptions, ICustomParticleDataWi
 	public Deserializer<SmokeParticleData> getDeserializer() {
 		return DESERIALIZER;
 	}
-	public MapCodec<SmokeParticleData> getCodec(ParticleType<SmokeParticleData> type) {
+	public Codec<SmokeParticleData> getCodec(ParticleType<SmokeParticleData> type) {
 		return CODEC;
 	}
-	public java.util.function.Function<net.minecraft.client.particle.SpriteSet, net.minecraft.client.particle.ParticleProvider<SmokeParticleData>> getMetaFactory() {
-		return SmokeParticle.Factory::new;
+	public Object getMetaFactory() {
+		return null;
 	}
 }

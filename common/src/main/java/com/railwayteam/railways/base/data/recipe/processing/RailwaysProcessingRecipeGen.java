@@ -28,7 +28,7 @@ import com.zurrtum.create.catnip.platform.CatnipServices;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.PackOutput;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.ItemLike;
 import org.jetbrains.annotations.NotNull;
@@ -74,7 +74,7 @@ public abstract class RailwaysProcessingRecipeGen extends RailwaysRecipeProvider
 			ItemLike itemLike = singleIngredient.get();
 			transform
 				.apply(new ProcessingRecipeBuilder<>(serializer.getFactory(),
-					new Identifier(namespace, CatnipServices.REGISTRIES.getKeyOrThrow(itemLike.asItem())
+					ResourceLocation.fromNamespaceAndPath(namespace, CatnipServices.REGISTRIES.getKeyOrThrow(itemLike.asItem())
 						.getPath())).withItemIngredients(Ingredient.of(itemLike)))
 				.build(c);
 		};
@@ -91,7 +91,7 @@ public abstract class RailwaysProcessingRecipeGen extends RailwaysRecipeProvider
 		return create(Railways.MOD_ID, singleIngredient, transform);
 	}
 
-	protected <T extends ProcessingRecipe<?>> GeneratedRecipe createWithDeferredId(Supplier<Identifier> name,
+	protected <T extends ProcessingRecipe<?>> GeneratedRecipe createWithDeferredId(Supplier<ResourceLocation> name,
 		UnaryOperator<ProcessingRecipeBuilder<T>> transform) {
 		ProcessingRecipeSerializer<T> serializer = getSerializer();
 		GeneratedRecipe generatedRecipe =
@@ -105,7 +105,7 @@ public abstract class RailwaysProcessingRecipeGen extends RailwaysRecipeProvider
 	 * Create a new processing recipe, with recipe definitions provided by the
 	 * function
 	 */
-	protected <T extends ProcessingRecipe<?>> GeneratedRecipe create(Identifier name,
+	protected <T extends ProcessingRecipe<?>> GeneratedRecipe create(ResourceLocation name,
 		UnaryOperator<ProcessingRecipeBuilder<T>> transform) {
 		return createWithDeferredId(() -> name, transform);
 	}
@@ -125,9 +125,9 @@ public abstract class RailwaysProcessingRecipeGen extends RailwaysRecipeProvider
 		return getRecipeType().getSerializer();
 	}
 
-	protected Supplier<Identifier> idWithSuffix(Supplier<ItemLike> item, String suffix) {
+	protected Supplier<ResourceLocation> idWithSuffix(Supplier<ItemLike> item, String suffix) {
 		return () -> {
-			Identifier registryName = CatnipServices.REGISTRIES.getKeyOrThrow(item.get()
+			ResourceLocation registryName = CatnipServices.REGISTRIES.getKeyOrThrow(item.get()
 				.asItem());
 			return Railways.asResource(registryName.getPath() + suffix);
 		};

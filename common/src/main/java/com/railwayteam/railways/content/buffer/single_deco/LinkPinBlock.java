@@ -26,7 +26,7 @@ import com.zurrtum.create.catnip.math.VoxelShaper;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
@@ -78,10 +78,10 @@ public class LinkPinBlock extends AbstractDyeableSingleBufferBlock implements Bl
             this.langName = langName;
         }
 
-        public Identifier getModel() {
+        public ResourceLocation getModel() {
             return Railways.asResource("block/buffer/single_deco/" + model);
         }
-        public Identifier getModel(Void context) {
+        public ResourceLocation getModel(Void context) {
             return getModel();
         }
         public String getBlockId(Void context) {

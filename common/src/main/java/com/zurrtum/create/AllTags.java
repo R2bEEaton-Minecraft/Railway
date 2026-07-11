@@ -2,7 +2,7 @@ package com.zurrtum.create;
 
 import net.minecraft.core.registries.Registries;
 import net.minecraft.tags.TagKey;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
@@ -21,7 +21,7 @@ public class AllTags {
         public final TagKey<Block> tag;
 
         AllBlockTags(String path) {
-            tag = TagKey.create(Registries.BLOCK, Identifier.fromNamespaceAndPath("create", path));
+            tag = TagKey.create(Registries.BLOCK, ResourceLocation.fromNamespaceAndPath("create", path));
         }
 
         public boolean matches(Block block) {
@@ -37,7 +37,6 @@ public class AllTags {
         CONTRAPTION_CONTROLLED("contraption_controlled"),
         SLEEPERS("sleepers"),
         TOOLBOXES("toolboxes"),
-        TRACK_NUGGETS("track_nuggets"),
         TRACKS("tracks"),
         UPRIGHT_ON_BELT("upright_on_belt"),
         WRENCH("wrench");
@@ -45,7 +44,7 @@ public class AllTags {
         public final TagKey<Item> tag;
 
         AllItemTags(String path) {
-            tag = TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("create", path));
+            tag = TagKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath("create", path));
         }
 
         public boolean matches(Item item) {

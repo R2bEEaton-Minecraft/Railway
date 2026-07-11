@@ -24,7 +24,7 @@ import com.railwayteam.railways.compat.tracks.GenericTrackCompat;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.crafting.Ingredient;
 
@@ -34,9 +34,9 @@ public class TFCTrackCompat extends GenericTrackCompat {
     }
     protected Ingredient getIngredientForRail() {
         return Ingredient.of(HolderSet.emptyNamed(BuiltInRegistries.ITEM,
-                TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("forge", "rods/wrought_iron"))));
+                TagKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath("forge", "rods/wrought_iron"))));
     }
-    protected Identifier getSlabLocation(String name) {
+    protected ResourceLocation getSlabLocation(String name) {
         return asResource("wood/planks/" + name + "_slab");
     }
 

@@ -36,14 +36,14 @@ import com.zurrtum.create.AllItems;
 import com.tterrag.registrate.util.entry.ItemProviderEntry;
 import com.zurrtum.create.catnip.data.Pair;
 import com.zurrtum.create.catnip.platform.CatnipServices;
-import net.minecraft.advancements.criterion.ItemPredicate;
+import net.minecraft.advancements.critereon.ItemPredicate;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.data.recipes.ShapedRecipeBuilder;
 import net.minecraft.data.recipes.ShapelessRecipeBuilder;
 import net.minecraft.data.recipes.SimpleCookingRecipeBuilder;
 import net.minecraft.data.recipes.SingleItemRecipeBuilder;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
@@ -416,7 +416,7 @@ public class RailwaysStandardRecipeGen extends RailwaysRecipeProvider {
         return new GeneratedRecipeBuilder("/", result);
     }
 
-    GeneratedRecipeBuilder create(Identifier result) {
+    GeneratedRecipeBuilder create(ResourceLocation result) {
         return new GeneratedRecipeBuilder("/", result);
     }
 
@@ -436,7 +436,7 @@ public class RailwaysStandardRecipeGen extends RailwaysRecipeProvider {
         private final String path;
         private String suffix;
         private Supplier<? extends ItemLike> result;
-        private Identifier compatDatagenOutput;
+        private ResourceLocation compatDatagenOutput;
 
         private Supplier<ItemPredicate> unlockedBy;
         private int amount;
@@ -453,7 +453,7 @@ public class RailwaysStandardRecipeGen extends RailwaysRecipeProvider {
             this.result = result;
         }
 
-        public GeneratedRecipeBuilder(String path, Identifier result) {
+        public GeneratedRecipeBuilder(String path, ResourceLocation result) {
             this(path);
             this.compatDatagenOutput = result;
         }
@@ -509,30 +509,30 @@ public class RailwaysStandardRecipeGen extends RailwaysRecipeProvider {
             });
         }
 
-        private static Identifier clean(Identifier loc) {
+        private static ResourceLocation clean(ResourceLocation loc) {
             String path = loc.getPath();
             while (path.contains("//"))
                 path = path.replaceAll("//", "/");
-            return new Identifier(loc.getNamespace(), path);
+            return ResourceLocation.fromNamespaceAndPath(loc.getNamespace(), path);
         }
 
-        private Identifier createSimpleLocation(String recipeType) {
-            Identifier loc = clean(Railways.asResource(recipeType + "/" + getRegistryName().getPath() + suffix));
+        private ResourceLocation createSimpleLocation(String recipeType) {
+            ResourceLocation loc = clean(Railways.asResource(recipeType + "/" + getRegistryName().getPath() + suffix));
             if (addToEmiDefaults) {
                 EmiRecipeDefaultsGen.DEFAULT_RECIPES.add(loc);
             }
             return loc;
         }
 
-        private Identifier createLocation(String recipeType) {
-            Identifier loc = clean(Railways.asResource(recipeType + "/" + path + "/" + getRegistryName().getPath() + suffix));
+        private ResourceLocation createLocation(String recipeType) {
+            ResourceLocation loc = clean(Railways.asResource(recipeType + "/" + path + "/" + getRegistryName().getPath() + suffix));
             if (addToEmiDefaults) {
                 EmiRecipeDefaultsGen.DEFAULT_RECIPES.add(loc);
             }
             return loc;
         }
 
-        private Identifier getRegistryName() {
+        private ResourceLocation getRegistryName() {
             return compatDatagenOutput == null ? CatnipServices.REGISTRIES.getKeyOrThrow(result.get()
                 .asItem()) : compatDatagenOutput;
         }

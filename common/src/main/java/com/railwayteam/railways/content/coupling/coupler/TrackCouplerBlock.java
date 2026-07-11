@@ -18,7 +18,6 @@
 
 package com.railwayteam.railways.content.coupling.coupler;
 
-import com.railwayteam.railways.Railways;
 import com.railwayteam.railways.registry.CRBlockEntities;
 import com.zurrtum.create.content.equipment.wrench.IWrenchable;
 import com.zurrtum.create.foundation.block.IBE;
@@ -33,7 +32,6 @@ import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.minecraft.world.level.redstone.Orientation;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition.Builder;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -62,10 +60,7 @@ public abstract class TrackCouplerBlock extends Block implements IBE<TrackCouple
 
 	@Nullable
 	public BlockState getStateForPlacement(BlockPlaceContext pContext) {
-		boolean hasSignal = pContext.getLevel().hasNeighborSignal(pContext.getClickedPos());
-		if (!pContext.getLevel().isClientSide())
-			Railways.LOGGER.info("[TrackCouplerBlock {}] placed hasSignal={}", pContext.getClickedPos(), hasSignal);
-		return this.defaultBlockState().setValue(POWERED, hasSignal);
+		return this.defaultBlockState().setValue(POWERED, pContext.getLevel().hasNeighborSignal(pContext.getClickedPos()));
 	}
 
 	/**
@@ -101,30 +96,21 @@ public abstract class TrackCouplerBlock extends Block implements IBE<TrackCouple
 		if (!state.is(newState.getBlock()))
 			worldIn.removeBlockEntity(pos);
 	}
-	@Override
-	protected void neighborChanged(BlockState pState, Level pLevel, BlockPos pPos, Block pBlock, Orientation pOrientation,
-								   boolean pIsMoving) {
+	public void neighborChanged(BlockState pState, Level pLevel, BlockPos pPos, Block pBlock, BlockPos pFromPos,
+								boolean pIsMoving) {
 		if (pLevel.isClientSide())
 			return;
 		boolean powered = pState.getValue(POWERED);
-		boolean hasSignal = pLevel.hasNeighborSignal(pPos);
-		Railways.LOGGER.info("[TrackCouplerBlock {}] neighborChanged powered={} hasSignal={} moving={}",
-			pPos, powered, hasSignal, pIsMoving);
-		if (powered == hasSignal)
+		if (powered == pLevel.hasNeighborSignal(pPos))
 			return;
 		if (powered) {
-			Railways.LOGGER.info("[TrackCouplerBlock {}] scheduling unpower tick", pPos);
 			pLevel.scheduleTick(pPos, this, 4);
 		} else {
-			Railways.LOGGER.info("[TrackCouplerBlock {}] setting powered=true", pPos);
 			pLevel.setBlock(pPos, pState.cycle(POWERED), 2);
 		}
 	}
 	public void tick(BlockState pState, ServerLevel pLevel, BlockPos pPos, RandomSource pRand) {
-		boolean powered = pState.getValue(POWERED);
-		boolean hasSignal = pLevel.hasNeighborSignal(pPos);
-		Railways.LOGGER.info("[TrackCouplerBlock {}] scheduled tick powered={} hasSignal={}", pPos, powered, hasSignal);
-		if (powered && !hasSignal)
+		if (pState.getValue(POWERED) && !pLevel.hasNeighborSignal(pPos))
 			pLevel.setBlock(pPos, pState.cycle(POWERED), 2);
 	}
 	public InteractionResult onWrenched(BlockState state, UseOnContext context) {
@@ -134,8 +120,6 @@ public abstract class TrackCouplerBlock extends Block implements IBE<TrackCouple
 		BlockPos pos = context.getClickedPos();
 		BlockState newState = state.cycle(MODE);
 		level.setBlock(pos, newState, 3);
-		Railways.LOGGER.info("[TrackCouplerBlock {}] wrenched mode {} -> {} powered={}",
-			pos, state.getValue(MODE), newState.getValue(MODE), newState.getValue(POWERED));
 		Player player = context.getPlayer();
 		if (player != null)
 			player.displayClientMessage(newState.getValue(MODE).getTranslatedName(), true);

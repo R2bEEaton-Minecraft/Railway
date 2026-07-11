@@ -24,13 +24,13 @@ import com.railwayteam.railways.base.data.recipe.EnumRecipeList.PalettesRecipeLi
 import com.railwayteam.railways.registry.CRPalettes.Styles;
 import com.zurrtum.create.AllRecipeTypes;
 import net.minecraft.data.PackOutput;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 
 public class RailwaysItemApplicationRecipeGen extends RailwaysProcessingRecipeGen {
     @SuppressWarnings("unused")
     PalettesRecipeList FLYWHEELS = new PalettesRecipeList(color -> createWithDeferredId(
         () -> {
-            Identifier loc = Railways.asResource("palettes/flywheels/" + color.getSerializedName());
+            ResourceLocation loc = Railways.asResource("palettes/flywheels/" + color.getSerializedName());
             EmiRecipeDefaultsGen.DEFAULT_RECIPES.add(Railways.asResource(getRecipeType().getId().getPath() + "/" + loc.getPath()));
             return loc;
         },

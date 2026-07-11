@@ -21,33 +21,36 @@ package com.railwayteam.railways.content.coupling.coupler;
 import com.railwayteam.railways.Railways;
 import com.railwayteam.railways.config.CRConfigs;
 import com.railwayteam.railways.content.coupling.TrainUtils;
-import com.railwayteam.railways.mixin.AccessorTrackTargetingBehavior;
+import com.railwayteam.railways.mixincompat.AccessorTrackTargetingBehavior;
 import com.railwayteam.railways.mixin_interfaces.IOccupiedCouplers;
 import com.railwayteam.railways.multiloader.PlayerSelection;
 import com.railwayteam.railways.registry.CREdgePointTypes;
 import com.railwayteam.railways.registry.CRPackets;
-import com.railwayteam.railways.multiloader.Env;
-import com.zurrtum.create.foundation.blockEntity.behaviour.scrollValue.ServerScrollValueBehaviour;
 import com.railwayteam.railways.util.packet.TrackCouplerClientInfoPacket;
 import com.zurrtum.create.Create;
 import com.zurrtum.create.api.contraption.transformable.TransformableBlockEntity;
+import com.zurrtum.create.client.api.goggles.IHaveGoggleInformation;
 import com.zurrtum.create.content.contraptions.StructureTransform;
 import com.zurrtum.create.content.trains.entity.Carriage;
 import com.zurrtum.create.content.trains.entity.CarriageBogey;
 import com.zurrtum.create.content.trains.entity.Train;
 import com.zurrtum.create.content.trains.entity.TravellingPoint;
-import com.zurrtum.create.content.trains.graph.TrackGraph;
 import com.zurrtum.create.content.trains.graph.TrackGraphLocation;
 import com.zurrtum.create.content.trains.graph.TrackNodeLocation;
+import com.zurrtum.create.content.trains.signal.SignalBlock;
 import com.zurrtum.create.content.trains.track.ITrackBlock;
 import com.zurrtum.create.content.trains.track.TrackBlock;
 import com.zurrtum.create.content.trains.track.TrackTargetingBehaviour;
 import com.zurrtum.create.foundation.blockEntity.SmartBlockEntity;
+import com.zurrtum.create.foundation.blockEntity.behaviour.scrollValue.ServerScrollValueBehaviour;
 import com.zurrtum.create.api.behaviour.BlockEntityBehaviour;
 import com.zurrtum.create.client.foundation.blockEntity.behaviour.CenteredSideValueBoxTransform;
 import com.zurrtum.create.catnip.data.Couple;
+import com.zurrtum.create.client.catnip.lang.Lang;
+import com.zurrtum.create.client.catnip.lang.LangBuilder;
 import com.zurrtum.create.catnip.math.VecHelper;
 import com.zurrtum.create.catnip.nbt.NBTHelper;
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -58,8 +61,6 @@ import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.storage.ValueInput;
-import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
@@ -70,7 +71,7 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
 
-public class TrackCouplerBlockEntity extends SmartBlockEntity implements TransformableBlockEntity {
+public class TrackCouplerBlockEntity extends SmartBlockEntity implements TransformableBlockEntity, IHaveGoggleInformation {
 
     private BlockState cachedTrackState = null;
     private BlockState cachedSecondaryTrackState = null;
@@ -79,7 +80,6 @@ public class TrackCouplerBlockEntity extends SmartBlockEntity implements Transfo
     private int lastAnalogOutput = 0;
     protected int edgeSpacing = 5;
     private int lastEdgeSpacing = 5;
-    private boolean debugCouplerOperation = false;
     private MutableComponent error = null;
     private MutableComponent error2 = null;
     private ClientInfo clientInfo;
@@ -94,43 +94,35 @@ public class TrackCouplerBlockEntity extends SmartBlockEntity implements Transfo
         super(type, pos, state);
     }
 
-    @Override
-    protected void write(ValueOutput output, boolean clientPacket) {
-        super.write(output, clientPacket);
-        output.putBoolean("EdgePointsOk", edgePointsOk);
-        output.putBoolean("Power", lastReportedPower);
-        output.putInt("AnalogOutput", lastAnalogOutput);
-        output.putInt("EdgeSpacing", edgeSpacing);
-        output.putInt("LastEdgeSpacing", lastEdgeSpacing);
+        protected void write(CompoundTag tag, boolean clientPacket) {
+
+        tag.putBoolean("EdgePointsOk", edgePointsOk);
+        tag.putBoolean("Power", lastReportedPower);
+        tag.putInt("AnalogOutput", lastAnalogOutput);
+        tag.putInt("EdgeSpacing", edgeSpacing);
+        tag.putInt("LastEdgeSpacing", lastEdgeSpacing);
         //if (clientPacket && clientInfo != null)
-        //    output.store("ClientInfo", CompoundTag.CODEC, clientInfo.write());
+        //    tag.put("ClientInfo", clientInfo.write());
     }
 
-    @Override
-    protected void read(ValueInput input, boolean clientPacket) {
-        super.read(input, clientPacket);
-        edgePointsOk = input.getBooleanOr("EdgePointsOk", false);
-        lastReportedPower = input.getBooleanOr("Power", false);
-        lastAnalogOutput = input.getIntOr("AnalogOutput", 0);
-        edgeSpacing = input.getIntOr("EdgeSpacing", edgeSpacing);
-        lastEdgeSpacing = input.getIntOr("LastEdgeSpacing", lastEdgeSpacing);
+        protected void read(CompoundTag tag, boolean clientPacket) {
+
+        edgePointsOk = tag.getBoolean("EdgePointsOk").orElse(false);
+        lastReportedPower = tag.getBoolean("Power").orElse(false);
+        lastAnalogOutput = tag.getInt("AnalogOutput").orElse(0);
+        edgeSpacing = tag.getInt("EdgeSpacing").orElse(0);
+        lastEdgeSpacing = tag.getInt("LastEdgeSpacing").orElse(0);
         edgeSpacingScroll.setValue(edgeSpacing);
         //if (clientPacket)
-        //    input.read("ClientInfo", CompoundTag.CODEC).ifPresent(tag -> clientInfo = new ClientInfo(tag));
+        //    clientInfo = new ClientInfo(tag.getCompound("ClientInfo").orElse(new CompoundTag()));
         invalidateRenderBoundingBox();
     }
     public void addBehaviours(List<BlockEntityBehaviour<?>> behaviours) {
         behaviours.add(edgePoint = new TrackTargetingBehaviour<>(this, CREdgePointTypes.COUPLER));
         behaviours.add(secondEdgePoint = new SecondaryTrackTargetingBehaviour<>(this, CREdgePointTypes.COUPLER));
-        edgeSpacingScroll = new ServerScrollValueBehaviour(this) {
-            public String getClipboardKey() {
-                return "Coupler";
-            }
-        };
-        edgeSpacingScroll.between(3, 15);
-        edgeSpacingScroll.withCallback(i -> this.edgeSpacing = i);
-        behaviours.add(edgeSpacingScroll);
-        Env.CLIENT.runIfCurrent(() -> () -> behaviours.add(TrackCouplerBlockEntityClientBehaviours.createEdgeSpacingScroll(this)));
+        behaviours.add(edgeSpacingScroll = new ServerScrollValueBehaviour(this)
+            .between(3, 15)
+            .withCallback(i -> this.edgeSpacing = i));
     }
     public void tick() {
         super.tick();
@@ -139,11 +131,10 @@ public class TrackCouplerBlockEntity extends SmartBlockEntity implements Transfo
             return;
 
         BlockState blockState = getBlockState();
-        blockState.getOptionalValue(TrackCouplerBlock.POWERED).ifPresent(powered -> {
+
+        blockState.getOptionalValue(SignalBlock.POWERED).ifPresent(powered -> {
             if (lastReportedPower == powered)
                 return;
-            Railways.LOGGER.info("[TrackCoupler {}] block entity power transition previous={} current={} mode={} edgePointsOk={}",
-                getBlockPos(), lastReportedPower, powered, getAllowedOperationMode(), edgePointsOk);
             lastReportedPower = powered;
             if (powered)
                 onPowered();
@@ -163,76 +154,26 @@ public class TrackCouplerBlockEntity extends SmartBlockEntity implements Transfo
         if (level == null || level.isClientSide())
             return;
 //        this.getSecondaryCoupler().blockEntityAdded(this, false); //FIX_ME remove this
-        debugCouplerOperation = true;
-        try {
-            debugCoupler("powered: allowedMode={} edgePointsOk={} spacing={} primaryTarget={} secondaryTarget={} primaryGlobal={} secondaryGlobal={}",
-                getAllowedOperationMode(), edgePointsOk, edgeSpacing, getTargetTrack(edgePoint), getTargetTrack(secondEdgePoint),
-                edgePoint.getGlobalPosition(), secondEdgePoint.getGlobalPosition());
-            refreshOccupiedCouplers();
-            OperationInfo info = getOperationInfo();
-            debugCoupler("resolved operation={}", info.mode);
-            switch (info.mode) {
-                case DECOUPLING -> {
-                    Train train = info.frontCarriage.train;
-                    int splitIndex = train.carriages.indexOf(info.backCarriage);
-                    int numberOffEnd = train.carriages.size() - splitIndex; // all carriages after and including the back carriage
-                    debugCoupler("decoupling: train={} frontIndex={} backIndex={} numberOffEnd={}",
-                        describeTrain(train), train.carriages.indexOf(info.frontCarriage), splitIndex, numberOffEnd);
-                    TrainUtils.splitTrain(train, numberOffEnd);
-                }
-                case COUPLING -> {
-                    Train frontTrain = info.frontCarriage.train;
-                    Train backTrain = info.backCarriage.train;
-                    debugCoupler("coupling: frontTrain={} backTrain={} effectiveSpacing={}",
-                        describeTrain(frontTrain), describeTrain(backTrain), cachedEffectiveEdgeSpacing);
-                    if (frontTrain == backTrain) {
-                        debugCoupler("coupling skipped: both carriage references are on the same train");
-                        break;
-                    }
-                    TrainUtils.combineTrains(frontTrain, backTrain, getBlockPos().above(), level, cachedEffectiveEdgeSpacing);
-                }
-                case NONE -> debugCoupler("no operation: error={} secondaryError={}", describeComponent(error), describeComponent(error2));
+        OperationInfo info = getOperationInfo();
+        switch (info.mode) {
+            case DECOUPLING -> {
+                Train train = info.frontCarriage.train;
+                int numberOffEnd = train.carriages.size() - train.carriages.indexOf(info.backCarriage); // all carriages after and including the back carriage
+                TrainUtils.splitTrain(train, numberOffEnd);
             }
-        } finally {
-            debugCouplerOperation = false;
+            case COUPLING -> {
+                Train frontTrain = info.frontCarriage.train;
+                Train backTrain = info.backCarriage.train;
+                if (frontTrain == backTrain)
+                    break;
+                TrainUtils.combineTrains(frontTrain, backTrain, getBlockPos().above(), level, cachedEffectiveEdgeSpacing);
+            }
+            case NONE -> {
+            }
         }
     }
 
     protected void onUnpowered() {
-    }
-
-    private void refreshOccupiedCouplers() {
-        TrackGraphLocation loc1 = edgePoint.determineGraphLocation();
-        TrackGraphLocation loc2 = secondEdgePoint.determineGraphLocation();
-        if (loc1 == null || loc1.graph == null) {
-            debugCoupler("refresh skipped: primary graph location missing");
-            return;
-        }
-
-        TrackGraph graph = loc1.graph;
-        if (loc2 != null && loc2.graph != null && loc2.graph != graph) {
-            debugCoupler("refresh skipped: primary and secondary are on different graphs");
-            return;
-        }
-
-        int[] refreshed = {0};
-        Create.RAILWAYS.trains.forEach((uuid, train) -> {
-            if (train.graph != graph)
-                return;
-            train.collectInitiallyOccupiedSignalBlocks();
-            refreshed[0]++;
-            if (train instanceof IOccupiedCouplers occupiedCouplers) {
-                debugCoupler("refresh train={} occupiedCouplers={}", describeTrain(train), occupiedCouplers.railways$getOccupiedCouplers());
-                for (UUID couplerId : occupiedCouplers.railways$getOccupiedCouplers()) {
-                    TrackCoupler coupler = graph.getPoint(CREdgePointTypes.COUPLER, couplerId);
-                    if (coupler != null) {
-                        coupler.keepAlive(train);
-                        debugCoupler("kept alive coupler={} for train={}", describeCoupler(coupler), describeTrain(train));
-                    }
-                }
-            }
-        });
-        debugCoupler("refresh complete: trainsOnGraph={}", refreshed[0]);
     }
 
     public boolean getReportedPower() {
@@ -298,9 +239,8 @@ public class TrackCouplerBlockEntity extends SmartBlockEntity implements Transfo
                     if (location != null && location.graph != null) {
                         location.graph.removePoint(level.getServer(), CREdgePointTypes.COUPLER, point.id);
                         Create.RAILWAYS.trains.forEach((uuid, train) -> {
-                            if (train instanceof IOccupiedCouplers occupiedCouplers)
-                                occupiedCouplers.railways$getOccupiedCouplers().remove(point.id);
-                            if (uuid.equals(point.getCurrentTrain()) || train.graph == location.graph) {
+                            ((IOccupiedCouplers) train).railways$getOccupiedCouplers().remove(point.id);
+                            if (uuid == point.getCurrentTrain() || train.graph == location.graph) {
                                 train.updateSignalBlocks = true;
                             }
                         });
@@ -410,14 +350,9 @@ public class TrackCouplerBlockEntity extends SmartBlockEntity implements Transfo
         Vec3 wheelPosition = relevantPoint.getPosition(carriage.train.graph).add(relevantPoint2.getPosition(carriage.train.graph)).scale(0.5).add(0, upsideDown ? 2 : 0, 0);
         Vec3 couplerSpatialPosition = Vec3.atBottomCenterOf(edgePoint.getGlobalPosition().above());
 //        return (coupler.isPrimary(relevantPoint.node1) || coupler.isPrimary(relevantPoint.node2)) && Math.abs(relevantPoint.position - (couplerPosition+0.5)) < .75;
-        boolean primarySide = coupler.isPrimary(relevantPoint.node1) || coupler.isPrimary(relevantPoint.node2) ||
-                coupler.isPrimary(relevantPoint2.node1) || coupler.isPrimary(relevantPoint2.node2);
-        double distanceSqr = wheelPosition.distanceToSqr(couplerSpatialPosition);
-        boolean result = primarySide && distanceSqr < .8 * .8;
-        debugCoupler("carriage check: train={} carriageIndex={} leading={} target={} coupler={} couplerPosition={} primarySide={} distanceSqr={} result={}",
-            describeTrain(carriage.train), carriage.train.carriages.indexOf(carriage), leading, edgePoint.getGlobalPosition(),
-            describeCoupler(coupler), couplerPosition, primarySide, distanceSqr, result);
-        return result;
+        return (coupler.isPrimary(relevantPoint.node1) || coupler.isPrimary(relevantPoint.node2) ||
+                coupler.isPrimary(relevantPoint2.node1) || coupler.isPrimary(relevantPoint2.node2)) &&
+                wheelPosition.distanceToSqr(couplerSpatialPosition) < .8 * .8;
     }
 
     public AllowedOperationMode getAllowedOperationMode() {
@@ -427,19 +362,16 @@ public class TrackCouplerBlockEntity extends SmartBlockEntity implements Transfo
     public OperationInfo getOperationInfo() {
         clearErrors();
         OperationInfo info = getOperationInfo(false);
-        debugCoupler("normal orientation result={}", info.mode);
         if (info.mode == OperationMode.NONE) {
             MutableComponent backupError = error;
             clearErrors();
             info = getOperationInfo(true);
-            debugCoupler("reversed orientation result={}", info.mode);
             if (info.mode == OperationMode.NONE)
                 error = backupError;
         }
         if (!info.mode.permitted(getAllowedOperationMode())) {
             clearErrors();
             setError(Component.translatable("railways.tooltip.coupler.error.mode_not_permitted"));
-            debugCoupler("operation {} blocked by allowed mode {}", info.mode, getAllowedOperationMode());
             return OperationInfo.NONE;
         }
         return info;
@@ -451,26 +383,18 @@ public class TrackCouplerBlockEntity extends SmartBlockEntity implements Transfo
 
         TrackTargetingBehaviour<TrackCoupler> edgePoint1 = reversed ? secondEdgePoint : edgePoint;
         TrackTargetingBehaviour<TrackCoupler> edgePoint2 = reversed ? edgePoint : secondEdgePoint;
-        debugCoupler("checking orientation reversed={} coupler1={} coupler2={} edgePoint1={} edgePoint2={}",
-            reversed, describeCoupler(coupler1), describeCoupler(coupler2), edgePoint1.getGlobalPosition(), edgePoint2.getGlobalPosition());
         if (coupler1 != null && coupler2 != null && coupler1.isActivated() && coupler2.isActivated()) {
             Train primaryTrain = Create.RAILWAYS.trains.get(coupler1.getCurrentTrain());
             Train secondaryTrain = Create.RAILWAYS.trains.get(coupler2.getCurrentTrain());
-            debugCoupler("activated trains: primary={} secondary={}", describeTrain(primaryTrain), describeTrain(secondaryTrain));
             if (primaryTrain != null && primaryTrain == secondaryTrain) {
                 //Decoupling, if back wheels of a carriage are on the secondary coupler and the front wheels of the carriage behind it are on the primary coupler
                 Carriage frontCarriage = getCarriageOnPoint(primaryTrain, coupler2, edgePoint2, false);
                 if (frontCarriage == null)
                     setError(Component.translatable("railways.tooltip.coupler.error.carriage_alignment"));
-                debugCoupler("decouple candidate: frontCarriageIndex={}",
-                    frontCarriage == null ? "null" : primaryTrain.carriages.indexOf(frontCarriage));
                 if (frontCarriage != null && primaryTrain.carriages.indexOf(frontCarriage) < primaryTrain.carriages.size() - 1) {
                     Carriage backCarriage = primaryTrain.carriages.get(primaryTrain.carriages.indexOf(frontCarriage) + 1);
-                    boolean backAligned = isCarriageWheelOnPoint(backCarriage, coupler1, edgePoint1, true);
-                    int indexGap = Math.abs(primaryTrain.carriages.indexOf(frontCarriage) - primaryTrain.carriages.indexOf(backCarriage));
-                    debugCoupler("decouple candidate: backCarriageIndex={} backAligned={} indexGap={}",
-                        primaryTrain.carriages.indexOf(backCarriage), backAligned, indexGap);
-                    if (backAligned && indexGap == 1) //Make sure that the carriages are actually next to each other
+                    if (isCarriageWheelOnPoint(backCarriage, coupler1, edgePoint1, true) &&
+                            Math.abs(primaryTrain.carriages.indexOf(frontCarriage) - primaryTrain.carriages.indexOf(backCarriage)) == 1) //Make sure that the carriages are actually next to each other
                         return new OperationInfo(OperationMode.DECOUPLING, frontCarriage, backCarriage);
                     else
                         setError(Component.translatable("railways.tooltip.coupler.error.carriage_alignment"));
@@ -481,9 +405,6 @@ public class TrackCouplerBlockEntity extends SmartBlockEntity implements Transfo
                 //Coupling if the front wheels of primaryTrain are on coupler1 and the back wheels of secondaryTrain are on coupler2
                 Carriage primaryCarriage = getCarriageOnPoint(primaryTrain, coupler1, edgePoint1, true);
                 Carriage secondaryCarriage = getCarriageOnPoint(secondaryTrain, coupler2, edgePoint2, false);
-                debugCoupler("couple candidate: primaryCarriageIndex={} secondaryCarriageIndex={}",
-                    primaryCarriage == null ? "null" : primaryTrain.carriages.indexOf(primaryCarriage),
-                    secondaryCarriage == null ? "null" : secondaryTrain.carriages.indexOf(secondaryCarriage));
                 if (primaryCarriage != null && secondaryCarriage != null && primaryTrain.carriages.indexOf(primaryCarriage) == 0 &&
                         secondaryTrain.carriages.indexOf(secondaryCarriage) == secondaryTrain.carriages.size() - 1) {
                     // ensure correct order when only one bogey (if 'outer' points are closer together than 'inner' points, then something is off
@@ -493,7 +414,6 @@ public class TrackCouplerBlockEntity extends SmartBlockEntity implements Transfo
                     double innerLength = secondaryCarriage.getTrailingPoint().getPosition(secondaryTrain.graph)
                         .subtract(primaryCarriage.getLeadingPoint().getPosition(primaryTrain.graph))
                         .lengthSqr();
-                    debugCoupler("couple candidate lengths: outer={} inner={}", outerLength, innerLength);
                     if (outerLength < innerLength) {
                         return OperationInfo.NONE;
                     } else {
@@ -515,37 +435,6 @@ public class TrackCouplerBlockEntity extends SmartBlockEntity implements Transfo
             setError(Component.translatable("railways.tooltip.coupler.error.missing_train"));
         }
         return OperationInfo.NONE;
-    }
-
-    private @Nullable BlockPos getTargetTrack(TrackTargetingBehaviour<TrackCoupler> target) {
-        if (target == null)
-            return null;
-        return ((AccessorTrackTargetingBehavior) target).getTargetTrack();
-    }
-
-    private void debugCoupler(String message, Object... args) {
-        if (!debugCouplerOperation)
-            return;
-        Object[] allArgs = new Object[args.length + 1];
-        allArgs[0] = getBlockPos();
-        System.arraycopy(args, 0, allArgs, 1, args.length);
-        Railways.LOGGER.info("[TrackCoupler {}] " + message, allArgs);
-    }
-
-    private String describeCoupler(@Nullable TrackCoupler coupler) {
-        if (coupler == null)
-            return "null";
-        return "id=" + coupler.getId() + ",active=" + coupler.isActivated() + ",train=" + coupler.getCurrentTrain();
-    }
-
-    private String describeTrain(@Nullable Train train) {
-        if (train == null)
-            return "null";
-        return train.id + "/" + train.name.getString() + ",carriages=" + train.carriages.size();
-    }
-
-    private String describeComponent(@Nullable Component component) {
-        return component == null ? "null" : component.getString();
     }
 
     public OperationMode getOperationMode() {
@@ -618,7 +507,7 @@ public class TrackCouplerBlockEntity extends SmartBlockEntity implements Transfo
         secondEdgePoint.transform(blockEntity, structureTransform);
     }
 
-    static class TrackCouplerValueBoxTransform extends CenteredSideValueBoxTransform {
+    public static class TrackCouplerValueBoxTransform extends CenteredSideValueBoxTransform {
 
         public TrackCouplerValueBoxTransform(boolean vertical) {
             super((state, d) -> d.getAxis().isVertical() == vertical);
@@ -689,4 +578,53 @@ public class TrackCouplerBlockEntity extends SmartBlockEntity implements Transfo
         }
     }
 
+    private static LangBuilder b() {
+        return Lang.builder(Railways.MOD_ID);
+    }
+
+    /**
+     * this method will be called when looking at a BlockEntity that implemented this
+     * interface
+     *
+     * @param tooltip
+     * @param isPlayerSneaking
+     * @return {@code true} if the tooltip creation was successful and should be
+     * displayed, or {@code false} if the overlay should not be displayed
+     */
+    public boolean addToGoggleTooltip(List<Component> tooltip, boolean isPlayerSneaking) {
+        b().translate("tooltip.coupler.header").forGoggles(tooltip);
+        b().translate("tooltip.coupler.mode")
+                .style(ChatFormatting.YELLOW)
+                .forGoggles(tooltip);
+        b().translate("coupler.mode." + getAllowedOperationMode().getSerializedName())
+                .style(ChatFormatting.YELLOW)
+                .forGoggles(tooltip);
+
+        String train1 = clientInfo == null ? "None" : clientInfo.trainName1;
+        String train2 = clientInfo == null ? "None" : clientInfo.trainName2;
+        OperationMode operationMode = clientInfo == null ? OperationMode.NONE : clientInfo.mode;
+        b().translate("tooltip.coupler.train1", train1)
+                .style(ChatFormatting.GOLD)
+                .forGoggles(tooltip);
+        b().translate("tooltip.coupler.train2", train2)
+                .style(ChatFormatting.GOLD)
+                .forGoggles(tooltip);
+
+        b().translate("tooltip.coupler.action." + operationMode.name().toLowerCase(Locale.ROOT))
+                .style(ChatFormatting.GREEN)
+                .forGoggles(tooltip);
+        if (clientInfo != null) {
+            if (clientInfo.error != null) {
+                b().add(clientInfo.error)
+                        .style(ChatFormatting.DARK_RED)
+                        .forGoggles(tooltip);
+            }
+            if (clientInfo.error2 != null && CRConfigs.client().showExtendedCouplerDebug.get()) {
+                b().add(clientInfo.error2)
+                        .style(ChatFormatting.DARK_PURPLE)
+                        .forGoggles(tooltip);
+            }
+        }
+        return true;
+    }
 }

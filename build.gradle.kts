@@ -25,9 +25,22 @@ import net.fabricmc.loom.api.LoomGradleExtensionAPI
 import net.fabricmc.loom.task.RemapJarTask
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassWriter
+import org.objectweb.asm.Handle
+import org.objectweb.asm.Opcodes
 import org.objectweb.asm.tree.AnnotationNode
 import org.objectweb.asm.tree.ClassNode
+import org.objectweb.asm.tree.FieldInsnNode
 import org.objectweb.asm.tree.MethodNode
+import org.objectweb.asm.tree.MethodInsnNode
+import org.objectweb.asm.tree.InvokeDynamicInsnNode
+import org.objectweb.asm.tree.JumpInsnNode
+import org.objectweb.asm.tree.LabelNode
+import org.objectweb.asm.tree.LdcInsnNode
+import org.objectweb.asm.tree.InsnList
+import org.objectweb.asm.tree.InsnNode
+import org.objectweb.asm.tree.VarInsnNode
+import org.objectweb.asm.commons.ClassRemapper
+import org.objectweb.asm.commons.Remapper
 import java.util.*
 import java.util.jar.JarEntry
 import java.util.jar.JarFile
@@ -59,6 +72,8 @@ val includeDevCommands = !isRelease && System.getenv("INCLUDE_DEV_COMMANDS")?.to
 val gitHash = "\"${calculateGitHash() + (if (hasUnstaged()) "-modified" else "")}\""
 
 repositories {
+    maven("https://maven.ithundxr.dev/mirror")
+    maven("https://mvn.devos.one/snapshots/")
     maven("https://api.modrinth.com/maven") {
         content {
             includeGroup("maven.modrinth")
@@ -66,7 +81,9 @@ repositories {
     }
 }
 
-val patchedCreateFlyJar = layout.projectDirectory.file("gradle/patched-deps/create-fly-${"create_fabric_version"()}-dev-patched.jar")
+val patchedCreateFlyJar = layout.projectDirectory.file(
+    "local-maven/local/createfly/create-fly/${"create_fabric_version"()}/create-fly-${"create_fabric_version"()}.jar"
+)
 
 fun resolveCreateFlyDevJar(): File {
     return configurations.detachedConfiguration(
@@ -88,6 +105,16 @@ fun patchCreateFlyDevJar(sourceJar: File, outputFile: File) {
                 var data = jar.getInputStream(entry).readAllBytes()
                 if (entry.name.endsWith(".class"))
                     data = patchCreateFlyMixinDescriptors(entry.name, data)
+                if (entry.name == "com/zurrtum/create/client/model/obj/ObjGeometry\$ModelMesh.class")
+                    data = patchCreateFlyObjTextureFallback(data)
+                if (entry.name == "create.mixins.json")
+                    data = data.toString(Charsets.UTF_8)
+                        .replace(Regex("(?m)^\\s*\\\"UtilMixin\\\",?\\r?\\n"), "")
+                        .toByteArray(Charsets.UTF_8)
+                if (entry.name == "create.client.mixins.json")
+                    data = data.toString(Charsets.UTF_8)
+                        .replace(Regex("(?m)^\\s*\\\"MinecraftClientMixin\\\",?\\r?\\n"), "")
+                        .toByteArray(Charsets.UTF_8)
 
                 out.putNextEntry(JarEntry(entry.name))
                 out.write(data)
@@ -95,6 +122,31 @@ fun patchCreateFlyDevJar(sourceJar: File, outputFile: File) {
             }
         }
     }
+}
+
+fun patchCreateFlyObjTextureFallback(bytes: ByteArray): ByteArray {
+    val node = ClassNode()
+    ClassReader(bytes).accept(node, 0)
+    node.methods.filter { it.name == "addQuads" }.forEach { method ->
+        method.instructions.toArray()
+            .filterIsInstance<FieldInsnNode>()
+            .filter {
+                it.opcode == Opcodes.GETFIELD &&
+                    it.owner == "com/zurrtum/create/client/model/obj/ObjMaterialLibrary\$Material" &&
+                    it.name == "diffuseColorMap"
+            }
+            .forEach { field ->
+                val present = LabelNode()
+                method.instructions.insert(field, InsnList().apply {
+                    add(InsnNode(Opcodes.DUP))
+                    add(JumpInsnNode(Opcodes.IFNONNULL, present))
+                    add(InsnNode(Opcodes.POP))
+                    add(LdcInsnNode("#particle"))
+                    add(present)
+                })
+            }
+    }
+    return ClassWriter(ClassWriter.COMPUTE_FRAMES or ClassWriter.COMPUTE_MAXS).also(node::accept).toByteArray()
 }
 
 if (!patchedCreateFlyJar.asFile.isFile) {
@@ -112,6 +164,229 @@ val patchedCreateFlyFiles = files(patchedCreateFlyJar).also {
     it.builtBy(patchCreateFlyDevJarTask)
 }
 extra["patchedCreateFlyFiles"] = patchedCreateFlyFiles
+extra["patchedCreateFlyDependency"] = "local.createfly:create-fly:${"create_fabric_version"()}"
+
+val patchedRegistrateVersion = "MC1.20-1.3.11-fabric-dev"
+val patchedRegistrateJar = layout.projectDirectory.file(
+    "local-maven/local/registrate/Registrate/$patchedRegistrateVersion/Registrate-$patchedRegistrateVersion.jar"
+)
+
+fun resolveRegistrateJar(): File = configurations.detachedConfiguration(
+    dependencies.create("com.tterrag.registrate_fabric:Registrate:1.3.79-MC1.20.1")
+).also { it.isTransitive = false }.singleFile
+
+fun patchRegistrateJar(sourceJar: File, outputFile: File) {
+    outputFile.parentFile.mkdirs()
+    JarFile(sourceJar).use { jar ->
+        JarOutputStream(outputFile.outputStream()).use { out ->
+            jar.entries().asIterator().forEach { entry ->
+                if (!entry.isDirectory && entry.name != "fabric.mod.json") {
+                    out.putNextEntry(JarEntry(entry.name))
+                    var data = jar.getInputStream(entry).readAllBytes()
+                    if (entry.name.endsWith(".class"))
+                        data = patchRegistrateIntermediaryCalls(data)
+                    if (entry.name == "registrate-fabric.mixins.json")
+                        data = data.toString(Charsets.UTF_8)
+                            .replace(Regex("(?m)^\\s*\\\"LootTableProviderMixin\\\",?\\r?\\n"), "")
+                            .replace(Regex("(?m)^\\s*\\\"accessor\\.SpawnPlacementsAccessor\\\",?\\r?\\n"), "")
+                            .toByteArray(Charsets.UTF_8)
+                    if (entry.name == "com/tterrag/registrate/fabric/RegistryObject.class")
+                        data = patchRegistrateRegistryObject(data)
+                    if (entry.name == "com/tterrag/registrate/builders/BlockBuilder.class")
+                        data = patchRegistrateBlockBuilderIds(patchRegistrateBlockBuilder(data))
+                    if (entry.name == "com/tterrag/registrate/builders/ItemBuilder.class")
+                        data = patchRegistrateItemBuilderIds(data)
+                    if (entry.name == "com/tterrag/registrate/builders/EntityBuilder.class")
+                        data = patchRegistrateEntityBuilderIds(data)
+                    if (entry.name == "com/tterrag/registrate/builders/BlockEntityBuilder.class")
+                        data = patchRegistrateBlockEntityBuilder(data)
+                    if (entry.name == "com/tterrag/registrate/builders/MenuBuilder.class")
+                        data = patchRegistrateMenuBuilder(data)
+                    out.write(data)
+                    out.closeEntry()
+                }
+            }
+            out.putNextEntry(JarEntry("fabric.mod.json"))
+            out.write(jar.getInputStream(jar.getJarEntry("fabric.mod.json")).readAllBytes())
+            out.closeEntry()
+        }
+    }
+}
+
+fun patchRegistrateIntermediaryCalls(bytes: ByteArray): ByteArray {
+    val node = ClassNode()
+    ClassReader(bytes).accept(node, 0)
+    node.methods.forEach { method ->
+        method.instructions.iterator().forEachRemaining { insn ->
+            if (insn is MethodInsnNode) {
+                if (insn.name == "method_30517") insn.name = "key"
+                if (insn.owner == "net/minecraft/class_2378" && insn.name == "method_10223") insn.name = "getValue"
+            }
+            if (insn is FieldInsnNode && insn.opcode == Opcodes.GETSTATIC &&
+                insn.owner == "net/minecraft/class_1723" && insn.name == "field_21668") {
+                insn.owner = "net/minecraft/client/renderer/texture/TextureAtlas"
+                insn.name = "LOCATION_BLOCKS"
+            }
+        }
+    }
+    return ClassWriter(0).also { node.accept(it) }.toByteArray()
+}
+
+fun patchRegistrateRegistryObject(bytes: ByteArray): ByteArray {
+    val node = ClassNode()
+    ClassReader(bytes).accept(node, 0)
+    node.methods.forEach { method ->
+        method.instructions.iterator().forEachRemaining { insn ->
+            if (insn is MethodInsnNode && insn.owner == "net/minecraft/class_2378" && insn.name == "method_10223")
+                insn.name = "getValue"
+        }
+    }
+    return ClassWriter(0).also { node.accept(it) }.toByteArray()
+}
+
+fun patchRegistrateBlockBuilder(bytes: ByteArray): ByteArray {
+    val node = ClassNode()
+    ClassReader(bytes).accept(node, 0)
+    node.methods.forEach { method ->
+        method.instructions.iterator().forEachRemaining { insn ->
+            if (insn is MethodInsnNode && insn.owner == "net/minecraft/class_2248" && insn.name == "method_9539")
+                insn.name = "getDescriptionId"
+            if (insn is InvokeDynamicInsnNode) {
+                insn.bsmArgs = insn.bsmArgs.map { arg ->
+                    if (arg is Handle && arg.name == "method_9539")
+                        Handle(arg.tag, arg.owner, "getDescriptionId", arg.desc, arg.isInterface)
+                    else arg
+                }.toTypedArray()
+            }
+        }
+    }
+    return ClassWriter(0).also { node.accept(it) }.toByteArray()
+}
+
+fun patchRegistrateBlockBuilderIds(bytes: ByteArray): ByteArray {
+    val node = ClassNode()
+    ClassReader(bytes).accept(node, 0)
+    val method = node.methods.firstOrNull { it.name == "createEntry" && it.desc == "()Lnet/minecraft/class_2248;" }
+        ?: return bytes
+    val target = method.instructions.iterator().asSequence().filterIsInstance<MethodInsnNode>()
+        .firstOrNull { it.owner == "com/tterrag/registrate/util/nullness/NonNullFunction" && it.name == "apply" }
+        ?: return bytes
+    val code = InsnList().apply {
+        add(VarInsnNode(Opcodes.ALOAD, 1))
+        add(FieldInsnNode(Opcodes.GETSTATIC, "net/minecraft/core/registries/Registries", "BLOCK", "Lnet/minecraft/resources/ResourceKey;"))
+        add(VarInsnNode(Opcodes.ALOAD, 0))
+        add(MethodInsnNode(Opcodes.INVOKEVIRTUAL, node.name, "getOwner", "()Lcom/tterrag/registrate/AbstractRegistrate;", false))
+        add(MethodInsnNode(Opcodes.INVOKEVIRTUAL, "com/tterrag/registrate/AbstractRegistrate", "getModid", "()Ljava/lang/String;", false))
+        add(VarInsnNode(Opcodes.ALOAD, 0))
+        add(MethodInsnNode(Opcodes.INVOKEVIRTUAL, node.name, "getName", "()Ljava/lang/String;", false))
+        add(MethodInsnNode(Opcodes.INVOKESTATIC, "net/minecraft/resources/ResourceLocation", "fromNamespaceAndPath", "(Ljava/lang/String;Ljava/lang/String;)Lnet/minecraft/resources/ResourceLocation;", false))
+        add(MethodInsnNode(Opcodes.INVOKESTATIC, "net/minecraft/resources/ResourceKey", "create", "(Lnet/minecraft/resources/ResourceKey;Lnet/minecraft/resources/ResourceLocation;)Lnet/minecraft/resources/ResourceKey;", false))
+        add(MethodInsnNode(Opcodes.INVOKEVIRTUAL, "net/minecraft/world/level/block/state/BlockBehaviour\$Properties", "setId", "(Lnet/minecraft/resources/ResourceKey;)Lnet/minecraft/world/level/block/state/BlockBehaviour\$Properties;", false))
+        add(InsnNode(Opcodes.POP))
+    }
+    method.instructions.insertBefore(target, code)
+    return ClassWriter(ClassWriter.COMPUTE_MAXS).also { node.accept(it) }.toByteArray()
+}
+
+fun patchRegistrateItemBuilderIds(bytes: ByteArray): ByteArray {
+    val node = ClassNode()
+    ClassReader(bytes).accept(node, 0)
+    val method = node.methods.firstOrNull { it.name == "createEntry" && it.desc == "()Lnet/minecraft/class_1792;" }
+        ?: return bytes
+    val target = method.instructions.iterator().asSequence().filterIsInstance<MethodInsnNode>()
+        .firstOrNull { it.owner == "com/tterrag/registrate/util/nullness/NonNullFunction" && it.name == "apply" }
+        ?: return bytes
+    val code = InsnList().apply {
+        add(VarInsnNode(Opcodes.ALOAD, 1))
+        add(FieldInsnNode(Opcodes.GETSTATIC, "net/minecraft/core/registries/Registries", "ITEM", "Lnet/minecraft/resources/ResourceKey;"))
+        add(VarInsnNode(Opcodes.ALOAD, 0))
+        add(MethodInsnNode(Opcodes.INVOKEVIRTUAL, node.name, "getOwner", "()Lcom/tterrag/registrate/AbstractRegistrate;", false))
+        add(MethodInsnNode(Opcodes.INVOKEVIRTUAL, "com/tterrag/registrate/AbstractRegistrate", "getModid", "()Ljava/lang/String;", false))
+        add(VarInsnNode(Opcodes.ALOAD, 0))
+        add(MethodInsnNode(Opcodes.INVOKEVIRTUAL, node.name, "getName", "()Ljava/lang/String;", false))
+        add(MethodInsnNode(Opcodes.INVOKESTATIC, "net/minecraft/resources/ResourceLocation", "fromNamespaceAndPath", "(Ljava/lang/String;Ljava/lang/String;)Lnet/minecraft/resources/ResourceLocation;", false))
+        add(MethodInsnNode(Opcodes.INVOKESTATIC, "net/minecraft/resources/ResourceKey", "create", "(Lnet/minecraft/resources/ResourceKey;Lnet/minecraft/resources/ResourceLocation;)Lnet/minecraft/resources/ResourceKey;", false))
+        add(MethodInsnNode(Opcodes.INVOKEVIRTUAL, "net/minecraft/world/item/Item\$Properties", "setId", "(Lnet/minecraft/resources/ResourceKey;)Lnet/minecraft/world/item/Item\$Properties;", false))
+        add(InsnNode(Opcodes.POP))
+    }
+    method.instructions.insertBefore(target, code)
+    return ClassWriter(ClassWriter.COMPUTE_MAXS).also { node.accept(it) }.toByteArray()
+}
+
+fun patchRegistrateEntityBuilderIds(bytes: ByteArray): ByteArray {
+    val node = ClassNode()
+    ClassReader(bytes).accept(node, 0)
+    val method = node.methods.firstOrNull { it.name == "createEntry" } ?: return bytes
+    val target = method.instructions.iterator().asSequence().filterIsInstance<MethodInsnNode>()
+        .firstOrNull { it.owner == "net/fabricmc/fabric/api/object/builder/v1/entity/FabricEntityTypeBuilder" && it.name == "build" && it.desc == "()Lnet/minecraft/class_1299;" }
+        ?: return bytes
+    val code = InsnList().apply {
+        add(FieldInsnNode(Opcodes.GETSTATIC, "net/minecraft/core/registries/Registries", "ENTITY_TYPE", "Lnet/minecraft/resources/ResourceKey;"))
+        add(VarInsnNode(Opcodes.ALOAD, 0))
+        add(MethodInsnNode(Opcodes.INVOKEVIRTUAL, node.name, "getOwner", "()Lcom/tterrag/registrate/AbstractRegistrate;", false))
+        add(MethodInsnNode(Opcodes.INVOKEVIRTUAL, "com/tterrag/registrate/AbstractRegistrate", "getModid", "()Ljava/lang/String;", false))
+        add(VarInsnNode(Opcodes.ALOAD, 0))
+        add(MethodInsnNode(Opcodes.INVOKEVIRTUAL, node.name, "getName", "()Ljava/lang/String;", false))
+        add(MethodInsnNode(Opcodes.INVOKESTATIC, "net/minecraft/resources/ResourceLocation", "fromNamespaceAndPath", "(Ljava/lang/String;Ljava/lang/String;)Lnet/minecraft/resources/ResourceLocation;", false))
+        add(MethodInsnNode(Opcodes.INVOKESTATIC, "net/minecraft/resources/ResourceKey", "create", "(Lnet/minecraft/resources/ResourceKey;Lnet/minecraft/resources/ResourceLocation;)Lnet/minecraft/resources/ResourceKey;", false))
+    }
+    method.instructions.insertBefore(target, code)
+    target.desc = "(Lnet/minecraft/resources/ResourceKey;)Lnet/minecraft/class_1299;"
+    return ClassWriter(ClassWriter.COMPUTE_MAXS).also { node.accept(it) }.toByteArray()
+}
+
+fun patchRegistrateBlockEntityBuilder(bytes: ByteArray): ByteArray {
+    val source = ClassReader(bytes)
+    val node = ClassNode()
+    source.accept(ClassRemapper(node, object : Remapper() {
+        override fun map(internalName: String): String = when (internalName) {
+            "net/minecraft/class_2591\$class_2592" -> "net/fabricmc/fabric/api/object/builder/v1/block/entity/FabricBlockEntityTypeBuilder"
+            "net/minecraft/class_2591\$class_5559" -> "net/fabricmc/fabric/api/object/builder/v1/block/entity/FabricBlockEntityTypeBuilder\$Factory"
+            else -> internalName
+        }
+        override fun mapMethodName(owner: String, name: String, descriptor: String): String = when {
+            owner == "net/minecraft/class_2591\$class_2592" && name == "method_20528" -> "create"
+            owner == "net/minecraft/class_2591\$class_2592" && name == "method_11034" -> "build"
+            else -> name
+        }
+    }), 0)
+    return ClassWriter(0).also { node.accept(it) }.toByteArray()
+}
+
+fun patchRegistrateMenuBuilder(bytes: ByteArray): ByteArray {
+    val node = ClassNode()
+    ClassReader(bytes).accept(node, 0)
+    node.methods.forEach { method ->
+        val calls = method.instructions.iterator().asSequence().filterIsInstance<MethodInsnNode>().toList()
+        calls.filter { it.owner == "net/fabricmc/fabric/api/screenhandler/v1/ExtendedScreenHandlerType" && it.name == "<init>" && !it.desc.contains("StreamCodec") }
+            .forEach { call ->
+                val code = InsnList().apply {
+                    add(InsnNode(Opcodes.ACONST_NULL))
+                    add(MethodInsnNode(Opcodes.INVOKESTATIC, "net/minecraft/network/codec/StreamCodec", "unit", "(Ljava/lang/Object;)Lnet/minecraft/network/codec/StreamCodec;", true))
+                }
+                method.instructions.insertBefore(call, code)
+                call.desc = "(Lnet/fabricmc/fabric/api/screenhandler/v1/ExtendedScreenHandlerType\$ExtendedFactory;Lnet/minecraft/network/codec/StreamCodec;)V"
+            }
+    }
+    return ClassWriter(ClassWriter.COMPUTE_MAXS).also { node.accept(it) }.toByteArray()
+}
+
+fun patchRegistrateMinecraftNames(bytes: ByteArray): ByteArray {
+    val node = ClassNode()
+    ClassReader(bytes).accept(node, 0)
+    node.methods.forEach { method ->
+        method.instructions.iterator().forEachRemaining { insn ->
+            if (insn is FieldInsnNode && insn.owner == "net/minecraft/world/item/CreativeModeTabs" && insn.name == "f_256750_")
+                insn.name = "SEARCH"
+        }
+    }
+    return ClassWriter(0).also { node.accept(it) }.toByteArray()
+}
+
+if (!patchedRegistrateJar.asFile.isFile)
+    patchRegistrateJar(resolveRegistrateJar(), patchedRegistrateJar.asFile)
+
+extra["patchedRegistrateDependency"] = "local.registrate:Registrate:$patchedRegistrateVersion"
 
 if (!isRelease && removeDevMixinAnyway) {
     println("Removing dev mixins, even though it's not a release build")
@@ -430,7 +705,8 @@ fun patchCreateFlyMixinDescriptors(entryName: String, bytes: ByteArray): ByteArr
     val replacements = when (entryName) {
         "com/zurrtum/create/mixin/EntityMixin.class",
         "com/zurrtum/create/client/mixin/EntityMixin.class" -> mapOf(
-            "method_5873" to "method_5873(Lnet/minecraft/class_1297;ZZ)Z"
+            "method_5873" to "startRiding(Lnet/minecraft/world/entity/Entity;Z)Z",
+            "method_5873(Lnet/minecraft/class_1297;ZZ)Z" to "startRiding(Lnet/minecraft/world/entity/Entity;Z)Z"
         )
         "com/zurrtum/create/client/mixin/MinecraftClientMixin.class" -> mapOf(
             "method_18096" to "method_18096(Lnet/minecraft/class_437;ZZ)V"

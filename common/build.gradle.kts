@@ -20,6 +20,12 @@ loom {
     accessWidenerPath = file("src/main/resources/railways.accesswidener")
 }
 
+// The common project is an intermediate compile artifact; only the Fabric jar is distributable.
+// Disabling its remap task also avoids Loom treating the same unclassified jar as input and output.
+tasks.named("remapJar") {
+    enabled = false
+}
+
 architectury {
     common {
         for(p in rootProject.subprojects) {
@@ -39,8 +45,8 @@ dependencies {
     // dependencies must also be pulled in to minimize problems, from remapping issues to compile errors.
     // All dependencies except Flywheel and Registrate are NOT safe to use!
     // Flywheel and Registrate must also be used carefully due to differences.
-    modCompileOnly(rootProject.extra["patchedCreateFlyFiles"]!!)
-    compileOnly("com.tterrag.registrate:Registrate:MC1.20-1.3.11")
+    modCompileOnly(rootProject.extra["patchedCreateFlyDependency"] as String)
+    modCompileOnly(rootProject.extra["patchedRegistrateDependency"] as String)
     compileOnly("com.google.code.findbugs:jsr305:3.0.2")
 
     // required for proper remapping and compiling
@@ -58,23 +64,6 @@ tasks.processResources {
 
     // don't add development or to-do files into built jar
     exclude("**/*.bbmodel", "**/*.lnk", "**/*.xcf", "**/*.md", "**/*.txt", "**/*.blend", "**/*.blend1")
-
-    listOf("src/main/resources", "src/generated/resources").forEach { resourceDir ->
-        from(resourceDir) {
-            include("data/**/tags/items/**")
-            eachFile {
-                path = path.replace("/tags/items/", "/tags/item/")
-            }
-            includeEmptyDirs = false
-        }
-        from(resourceDir) {
-            include("data/**/tags/blocks/**")
-            eachFile {
-                path = path.replace("/tags/blocks/", "/tags/block/")
-            }
-            includeEmptyDirs = false
-        }
-    }
 }
 
 sourceSets.main {
@@ -92,6 +81,9 @@ sourceSets.main {
         exclude("com/railwayteam/railways/mixin/MixinTrainPacket.java")
         exclude("com/railwayteam/railways/mixin/client/**")
         exclude("com/railwayteam/railways/mixin/conductor_possession/**")
+        exclude("com/railwayteam/railways/ponder/**")
+        exclude("com/railwayteam/railways/registry/CRPonderIndex.java")
+        exclude("com/railwayteam/railways/registry/CRPonderTags.java")
         exclude("com/railwayteam/railways/mixin/AccessorIngredient\$TagValue.java")
         exclude("com/railwayteam/railways/mixin/MixinAbstractMinecart.java")
         exclude("com/railwayteam/railways/mixin/MixinAbstractMinecart_Type.java")
@@ -103,10 +95,16 @@ sourceSets.main {
         exclude("com/railwayteam/railways/content/custom_tracks/casing/RuntimeFakePartialModel.java")
         exclude("com/railwayteam/railways/content/custom_tracks/casing/SpriteCopyingBakedModel.java")
         exclude("com/railwayteam/railways/content/conductor/ConductorElytraLayer.java")
-        // ConductorFlagLayer, ConductorRemoteLayer, ConductorToolboxLayer ported to 1.21.11 API
+        exclude("com/railwayteam/railways/content/conductor/ConductorFlagLayer.java")
+        exclude("com/railwayteam/railways/content/conductor/ConductorRemoteLayer.java")
         exclude("com/railwayteam/railways/content/conductor/ConductorSecondaryHeadLayer.java")
+        exclude("com/railwayteam/railways/content/conductor/ConductorToolboxLayer.java")
         exclude("com/railwayteam/railways/content/bogey_menu/components/**")
         exclude("com/railwayteam/railways/content/animated_flywheel/FlywheelMovementBehaviour.java")
+        exclude("com/railwayteam/railways/content/custom_bogeys/renderer/**")
+        exclude("com/railwayteam/railways/content/custom_bogeys/special/invisible/InvisibleBogeyRenderer.java")
+        exclude("com/railwayteam/railways/content/custom_bogeys/special/invisible/InvisibleBogeyVisual.java")
+        exclude("com/railwayteam/railways/content/custom_bogeys/special/monobogey/MonoBogeyDisplay.java")
         exclude("com/railwayteam/railways/registry/advancement/**")
         exclude("com/railwayteam/railways/registry/commands/**")
         exclude("com/railwayteam/railways/util/client/ClientTextUtils.java")

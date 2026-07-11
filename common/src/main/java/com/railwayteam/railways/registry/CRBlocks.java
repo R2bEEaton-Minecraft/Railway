@@ -18,9 +18,10 @@
 
 package com.railwayteam.railways.registry;
 
+import net.minecraft.client.renderer.RenderType;
+
 import com.railwayteam.railways.ModSetup;
 import com.railwayteam.railways.Railways;
-import com.railwayteam.railways.multiloader.Env;
 import com.railwayteam.railways.base.data.BuilderTransformers;
 import com.railwayteam.railways.content.buffer.BlockStateBlockItem;
 import com.railwayteam.railways.content.buffer.BlockStateBlockItemGroup;
@@ -138,15 +139,6 @@ public class CRBlocks {
 
     private static final CreateRegistrate REGISTRATE = Railways.registrate();
 
-    /**
-     * ItemDescription is a client-only Create Fly class; tooltip descriptions only matter for
-     * rendering, so skip this entirely on a dedicated server rather than crash trying to load it.
-     */
-    private static void useTooltipDescriptionKey(net.minecraft.world.level.ItemLike item, String key) {
-        if (Env.CLIENT.isCurrent())
-            ItemDescription.useKey(item, key);
-    }
-
     private static BlockEntry<TrackBlock> makeTrack(TrackMaterial material) {
         return makeTrack(material, (c, p) -> {
         });
@@ -172,7 +164,7 @@ public class CRBlocks {
         if (CRTrackMaterials.getType(material) != CRTrackMaterials.CRTrackType.MONORAIL)
             trackTags.add(AllTags.AllBlockTags.GIRDABLE_TRACKS.tag);
         List<TagKey<Item>> itemTags = new ArrayList<>();
-        if (isPhantomTrack(material)) {
+        if (material == CRTrackMaterials.PHANTOM || material == CRTrackMaterials.getWide(CRTrackMaterials.PHANTOM) || material == CRTrackMaterials.getNarrow(CRTrackMaterials.PHANTOM)) {
             itemTags.add(CRTags.AllItemTags.PHANTOM_TRACK_REVEALING.tag);
         }
         //noinspection unchecked
@@ -188,23 +180,14 @@ public class CRBlocks {
             .tag(CommonTags.RELOCATION_NOT_SUPPORTED.forge, CommonTags.RELOCATION_NOT_SUPPORTED.fabric)
             .tag((TagKey<Block>[]) trackTags.toArray(TagKey[]::new)) // keep the cast, or stuff breaks
             .lang(CRTrackMaterials.langName(material) + " Train Track")
+            .addLayer(() -> RenderType::cutoutMipped)
             .onRegister(onRegister)
             .onRegister(CRTrackMaterials::addToBlockEntityType)
             .item(TrackBlockItem::new)
             .tag((TagKey<Item>[]) itemTags.toArray(TagKey[]::new))
             .tag(AllTags.AllItemTags.TRACKS.tag)
             .build()
-            .onRegisterAfter(Registries.ITEM, block -> {
-                if (isPhantomTrack(material))
-                    useTooltipDescriptionKey(block, "block.railways.track_phantom");
-            })
             .register();
-    }
-
-    private static boolean isPhantomTrack(TrackMaterial material) {
-        return material == CRTrackMaterials.PHANTOM
-            || material == CRTrackMaterials.getWide(CRTrackMaterials.PHANTOM)
-            || material == CRTrackMaterials.getNarrow(CRTrackMaterials.PHANTOM);
     }
 
     @FunctionalInterface
@@ -246,9 +229,9 @@ public class CRBlocks {
                 .tag(cycleTag)
             .onRegisterAfter(Registries.ITEM, v -> {
                 if (styled)
-                    useTooltipDescriptionKey(v, "block.railways.smokestack");
+                    ItemDescription.useKey(v, "block.railways.smokestack");
                 else
-                    useTooltipDescriptionKey(v, "block.railways.smokestack_caboosestyle");
+                    ItemDescription.useKey(v, "block.railways.smokestack_caboosestyle");
             })
             .build()
             .register();
@@ -296,7 +279,7 @@ public class CRBlocks {
             .tab(CRCreativeModeTabs.getBaseTabKey())
             .tag(cycleTag)
             .build()
-            .onRegisterAfter(Registries.ITEM, v -> useTooltipDescriptionKey(v, "block.railways.smokestack"))
+            .onRegisterAfter(Registries.ITEM, v -> ItemDescription.useKey(v, "block.railways.smokestack"))
             .register();
 
         BlockEntry<SmokeStackExtenderBlock> EXTENDER = REGISTRATE.block("smokestack_" + variant + "_extension", p -> new SmokeStackExtenderBlock(p, rotType, shape, cycleGroupSupplier, baseSupplier, variationType.property, variationType.defaultPart))
@@ -540,7 +523,6 @@ public class CRBlocks {
             .item(HandcarItem::new)
             .properties(p -> p.stacksTo(1))
             .build()
-            .onRegisterAfter(Registries.ITEM, v -> useTooltipDescriptionKey(v, "block.railways.handcar"))
             .lang("Handcar")
             .register();
 
@@ -632,7 +614,7 @@ public class CRBlocks {
                     .sound(SoundType.WOOD)
                     .instabreak()
                     .noLootTable()
-                    .noCollision()
+                    .noCollission()
 
             )
             .transform(BuilderTransformers.conductorWhistleFlag())
@@ -759,7 +741,6 @@ public class CRBlocks {
             .transform(copycat())
             .transform(BuilderTransformers.conductorVent())
             .properties(p -> p.isSuffocating((state, level, pos) -> false))
-            .properties(BlockBehaviour.Properties::noOcclusion)
             .lang("Vent Block")
             .item()
             .transform(customItemModel("copycat_vent"))
@@ -770,7 +751,7 @@ public class CRBlocks {
         .initialProperties(SharedProperties::softMetal)
         .properties(p -> p.mapColor(MapColor.PODZOL))
         .properties(BlockBehaviour.Properties::noOcclusion)
-        .properties(BlockBehaviour.Properties::noCollision)
+        .properties(BlockBehaviour.Properties::noCollission)
         .properties(p -> p.sound(SoundType.NETHERITE_BLOCK))
         .transform(BuilderTransformers.bufferBlockState(state -> state.getValue(StandardTrackBufferBlock.STYLE).getModel(), state -> state.getValue(StandardTrackBufferBlock.FACING)))
         .tag(AllTags.AllBlockTags.MOVABLE_EMPTY_COLLIDER.tag)
@@ -781,49 +762,46 @@ public class CRBlocks {
         .transform(BuilderTransformers.variantBufferItem())
         .transform(customItemModel())
         .build()
-        .onRegisterAfter(Registries.ITEM, v -> useTooltipDescriptionKey(v, "block.railways.track_buffer"))
+        .onRegisterAfter(Registries.ITEM, v -> ItemDescription.useKey(v, "block.railways.track_buffer"))
         .register();
 
     public static final BlockEntry<NarrowTrackBufferBlock> TRACK_BUFFER_NARROW = REGISTRATE.block("buffer_narrow", NarrowTrackBufferBlock::new)
         .initialProperties(SharedProperties::softMetal)
         .properties(p -> p.mapColor(MapColor.PODZOL))
         .properties(BlockBehaviour.Properties::noOcclusion)
-        .properties(BlockBehaviour.Properties::noCollision)
+        .properties(BlockBehaviour.Properties::noCollission)
         .properties(p -> p.sound(SoundType.NETHERITE_BLOCK))
         .transform(BuilderTransformers.bufferBlockState(state -> state.getValue(NarrowTrackBufferBlock.STYLE).getModel(), state -> state.getValue(NarrowTrackBufferBlock.FACING)))
         .tag(AllTags.AllBlockTags.MOVABLE_EMPTY_COLLIDER.tag)
         .transform(axeOrPickaxe())
         .transform(BuilderTransformers.variantBuffer())
         .lang("Narrow Track Buffer")
-        .loot((p, b) -> p.dropOther(b, CRBlocks.TRACK_BUFFER.get()))
         .register();
 
     public static final BlockEntry<MonoTrackBufferBlock> TRACK_BUFFER_MONO = REGISTRATE.block("buffer_mono", MonoTrackBufferBlock::new)
         .initialProperties(SharedProperties::softMetal)
         .properties(p -> p.mapColor(MapColor.PODZOL))
         .properties(BlockBehaviour.Properties::noOcclusion)
-        .properties(BlockBehaviour.Properties::noCollision)
+        .properties(BlockBehaviour.Properties::noCollission)
         .properties(p -> p.sound(SoundType.NETHERITE_BLOCK))
         .transform(BuilderTransformers.monoBuffer())
         .tag(AllTags.AllBlockTags.MOVABLE_EMPTY_COLLIDER.tag)
         .transform(axeOrPickaxe())
         .transform(BuilderTransformers.variantBuffer())
         .lang("Monorail Track Buffer")
-        .loot((p, b) -> p.dropOther(b, CRBlocks.TRACK_BUFFER.get()))
         .register();
 
     public static final BlockEntry<WideTrackBufferBlock> TRACK_BUFFER_WIDE = REGISTRATE.block("buffer_wide", WideTrackBufferBlock::new)
         .initialProperties(SharedProperties::softMetal)
         .properties(p -> p.mapColor(MapColor.PODZOL))
         .properties(BlockBehaviour.Properties::noOcclusion)
-        .properties(BlockBehaviour.Properties::noCollision)
+        .properties(BlockBehaviour.Properties::noCollission)
         .properties(p -> p.sound(SoundType.NETHERITE_BLOCK))
         .transform(BuilderTransformers.bufferBlockState(state -> Railways.asResource("block/buffer/wide_buffer_stop"), state -> state.getValue(WideTrackBufferBlock.FACING)))
         .tag(AllTags.AllBlockTags.MOVABLE_EMPTY_COLLIDER.tag)
         .transform(axeOrPickaxe())
         .transform(BuilderTransformers.variantBuffer())
         .lang("Wide Track Buffer")
-        .loot((p, b) -> p.dropOther(b, CRBlocks.TRACK_BUFFER.get()))
         .register();
 
     public static final BlockEntry<LinkPinBlock> LINK_AND_PIN = REGISTRATE.block("link_and_pin", LinkPinBlock::new)
@@ -854,7 +832,7 @@ public class CRBlocks {
         .item()
         .transform(BuilderTransformers.variantBufferItem())
         .build()
-        .onRegisterAfter(Registries.ITEM, v -> useTooltipDescriptionKey(v, "block.railways.buffer"))
+        .onRegisterAfter(Registries.ITEM, v -> ItemDescription.useKey(v, "block.railways.buffer"))
         .register();
 
     public static final BlockEntry<GenericDyeableSingleBufferBlock> SMALL_BUFFER = REGISTRATE.block("small_buffer", GenericDyeableSingleBufferBlock.createFactory(CRShapes.SMALL_BUFFER))
@@ -867,7 +845,7 @@ public class CRBlocks {
         .item()
         .transform(BuilderTransformers.variantBufferItem())
         .build()
-        .onRegisterAfter(Registries.ITEM, v -> useTooltipDescriptionKey(v, "block.railways.buffer"))
+        .onRegisterAfter(Registries.ITEM, v -> ItemDescription.useKey(v, "block.railways.buffer"))
         .register();
 
     public static final BlockEntry<HeadstockBlock> HEADSTOCK = REGISTRATE.block("headstock", HeadstockBlock::new)

@@ -29,7 +29,7 @@ import com.zurrtum.create.content.trains.track.TrackMaterial;
 import com.zurrtum.create.foundation.block.IBE;
 import com.zurrtum.create.foundation.block.ProperWaterloggedBlock;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.Blocks;
@@ -50,7 +50,7 @@ public class CRBogeyBlock extends AbstractBogeyBlock<CRBogeyBlockEntity>
 		this.defaultStyle = defaultStyle;
 		registerDefaultState(defaultBlockState().setValue(WATERLOGGED, false));
 	}
-	public Identifier getTrackType(BogeyStyle style) {
+	public ResourceLocation getTrackType(BogeyStyle style) {
 		return CRTrackMaterials.CRTrackType.STANDARD;
 	}
 	public double getWheelPointSpacing() {

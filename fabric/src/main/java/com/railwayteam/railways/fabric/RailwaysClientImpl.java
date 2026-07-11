@@ -21,102 +21,35 @@ package com.railwayteam.railways.fabric;
 import com.mojang.brigadier.CommandDispatcher;
 import com.railwayteam.railways.Railways;
 import com.railwayteam.railways.RailwaysClient;
-import com.railwayteam.railways.base.reload.ClientResourceReloadListener;
-import com.railwayteam.railways.content.buffer.headstock.fabric.CopycatHeadstockModelRegistration;
-import com.railwayteam.railways.content.conductor.fabric.ConductorCapItemRenderer;
-import com.railwayteam.railways.events.ClientEvents;
-import com.railwayteam.railways.registry.CRParticleTypes;
-import com.zurrtum.create.content.trains.track.TrackMaterial;
+import com.railwayteam.railways.content.conductor.ConductorRenderer;
+import com.railwayteam.railways.registry.CREntities;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientWorldEvents;
-import net.fabricmc.fabric.api.client.rendering.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry;
+import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.fabric.api.resource.ResourcePackActivationType;
-import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.minecraft.client.model.geom.ModelLayerLocation;
-import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
+import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
-import net.minecraft.client.renderer.entity.EntityRendererProvider;
-import net.minecraft.client.renderer.entity.EntityRenderers;
+import net.minecraft.client.renderer.entity.MinecartRenderer;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
-import net.minecraft.server.packs.PackType;
-import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
 
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class RailwaysClientImpl implements ClientModInitializer {
 	public void onInitializeClient() {
-		CopycatHeadstockModelRegistration.register();
+		EntityRendererRegistry.register(CREntities.CART_BLOCK.get(),
+			context -> new MinecartRenderer(context, ModelLayers.MINECART));
+		EntityRendererRegistry.register(CREntities.CART_JUKEBOX.get(),
+			context -> new MinecartRenderer(context, ModelLayers.MINECART));
+		EntityRendererRegistry.register(CREntities.CONDUCTOR.get(), ConductorRenderer::new);
 		RailwaysClient.init();
-		if (FabricLoader.getInstance().isModLoaded("jei")) {
-			registerJeiCompat();
-		}
-		ConductorCapItemRenderer.register();
-		CRParticleTypes.registerFactories();
-		registerClientEvents();
-		registerTrackRenderLayers();
-
-		// Register vent block for CUTOUT chunk section so the hollow-frame copycat_base
-		// texture renders with proper alpha transparency (opaque frame, transparent center).
-		BlockRenderLayerMap.putBlock(
-				com.railwayteam.railways.registry.CRBlocks.CONDUCTOR_VENT.get(),
-				ChunkSectionLayer.CUTOUT);
-	}
-
-	private static void registerJeiCompat() {
-		try {
-			Class.forName("com.railwayteam.railways.compat.jei.RailwaysJeiClient")
-				.getMethod("register")
-				.invoke(null);
-		} catch (ReflectiveOperationException e) {
-			Railways.LOGGER.error("Failed to register Railways JEI client compatibility", e);
-		}
-	}
-
-	private static void registerTrackRenderLayers() {
-		for (TrackMaterial material : TrackMaterial.ALL.values()) {
-			if (Railways.MOD_ID.equals(material.getId().getNamespace())) {
-				BlockRenderLayerMap.putBlock(material.getBlock(), ChunkSectionLayer.CUTOUT);
-			}
-		}
-	}
-
-	private static void registerClientEvents() {
-		ClientTickEvents.START_CLIENT_TICK.register(ClientEvents::onClientTickStart);
-		ClientTickEvents.END_CLIENT_TICK.register(ClientEvents::onClientTickEnd);
-		ClientWorldEvents.AFTER_CLIENT_WORLD_CHANGE.register((mc, level) -> ClientEvents.onClientWorldLoad(level));
-		ResourceManagerHelper.get(PackType.SERVER_DATA).registerReloadListener(new SimpleSynchronousResourceReloadListener() {
-			@Override
-			public Identifier getFabricId() {
-				return Railways.asResource("client_events");
-			}
-
-			@Override
-			public void onResourceManagerReload(ResourceManager resourceManager) {
-				ClientEvents.onTagsUpdated();
-			}
-		});
-		ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(new SimpleSynchronousResourceReloadListener() {
-			@Override
-			public Identifier getFabricId() {
-				return Railways.asResource("client_resource_reload");
-			}
-
-			@Override
-			public void onResourceManagerReload(ResourceManager resourceManager) {
-				ClientResourceReloadListener.INSTANCE.onResourceManagerReload(resourceManager);
-			}
-		});
+		RailwaysBlockEntityRenderers.register();
 	}
 
 	@SuppressWarnings({"unchecked", "rawtypes"}) // jank!
@@ -129,10 +62,6 @@ public class RailwaysClientImpl implements ClientModInitializer {
 
 	public static void registerModelLayer(ModelLayerLocation layer, Supplier<LayerDefinition> definition) {
 		EntityModelLayerRegistry.registerModelLayer(layer, definition::get);
-	}
-
-	public static <T extends Entity> void registerEntityRenderer(EntityType<? extends T> type, EntityRendererProvider<T> provider) {
-		EntityRenderers.register(type, provider);
 	}
 
 	public static void registerBuiltinPack(String id, String name) {

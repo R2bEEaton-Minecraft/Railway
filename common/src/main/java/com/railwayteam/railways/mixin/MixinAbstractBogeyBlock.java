@@ -24,9 +24,9 @@ import com.railwayteam.railways.registry.CRBogeyStyles;
 import com.zurrtum.create.content.trains.bogey.AbstractBogeyBlock;
 import com.zurrtum.create.content.trains.bogey.BogeyStyle;
 import com.zurrtum.create.content.trains.track.ITrackBlock;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -45,7 +45,7 @@ import java.util.Map;
 
 @Mixin(value = AbstractBogeyBlock.class, remap = false)
 public abstract class MixinAbstractBogeyBlock {
-    @Unique private final ThreadLocal<Identifier> railways$trackType = new ThreadLocal<>();
+    @Unique private final ThreadLocal<ResourceLocation> railways$trackType = new ThreadLocal<>();
 
     @Inject(method = "getNextStyle(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;)Lcom/simibubi/create/content/trains/bogey/BogeyStyle;", at = @At("HEAD"), remap = true)
     private void storeSupportType(Level level, BlockPos pos, CallbackInfoReturnable<BogeyStyle> cir) {
@@ -82,8 +82,8 @@ public abstract class MixinAbstractBogeyBlock {
     }
 
     @WrapOperation(method = "getNextStyle(Lcom/simibubi/create/content/trains/bogey/BogeyStyle;)Lcom/simibubi/create/content/trains/bogey/BogeyStyle;", at = @At(value = "INVOKE", target = "Ljava/util/Map;values()Ljava/util/Collection;"))
-    private Collection<BogeyStyle> filterStyles(Map<Identifier, BogeyStyle> instance, Operation<Collection<BogeyStyle>> original) {
-        Identifier trackType = railways$trackType.get();
+    private Collection<BogeyStyle> filterStyles(Map<ResourceLocation, BogeyStyle> instance, Operation<Collection<BogeyStyle>> original) {
+        ResourceLocation trackType = railways$trackType.get();
         if (trackType == null) {
             return original.call(instance);
         } else {

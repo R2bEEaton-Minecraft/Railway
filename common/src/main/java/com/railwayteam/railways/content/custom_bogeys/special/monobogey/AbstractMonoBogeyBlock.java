@@ -31,7 +31,7 @@ import com.zurrtum.create.foundation.block.ProperWaterloggedBlock;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.Block;
@@ -60,7 +60,7 @@ public abstract class AbstractMonoBogeyBlock<T extends MonoBogeyBlockEntity> ext
             return base;
         return base.setValue(UPSIDE_DOWN, upsideDown);
     }
-    public Identifier getTrackType(BogeyStyle style) {
+    public ResourceLocation getTrackType(BogeyStyle style) {
         return CRTrackMaterials.CRTrackType.MONORAIL;
     }
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {

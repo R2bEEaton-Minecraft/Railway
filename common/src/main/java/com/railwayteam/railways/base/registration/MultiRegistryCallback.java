@@ -12,7 +12,7 @@ package com.railwayteam.railways.base.registration;
 
 import com.tterrag.registrate.AbstractRegistrate;
 import net.minecraft.core.Registry;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.resources.ResourceKey;
 
 import java.util.ArrayList;
@@ -26,8 +26,8 @@ public final class MultiRegistryCallback<A, B> {
 	}
 
 	public static <A, B> void create(
-		AbstractRegistrate<?> registrateA, ResourceKey<? extends Registry<A>> typeA, Identifier idA,
-		AbstractRegistrate<?> registrateB, ResourceKey<? extends Registry<B>> typeB, Identifier idB,
+		AbstractRegistrate<?> registrateA, ResourceKey<? extends Registry<A>> typeA, ResourceLocation idA,
+		AbstractRegistrate<?> registrateB, ResourceKey<? extends Registry<B>> typeB, ResourceLocation idB,
 		BiConsumer<A, B> callback
 	) {
 	}

@@ -21,7 +21,7 @@ package com.railwayteam.railways.mixin;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.railwayteam.railways.content.conductor.ConductorEntity;
 import com.railwayteam.railways.content.conductor.toolbox.MountedToolbox;
-import com.zurrtum.create.AllSynchedDatas;
+import com.railwayteam.railways.util.EntityUtils;
 import com.zurrtum.create.content.equipment.toolbox.ToolboxBlockEntity;
 import com.zurrtum.create.content.equipment.toolbox.ToolboxHandler;
 import net.minecraft.nbt.CompoundTag;
@@ -49,7 +49,7 @@ import java.util.UUID;
 public abstract class MixinToolboxHandler {
 
   @Shadow
-  public static void syncData(Player player, CompoundTag data) {
+  public static void syncData(Player player) {
     throw new AssertionError();
   }
 
@@ -71,9 +71,9 @@ public abstract class MixinToolboxHandler {
   private static void railways$connectConductorToolboxes(Entity entity, Level world, CallbackInfo ci,
                                                          @Local ServerPlayer player, @Local(ordinal = 0) CompoundTag compound, @Local(ordinal = 0) int i,
                                                          @Local String key, @Local(ordinal = 1) CompoundTag data, @Local(ordinal = 1) int slot) {
-    UUID uuid = railways$getEntityUUID(data);
-    if (uuid == null || !(world instanceof ServerLevel level))
+    if (!data.hasUUID("EntityUUID") || !(world instanceof ServerLevel level))
       return;
+    UUID uuid = data.getUUID("EntityUUID");
     Entity toolboxHolder = level.getEntity(uuid);
     if (toolboxHolder instanceof ConductorEntity conductor) {
       MountedToolbox toolbox = conductor.getToolbox();
@@ -81,7 +81,7 @@ public abstract class MixinToolboxHandler {
         toolbox.connectPlayer(slot, player, i);
     } else {
       compound.remove(key);
-      syncData(player, compound);
+      syncData(player);
     }
   }
 
@@ -98,24 +98,16 @@ public abstract class MixinToolboxHandler {
                                                          Player player, int hotbarSlot, boolean keepItems) {
     if (!(player.level instanceof ServerLevel level))
       return be;
-    CompoundTag toolboxData = AllSynchedDatas.TOOLBOX.get(player);
+    CompoundTag toolboxData = EntityUtils.getPersistentData(player).getCompound("CreateToolboxData").orElse(new CompoundTag());
     String key = String.valueOf(hotbarSlot);
-    CompoundTag data = toolboxData.getCompound(key).orElse(new CompoundTag());
-    UUID uuid = railways$getEntityUUID(data);
-    if (uuid == null)
+    CompoundTag data = toolboxData.getCompound(key);
+    if (!data.hasUUID("EntityUUID"))
       return be;
+    UUID uuid = data.getUUID("EntityUUID");
     Entity entity = level.getEntity(uuid);
     if (!(entity instanceof ConductorEntity conductor) || !conductor.isCarryingToolbox())
       return be;
     return conductor.getToolbox();
-  }
-
-  private static UUID railways$getEntityUUID(CompoundTag data) {
-    try {
-      return data.getString("EntityUUID").map(UUID::fromString).orElse(null);
-    } catch (IllegalArgumentException ignored) {
-      return null;
-    }
   }
 
   @Inject(method = "getNearest", at = @At("RETURN"))

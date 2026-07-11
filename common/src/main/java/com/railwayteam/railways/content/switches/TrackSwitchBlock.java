@@ -26,13 +26,14 @@ import com.zurrtum.create.content.equipment.wrench.IWrenchable;
 import com.zurrtum.create.content.trains.entity.TravellingPoint;
 import com.zurrtum.create.foundation.block.IBE;
 import dev.architectury.injectables.annotations.ExpectPlatform;
+import com.zurrtum.create.client.catnip.lang.Lang;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.arrow.Arrow;
+import net.minecraft.world.entity.projectile.Arrow;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -92,7 +93,7 @@ public abstract class TrackSwitchBlock extends HorizontalDirectionalBlock implem
       };
     }
     public @NotNull String getSerializedName() {
-      return name().toLowerCase(java.util.Locale.ROOT);
+      return Lang.asId(name());
     }
 
     public boolean canSwitchTo(SwitchState next, SwitchConstraint constraint) {
@@ -235,16 +236,6 @@ public abstract class TrackSwitchBlock extends HorizontalDirectionalBlock implem
     if (AllTags.AllItemTags.WRENCH.matches(itemInHand))
       return InteractionResult.PASS;
 
-    return useSwitch(level, pos, player);
-  }
-
-  @SuppressWarnings("deprecation")
-  protected @NotNull InteractionResult useWithoutItem(@NotNull BlockState state, @NotNull Level level, @NotNull BlockPos pos,
-                                                      @NotNull Player player, @NotNull BlockHitResult hit) {
-    return useSwitch(level, pos, player);
-  }
-
-  private @NotNull InteractionResult useSwitch(@NotNull Level level, @NotNull BlockPos pos, @NotNull Player player) {
     if (level.isClientSide()) {
       return InteractionResult.SUCCESS;
     }

@@ -19,31 +19,17 @@
 package com.railwayteam.railways.mixin;
 
 import com.zurrtum.create.content.contraptions.actors.roller.RollerBlockEntity;
-import com.zurrtum.create.content.contraptions.actors.roller.RollerBlockEntity.RollingMode;
 import com.zurrtum.create.content.contraptions.actors.roller.RollerMovementBehaviour;
 import com.zurrtum.create.content.trains.track.ITrackBlock;
-import com.zurrtum.create.foundation.blockEntity.behaviour.scrollValue.ServerScrollOptionBehaviour;
-import com.zurrtum.create.api.behaviour.BlockEntityBehaviour;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-
-import java.util.List;
 
 @Mixin(value = RollerBlockEntity.class, remap = false)
 public class MixinRollerBlockEntity {
-    @Shadow public ServerScrollOptionBehaviour<RollingMode> mode;
-
-    @Inject(method = "addBehaviours", at = @At("RETURN"))
-    private void railways$addTrackReplaceMode(List<BlockEntityBehaviour<?>> behaviours, CallbackInfo ci) {
-        mode.between(0, 3);
-    }
-
     @Inject(method = "isValidMaterial", at = @At("HEAD"), cancellable = true)
     private void makeTracksValid(ItemStack newFilter, CallbackInfoReturnable<Boolean> cir) {
         if (newFilter.isEmpty())
