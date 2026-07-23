@@ -61,6 +61,9 @@ import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
@@ -89,29 +92,33 @@ public class TrackCouplerBlockEntity extends SmartBlockEntity implements Transfo
     protected ServerScrollValueBehaviour edgeSpacingScroll;
 
     protected int cachedEffectiveEdgeSpacing = 5;
+    private boolean diagnosticsLogged;
+    private Boolean lastDiagnosticEdgePointsOk;
 
     public TrackCouplerBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
     }
 
-        protected void write(CompoundTag tag, boolean clientPacket) {
-
-        tag.putBoolean("EdgePointsOk", edgePointsOk);
-        tag.putBoolean("Power", lastReportedPower);
-        tag.putInt("AnalogOutput", lastAnalogOutput);
-        tag.putInt("EdgeSpacing", edgeSpacing);
-        tag.putInt("LastEdgeSpacing", lastEdgeSpacing);
+    @Override
+    protected void write(ValueOutput output, boolean clientPacket) {
+        super.write(output, clientPacket);
+        output.putBoolean("EdgePointsOk", edgePointsOk);
+        output.putBoolean("Power", lastReportedPower);
+        output.putInt("AnalogOutput", lastAnalogOutput);
+        output.putInt("EdgeSpacing", edgeSpacing);
+        output.putInt("LastEdgeSpacing", lastEdgeSpacing);
         //if (clientPacket && clientInfo != null)
         //    tag.put("ClientInfo", clientInfo.write());
     }
 
-        protected void read(CompoundTag tag, boolean clientPacket) {
-
-        edgePointsOk = tag.getBoolean("EdgePointsOk").orElse(false);
-        lastReportedPower = tag.getBoolean("Power").orElse(false);
-        lastAnalogOutput = tag.getInt("AnalogOutput").orElse(0);
-        edgeSpacing = tag.getInt("EdgeSpacing").orElse(0);
-        lastEdgeSpacing = tag.getInt("LastEdgeSpacing").orElse(0);
+    @Override
+    protected void read(ValueInput input, boolean clientPacket) {
+        super.read(input, clientPacket);
+        edgePointsOk = input.getBooleanOr("EdgePointsOk", false);
+        lastReportedPower = input.getBooleanOr("Power", false);
+        lastAnalogOutput = input.getIntOr("AnalogOutput", 0);
+        edgeSpacing = input.getIntOr("EdgeSpacing", edgeSpacing);
+        lastEdgeSpacing = input.getIntOr("LastEdgeSpacing", lastEdgeSpacing);
         edgeSpacingScroll.setValue(edgeSpacing);
         //if (clientPacket)
         //    clientInfo = new ClientInfo(tag.getCompound("ClientInfo").orElse(new CompoundTag()));
@@ -126,6 +133,13 @@ public class TrackCouplerBlockEntity extends SmartBlockEntity implements Transfo
     }
     public void tick() {
         super.tick();
+
+        if (!diagnosticsLogged) {
+            diagnosticsLogged = true;
+            Railways.LOGGER.info("[Coupler diagnostics] block entity tick at {} side={} type={} behaviours={}",
+                getBlockPos(), level.isClientSide() ? "client" : "server", getType(),
+                getAllBehaviours().stream().map(b -> b.getClass().getName()).toList());
+        }
 
         if (level.isClientSide())
             return;
@@ -257,6 +271,11 @@ public class TrackCouplerBlockEntity extends SmartBlockEntity implements Transfo
             lazierTickCounter = lazierTickRate;
             clearError2();
             updateOK();
+            if (lastDiagnosticEdgePointsOk == null || lastDiagnosticEdgePointsOk != edgePointsOk) {
+                lastDiagnosticEdgePointsOk = edgePointsOk;
+                Railways.LOGGER.info("[Coupler diagnostics] validity at {} changed to {}: {}",
+                    getBlockPos(), edgePointsOk, error2 == null ? "no error" : error2.getString());
+            }
         }
         clientInfo = new ClientInfo(this);
         clearErrors();
@@ -514,6 +533,14 @@ public class TrackCouplerBlockEntity extends SmartBlockEntity implements Transfo
         }
         protected Vec3 getSouthLocation() {
             return VecHelper.voxelSpace(8, 8, 16);
+        }
+
+        @Override
+        public boolean testHit(LevelAccessor level, BlockPos pos, BlockState state, Vec3 localHit) {
+            // The value box renders at the top surface, while this port's ray hit can land
+            // slightly below it on the coupler's collision shape. Keep the hold interaction
+            // active for clicks aimed at the upper half of the block.
+            return localHit.y >= .5;
         }
 
     }

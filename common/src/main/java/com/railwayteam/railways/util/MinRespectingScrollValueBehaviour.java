@@ -25,6 +25,7 @@ import com.zurrtum.create.client.foundation.blockEntity.ValueSettingsBoard;
 import com.zurrtum.create.client.foundation.blockEntity.ValueSettingsFormatter;
 import com.zurrtum.create.foundation.blockEntity.behaviour.ValueSettings;
 import com.zurrtum.create.client.foundation.blockEntity.behaviour.scrollValue.ScrollValueBehaviour;
+import com.zurrtum.create.AllItemTags;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.BlockHitResult;
@@ -56,6 +57,11 @@ public class MinRespectingScrollValueBehaviour extends ScrollValueBehaviour {
     public ScrollValueBehaviour requiresWrench() {
         this.needsWrench = true;
         return this;
+    }
+
+    @Override
+    public boolean mayInteract(Player player) {
+        return super.mayInteract(player) && player.getMainHandItem().getItemHolder().is(AllItemTags.TOOLS_WRENCH);
     }
     public ValueSettingsBoard createBoard(Player player, BlockHitResult hitResult) {
         return new ValueSettingsBoard(this.label, 1, 1,

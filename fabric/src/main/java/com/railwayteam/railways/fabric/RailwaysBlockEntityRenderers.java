@@ -19,6 +19,8 @@ final class RailwaysBlockEntityRenderers {
     static void register() {
         BlockEntityType<?> type = BuiltInRegistries.BLOCK_ENTITY_TYPE
             .getValue(Railways.asResource("track_coupler"));
+        Railways.LOGGER.info("[Coupler diagnostics] resolved block entity type: {} (registry id: {})",
+            type, BuiltInRegistries.BLOCK_ENTITY_TYPE.getKey(type));
         BlockEntityRendererRegistry.register((BlockEntityType<TrackCouplerBlockEntity>) type,
             TrackCouplerRenderer::new);
         AllBlockEntityBehaviours.add((BlockEntityType<TrackCouplerBlockEntity>) type, be -> {
@@ -27,8 +29,11 @@ final class RailwaysBlockEntityRenderers {
                 new TrackCouplerBlockEntity.TrackCouplerValueBoxTransform(true));
             behaviour.between(3, 15);
             behaviour.withFormatter(i -> i + "m");
-            behaviour.requiresWrench();
+            Railways.LOGGER.info("[Coupler diagnostics] creating client wrench behaviour for {} at {}",
+                be.getType(), be.getBlockPos());
             return behaviour;
         });
+        Railways.LOGGER.info("[Coupler diagnostics] renderer registration call completed; client behaviour factories: {}",
+            com.zurrtum.create.api.behaviour.BlockEntityBehaviour.CLIENT_REGISTRY.get(type).size());
     }
 }

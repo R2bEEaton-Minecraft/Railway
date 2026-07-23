@@ -35,9 +35,15 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 
 public class TrackCouplerRenderer extends SmartBlockEntityRenderer<TrackCouplerBlockEntity> {
+    private static boolean constructorLogged;
+    private static boolean renderLogged;
 
     public TrackCouplerRenderer(Context context) {
         super(context);
+        if (!constructorLogged) {
+            constructorLogged = true;
+            com.railwayteam.railways.Railways.LOGGER.info("[Coupler diagnostics] renderer constructed");
+        }
     }
 
     @Nullable
@@ -55,6 +61,14 @@ public class TrackCouplerRenderer extends SmartBlockEntityRenderer<TrackCouplerB
     protected void renderSafe(TrackCouplerBlockEntity te, float partialTicks, PoseStack ms, MultiBufferSource buffer,
                               int light, int overlay) {
         super.renderSafe(te, partialTicks, ms, buffer, light, overlay);
+
+        if (!renderLogged) {
+            renderLogged = true;
+            com.railwayteam.railways.Railways.LOGGER.info(
+                "[Coupler diagnostics] first render at {} edgePointsOk={} primary={} secondary={} model={}",
+                te.getBlockPos(), te.areEdgePointsOk(), te.edgePoint.getGlobalPosition(),
+                te.secondEdgePoint.getGlobalPosition(), getCouplerOverlayModel(te));
+        }
 
         renderEdgePoint(te, ms, buffer, light, overlay, te.edgePoint);
         renderEdgePoint(te, ms, buffer, light, overlay, te.secondEdgePoint);
