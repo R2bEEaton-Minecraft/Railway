@@ -49,3 +49,5 @@ last_run_console.txt
 last_run_error.txt
 .vscode/*
 net/*
+
+local-maven/*
