@@ -12,7 +12,12 @@
     {
       "fluid": "railways:paint",
       "amount": 10125,
-      "type": "fluid_stack"
+      "type": "fluid_stack",
+      "components": {
+        "minecraft:custom_data": {
+          "Color": "granite"
+        }
+      }
     }
   ]
 }

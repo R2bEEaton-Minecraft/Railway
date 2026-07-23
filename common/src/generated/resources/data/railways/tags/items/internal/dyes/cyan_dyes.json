@@ -2,7 +2,7 @@
   "replace": false,
   "values": [
     {
-      "id": "#c:cyan_dyes",
+      "id": "#c:dyes/cyan",
       "required": false
     },
     {

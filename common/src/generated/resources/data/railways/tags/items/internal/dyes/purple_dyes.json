@@ -2,7 +2,7 @@
   "replace": false,
   "values": [
     {
-      "id": "#c:purple_dyes",
+      "id": "#c:dyes/purple",
       "required": false
     },
     {

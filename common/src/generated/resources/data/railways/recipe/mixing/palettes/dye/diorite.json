@@ -1,6 +1,6 @@
 {
   "type": "create:mixing",
-  "heatRequirement": "heated",
+  "heat_requirement": "heated",
   "ingredients": [
     "minecraft:diorite",
     "#railways:binding_agents"
@@ -8,14 +8,19 @@
   "fluid_results": [
     {
       "id": "railways:paint",
-      "amount": 81000
+      "amount": 81000,
+      "components": {
+        "minecraft:custom_data": {
+          "Color": "diorite"
+        }
+      }
     }
   ],
   "fluid_ingredients": [
     {
       "amount": 81000,
-      "type": "fluid_stack",
-      "fluid": "minecraft:water"
+      "type": "fluid_tag",
+      "fluid_tag": "#minecraft:water"
     }
   ]
 }

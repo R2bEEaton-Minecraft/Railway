@@ -236,6 +236,10 @@ subprojects {
                 archiveClassifier.set("")
                 destinationDirectory = layout.buildDirectory.dir("libs").get()
             }
+            // The common remap task must not overwrite the jar it consumes.
+            tasks.named<RemapJarTask>("remapJar") {
+                archiveClassifier.set("remapped")
+            }
         }
         return@subprojects
     }

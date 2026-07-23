@@ -2,7 +2,7 @@
   "replace": false,
   "values": [
     {
-      "id": "#c:light_blue_dyes",
+      "id": "#c:dyes/light_blue",
       "required": false
     },
     {

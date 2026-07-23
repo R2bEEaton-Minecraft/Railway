@@ -34,6 +34,7 @@ import com.zurrtum.create.AllRecipeTypes;
 import com.zurrtum.create.content.decoration.palettes.AllPaletteStoneTypes;
 import com.zurrtum.create.content.processing.recipe.HeatCondition;
 import com.zurrtum.create.foundation.fluid.FluidIngredient;
+import com.zurrtum.create.foundation.fluid.FluidTagIngredient;
 import com.zurrtum.create.catnip.platform.CatnipServices;
 import net.minecraft.data.PackOutput;
 import net.minecraft.nbt.CompoundTag;
@@ -66,7 +67,7 @@ public class RailwaysMixingRecipeGen extends RailwaysProcessingRecipeGen {
         b -> {
             b.require(Ingredients.dye(dyeColor));
             b.require(Ingredients.bindingAgent());
-            b.require(FluidIngredient.fromTag(FluidTags.WATER, FluidUnits.bucket()));
+            b.require(new FluidTagIngredient(FluidTags.WATER, (int) FluidUnits.bucket()));
             FluidUtils.addFluidOutput(b, CRFluids.PAINT.get(), FluidUnits.bucket(), PaintFluid.setColor(new CompoundTag(), color));
             return b;
         }
@@ -128,7 +129,7 @@ public class RailwaysMixingRecipeGen extends RailwaysProcessingRecipeGen {
             b -> {
                 b.require(stoneType.getBaseBlock().get());
                 b.require(Ingredients.bindingAgent());
-                b.require(FluidIngredient.fromTag(FluidTags.WATER, FluidUnits.bucket()));
+                b.require(new FluidTagIngredient(FluidTags.WATER, (int) FluidUnits.bucket()));
                 b.requiresHeat(HeatCondition.HEATED);
                 FluidUtils.addFluidOutput(b, CRFluids.PAINT.get(), FluidUnits.bucket(), PaintFluid.setColor(new CompoundTag(), color));
                 return b;

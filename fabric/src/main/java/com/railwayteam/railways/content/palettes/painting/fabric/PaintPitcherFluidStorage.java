@@ -30,7 +30,10 @@ import net.fabricmc.fabric.api.transfer.v1.storage.StoragePreconditions;
 import net.fabricmc.fabric.api.transfer.v1.storage.base.SingleSlotStorage;
 import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.component.DataComponentPatch;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.material.Fluids;
 import org.jetbrains.annotations.Nullable;
 
@@ -65,7 +68,11 @@ class PaintPitcherFluidStorage implements SingleSlotStorage<FluidVariant> {
         if (!CRFluids.PAINT.get().isSame(resource.getFluid()))
             return null;
 
-        PalettesColor fluidColor = PaintFluid.getColor(resource.getNbt()).orElse(null);
+        var customData = resource.getComponents().get(DataComponents.CUSTOM_DATA);
+        PalettesColor fluidColor = customData == null ? null : customData
+            .map(CustomData::copyTag)
+            .flatMap(PaintFluid::getColor)
+            .orElse(null);
         if (fluidColor == null)
             return null;
 
@@ -94,7 +101,9 @@ class PaintPitcherFluidStorage implements SingleSlotStorage<FluidVariant> {
         StoragePreconditions.notBlankNotNegative(resource, maxAmount);
 
         PitcherColor color = getColorIfValid(resource);
-        if (color == null) return 0;
+        if (color == null) {
+            return 0;
+        }
 
         int currentLevels = getLevels();
         int levelCapacity = MAX_LEVELS - currentLevels;
@@ -138,8 +147,10 @@ class PaintPitcherFluidStorage implements SingleSlotStorage<FluidVariant> {
 
         PalettesColor color = item.getColor();
         return color == null ? FluidVariant.of(Fluids.WATER) : FluidVariant.of(
-            CRFluids.PAINT.get().getSource(),
-            PaintFluid.setColor(new CompoundTag(), item.getColor())
+            CRFluids.PAINT.get(),
+            DataComponentPatch.builder()
+                .set(DataComponents.CUSTOM_DATA, CustomData.of(PaintFluid.setColor(new CompoundTag(), item.getColor())))
+                .build()
         );
     }
     public long getAmount() {
