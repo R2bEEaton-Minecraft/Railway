@@ -2,7 +2,11 @@
   "replace": false,
   "values": [
     {
-      "id": "#c:colorless_glass",
+      "id": "#c:glass_panes/colorless",
+      "required": false
+    },
+    {
+      "id": "#c:glass_blocks/colorless",
       "required": false
     },
     {

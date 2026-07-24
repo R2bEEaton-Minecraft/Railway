@@ -2,7 +2,7 @@
   "replace": false,
   "values": [
     {
-      "id": "#c:copper_ingots",
+      "id": "#c:ingots/copper",
       "required": false
     },
     {

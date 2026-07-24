@@ -2,7 +2,7 @@
   "replace": false,
   "values": [
     {
-      "id": "#c:brass_ingots",
+      "id": "#c:ingots/brass",
       "required": false
     },
     {
