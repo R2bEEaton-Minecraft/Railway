@@ -2,7 +2,7 @@
   "replace": false,
   "values": [
     {
-      "id": "#c:magenta_dyes",
+      "id": "#c:dyes/magenta",
       "required": false
     },
     {

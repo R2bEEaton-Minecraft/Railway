@@ -7,14 +7,19 @@
   "fluid_results": [
     {
       "id": "railways:paint",
-      "amount": 81000
+      "amount": 81000,
+      "components": {
+        "minecraft:custom_data": {
+          "Color": "lime"
+        }
+      }
     }
   ],
   "fluid_ingredients": [
     {
       "amount": 81000,
-      "type": "fluid_stack",
-      "fluid": "minecraft:water"
+      "type": "fluid_tag",
+      "fluid_tag": "#minecraft:water"
     }
   ]
 }

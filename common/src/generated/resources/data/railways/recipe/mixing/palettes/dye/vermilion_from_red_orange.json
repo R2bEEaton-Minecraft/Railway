@@ -4,18 +4,33 @@
     {
       "fluid": "railways:paint",
       "amount": 10125,
-      "type": "fluid_stack"
+      "type": "fluid_stack",
+      "components": {
+        "minecraft:custom_data": {
+          "Color": "red"
+        }
+      }
     },
     {
       "fluid": "railways:paint",
       "amount": 10125,
-      "type": "fluid_stack"
+      "type": "fluid_stack",
+      "components": {
+        "minecraft:custom_data": {
+          "Color": "orange"
+        }
+      }
     }
   ],
   "fluid_results": [
     {
       "id": "railways:paint",
-      "amount": 20250
+      "amount": 20250,
+      "components": {
+        "minecraft:custom_data": {
+          "Color": "vermilion"
+        }
+      }
     }
   ]
 }

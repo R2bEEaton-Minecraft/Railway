@@ -3,10 +3,14 @@ package com.railwayteam.railways.multiloader.fluid.fabric;
 import com.mojang.serialization.Codec;
 import com.railwayteam.railways.multiloader.fluid.MultiloaderFluidStack;
 import com.zurrtum.create.foundation.fluid.FluidIngredient;
+import com.zurrtum.create.foundation.fluid.FluidStackIngredient;
+import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.CustomData;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 import org.jetbrains.annotations.NotNull;
@@ -33,6 +37,13 @@ public class MultiloaderFluidStackImpl extends MultiloaderFluidStack {
 
     public static MultiloaderFluidStack create(Fluid fluid, long amount, @Nullable CompoundTag nbt) {
         return new MultiloaderFluidStackImpl(fluid, amount, nbt);
+    }
+
+    private DataComponentPatch getComponentChanges() {
+        if (tag == null || tag.isEmpty()) return DataComponentPatch.EMPTY;
+        return DataComponentPatch.builder()
+            .set(DataComponents.CUSTOM_DATA, CustomData.of(tag))
+            .build();
     }
 
     public static MultiloaderFluidStack loadFluidStackFromNBT(CompoundTag tag) {
@@ -93,5 +104,7 @@ public class MultiloaderFluidStackImpl extends MultiloaderFluidStack {
     public boolean isLighterThanAir() { return false; }
 
     @Override
-    public FluidIngredient asFluidIngredient() { return null; }
+    public FluidIngredient asFluidIngredient() {
+        return new FluidStackIngredient(fluid, getComponentChanges(), Math.toIntExact(amount));
+    }
 }

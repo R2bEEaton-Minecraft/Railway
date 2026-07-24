@@ -2,7 +2,7 @@
   "replace": false,
   "values": [
     {
-      "id": "#c:lime_dyes",
+      "id": "#c:dyes/lime",
       "required": false
     },
     {

@@ -50,7 +50,7 @@ public class CommonTags {
 		for (DyeColor color : DyeColor.values()) {
 			String name = color.getName();
 			String common = "dyes/" + name + "_dyes";
-			String fabric = name + "_dyes";
+			String fabric = "dyes/" + name;
 			String forge = "dyes/" + name;
 			dyes.put(color, item(common, fabric, forge));
 		}

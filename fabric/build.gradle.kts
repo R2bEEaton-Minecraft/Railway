@@ -46,7 +46,8 @@ dependencies {
     compileOnly("com.tterrag.registrate:Registrate:MC1.20-1.3.11")
     compileOnly("com.google.code.findbugs:jsr305:3.0.2")
 
-    modCompileOnly("dev.emi:emi-fabric:${"emi_version"()}:api") { isTransitive = false }
+    // EMI has no release for Minecraft 1.21.11 yet. Keep the EMI compatibility
+    // sources excluded until a matching API is available.
     modCompileOnly("maven.modrinth:jei:${"jei_fabric_version"()}")
 
     // JEI (recipe viewer) - dev runtime only, for testing recipe-viewer compatibility
@@ -113,7 +114,6 @@ sourceSets.main {
         exclude("com/railwayteam/railways/content/palettes/boiler/fabric/BoilerBigOutlinesImpl.java")
         exclude("com/railwayteam/railways/content/palettes/boiler/fabric/BoilerBlockPlacementHelperImpl.java")
         exclude("com/railwayteam/railways/content/palettes/boiler/fabric/ObjModelBuilder.java")
-        exclude("com/railwayteam/railways/content/palettes/painting/fabric/PaintPitcherFluidStorage.java")
         exclude("com/railwayteam/railways/fabric/events/ClientEventsFabric.java")
         exclude("com/railwayteam/railways/fabric/mixin/**")
     }

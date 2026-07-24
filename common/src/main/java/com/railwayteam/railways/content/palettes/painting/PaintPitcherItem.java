@@ -29,6 +29,7 @@ import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
@@ -41,7 +42,9 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.item.ItemUseAnimation;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -54,6 +57,7 @@ import org.jetbrains.annotations.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 import static com.railwayteam.railways.util.ItemUtils.copyStackData;
 import static com.railwayteam.railways.util.ItemUtils.oppositeHand;
@@ -61,6 +65,7 @@ import static com.railwayteam.railways.util.ItemUtils.oppositeHand;
 @MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
 public abstract class PaintPitcherItem extends Item {
+    private static final String FILL_LEVEL = "FillLevel";
     public static final int MAX_LEVELS = 32;
     public static final long FLUID_PER_LEVEL = FluidUnits.bucket() / 8;
     public static final int LEVELS_PER_CANNON_SHOT = 8;
@@ -111,15 +116,17 @@ public abstract class PaintPitcherItem extends Item {
 
     private static void setLevels(ItemStack stack, int levels) {
         if (!(stack.getItem() instanceof PaintPitcherItem)) return;
-        if (levels <= 0) {
+        if (levels <= 0 || levels > MAX_LEVELS) {
             throw new IllegalArgumentException("Levels must be between 1 and " + MAX_LEVELS);
         }
+        CustomData.update(DataComponents.CUSTOM_DATA, stack, tag -> tag.putInt(FILL_LEVEL, levels));
     }
 
     public int getLevels(ItemStack stack) {
         if (!(stack.getItem() instanceof PaintPitcherItem)) return 0;
 
-        return MAX_LEVELS;
+        Tag fillLevel = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag().get(FILL_LEVEL);
+        return fillLevel instanceof net.minecraft.nbt.NumericTag numeric ? numeric.intValue() : MAX_LEVELS;
     }
 
     public long getFluidAmount(ItemStack stack) {
@@ -182,9 +189,12 @@ public abstract class PaintPitcherItem extends Item {
 
         return copyAsFilledStack(stack, 0);
     }
-    public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag isAdvanced) {
+    @Override
+    public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay display,
+                                Consumer<Component> tooltip, TooltipFlag isAdvanced) {
+        super.appendHoverText(stack, context, display, tooltip, isAdvanced);
         int levels = getLevels(stack);
-        tooltipComponents.add(Component.translatable("item.railways.paint_pitcher.paint_level", levels, MAX_LEVELS));
+        tooltip.accept(Component.translatable("item.railways.paint_pitcher.paint_level", levels, MAX_LEVELS));
     }
 
     @SuppressWarnings("ConstantValue") // IntelliJ is hallucinating that the nested loops never terminate

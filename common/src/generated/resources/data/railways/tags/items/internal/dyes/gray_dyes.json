@@ -2,7 +2,7 @@
   "replace": false,
   "values": [
     {
-      "id": "#c:gray_dyes",
+      "id": "#c:dyes/gray",
       "required": false
     },
     {
