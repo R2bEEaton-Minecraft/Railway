@@ -27,10 +27,18 @@ import com.railwayteam.railways.content.cycle_menu.TagCycleHandlerClient;
 import com.railwayteam.railways.content.qol.TrackEdgePointHighlighter;
 import com.railwayteam.railways.registry.CRKeys;
 import com.railwayteam.railways.registry.CRPackets;
+import com.railwayteam.railways.util.UpdateChecker;
 import com.railwayteam.railways.util.packet.ConfigureDevCapeC2SPacket;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.ApiStatus;
+
+import java.net.URI;
 
 public class ClientEvents {
 
@@ -66,6 +74,35 @@ public class ClientEvents {
     @MultiLoaderEvent
     public static void onClientWorldLoad(Level level) {
         PhantomSpriteManager.firstRun = true;
+        announceUpdateIfAvailable();
+    }
+
+    private static void announceUpdateIfAvailable() {
+        if (!UpdateChecker.INSTANCE.claimNotification())
+            return;
+
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player == null)
+            return;
+
+        MutableComponent modrinthLink = linkComponent("Modrinth", UpdateChecker.INSTANCE.getDownloadUrl());
+        MutableComponent curseforgeLink = linkComponent("CurseForge", UpdateChecker.INSTANCE.getCurseForgeUrl());
+
+        mc.player.displayClientMessage(Component.literal("[Steam 'n' Rails] ")
+            .withStyle(ChatFormatting.GOLD)
+            .append(Component.literal("A new version (" + UpdateChecker.INSTANCE.getLatestVersion() + ") is available: "))
+            .append(modrinthLink)
+            .append(Component.literal(" | "))
+            .append(curseforgeLink), false);
+    }
+
+    private static MutableComponent linkComponent(String label, String url) {
+        return Component.literal(label)
+            .withStyle(style -> style
+                .withColor(ChatFormatting.AQUA)
+                .withUnderlined(true)
+                .withClickEvent(new ClickEvent.OpenUrl(URI.create(url)))
+                .withHoverEvent(new HoverEvent.ShowText(Component.literal(url))));
     }
 
     protected static boolean isGameActive() {

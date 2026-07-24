@@ -50,6 +50,7 @@ import com.railwayteam.railways.registry.CRTrackMaterials;
 import com.railwayteam.railways.registry.CRContainerTypes;
 import com.railwayteam.railways.util.CustomTrackOverlayRendering;
 import com.railwayteam.railways.util.DevCapeUtils;
+import com.railwayteam.railways.util.UpdateChecker;
 import com.zurrtum.create.client.AllTrackMaterialModels;
 import com.zurrtum.create.client.AllTrackRenders;
 import com.zurrtum.create.client.content.trains.track.StandardTrackBlockRenderer;
@@ -108,6 +109,7 @@ public class RailwaysClient {
     CRFluids.initRendering();
 
     DevCapeUtils.INSTANCE.init();
+    UpdateChecker.INSTANCE.init();
 
     registerTrackModels();
   }
