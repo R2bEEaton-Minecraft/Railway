@@ -105,7 +105,7 @@ public class CopycatHeadstockBlock extends WaterloggedCopycatBlock implements Bl
             && !(coord != 0 && coord == facing.getAxisDirection()
             .getStep());
     }
-    public boolean canConnectTexturesToward(BlockAndTintGetter reader, BlockPos fromPos, BlockPos toPos, BlockState state) {
+    public boolean canConnectTexturesToward(net.minecraft.world.level.BlockAndLightGetter reader, BlockPos fromPos, BlockPos toPos, BlockState state) {
         Direction facing = state.getValue(FACING);
         boolean upsideDown = state.getValue(UPSIDE_DOWN);
         BlockState toState = reader.getBlockState(toPos);

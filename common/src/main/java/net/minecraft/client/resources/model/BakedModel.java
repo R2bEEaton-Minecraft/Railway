@@ -1,9 +1,8 @@
 package net.minecraft.client.resources.model;
 
-import net.minecraft.client.renderer.block.model.BakedQuad;
-import net.minecraft.client.renderer.block.model.ItemOverrides;
-import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.resources.model.cuboid.ItemTransforms;
+import net.minecraft.client.resources.model.geometry.BakedQuad;
 import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.state.BlockState;
@@ -34,9 +33,5 @@ public interface BakedModel {
 
     default ItemTransforms getTransforms() {
         return ItemTransforms.NO_TRANSFORMS;
-    }
-
-    default ItemOverrides getOverrides() {
-        return ItemOverrides.EMPTY;
     }
 }

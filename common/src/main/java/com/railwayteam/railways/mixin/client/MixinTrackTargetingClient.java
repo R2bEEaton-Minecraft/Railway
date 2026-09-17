@@ -25,7 +25,7 @@ import com.zurrtum.create.content.trains.graph.EdgePointType;
 import com.zurrtum.create.infrastructure.component.BezierTrackPointLocation;
 import com.zurrtum.create.content.trains.track.TrackTargetingClient;
 import com.zurrtum.create.client.flywheel.lib.transform.TransformStack;
-import com.zurrtum.create.client.catnip.render.SuperRenderTypeBuffer;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -55,10 +55,10 @@ public abstract class MixinTrackTargetingClient {
 
     @Inject(method = "render", at = @At(
         value = "FIELD", opcode = Opcodes.GETSTATIC,
-        target = "Lcom/simibubi/create/content/trains/track/TrackTargetingClient;lastType:Lcom/simibubi/create/content/trains/graph/EdgePointType;",
+        target = "Lcom/zurrtum/create/content/trains/track/TrackTargetingClient;lastType:Lcom/zurrtum/create/content/trains/graph/EdgePointType;",
         ordinal = 0
     ), cancellable = true)
-    private static void renderCustom(PoseStack ms, SuperRenderTypeBuffer buffer, Vec3 camera, CallbackInfo ci) {
+    private static void renderCustom(Minecraft mc, PoseStack ms, SubmitNodeCollector queue, Vec3 camera, CallbackInfo ci) {
         if (CustomTrackOverlayRendering.CUSTOM_OVERLAYS.containsKey(lastType)) {
             Minecraft mc = Minecraft.getInstance();
             BlockPos pos = lastHovered;
@@ -69,7 +69,7 @@ public abstract class MixinTrackTargetingClient {
             TransformStack.of(ms)
                 .translate(Vec3.atLowerCornerOf(pos)
                     .subtract(camera));
-            CustomTrackOverlayRendering.renderOverlay(mc.level, pos, direction, lastHoveredBezierSegment, ms, buffer, light,
+            CustomTrackOverlayRendering.renderOverlay(mc.level, pos, direction, lastHoveredBezierSegment, ms, queue, light,
                 OverlayTexture.NO_OVERLAY, lastType, 1 + 1 / 16f);
             ms.popPose();
             ci.cancel();
@@ -77,7 +77,7 @@ public abstract class MixinTrackTargetingClient {
     }
 
     @Inject(method = "render", at = @At("HEAD"))
-    private static void renderSwitchHints(PoseStack ms, SuperRenderTypeBuffer buffer, Vec3 camera, CallbackInfo ci) {
+    private static void renderSwitchHints(Minecraft mc, PoseStack ms, SubmitNodeCollector queue, Vec3 camera, CallbackInfo ci) {
         TrackSwitchDebugVisualizer.visualizePotentialLocations();
     }
 }

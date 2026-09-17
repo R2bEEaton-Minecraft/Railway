@@ -51,7 +51,7 @@ public class SmokeParticle extends SimpleAnimatedParticle {
 	private final boolean stationarySource;
 
 	protected SmokeParticle(ClientLevel world, SmokeParticleData data, double x, double y, double z, double dx, double dy, double dz, SpriteSet sprite) {
-		super(world, x, y, z, sprite, world.random.nextFloat() * .5f);
+		super(world, x, y, z, sprite, world.getRandom().nextFloat() * .5f);
 		double scale = 0.1;
 		xd = dx * scale;
 		yd = dy * scale + (this.random.nextFloat() / 500.0F);
@@ -61,7 +61,7 @@ public class SmokeParticle extends SimpleAnimatedParticle {
 		quadSize = .375f * 4;
 		setLifetime(data.stationary ? 400 : CRConfigs.client().smokeLifetime.get());
 		setPos(x, y, z);
-		roll = oRoll = world.random.nextFloat() * Mth.PI;
+		roll = oRoll = world.getRandom().nextFloat() * Mth.PI;
 		this.setSprite(sprite.get(CRConfigs.client().smokeQuality.get().ordinal(), SmokeQuality.values().length - 1));
 		alpha = data.stationary ? 0.25f : 0.1f;
 		ascendScale.chase(data.stationary ? 0.3 : 0.1, data.stationary ? 0.001 : 0.03, LerpedFloat.Chaser.EXP);
@@ -97,9 +97,8 @@ public class SmokeParticle extends SimpleAnimatedParticle {
 	}
 
 	@Override
-	public int getLightColor(float partialTick) {
-		BlockPos blockPos = BlockPos.containing(this.x, this.y, this.z);
-		return this.level.isLoaded(blockPos) ? LevelRenderer.getLightColor(level, blockPos) : 0;
+	public int getLightCoords(float partialTick) {
+		return super.getLightCoords(partialTick);
 	}
 
 	public static class Factory implements ParticleProvider<SmokeParticleData> {

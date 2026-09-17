@@ -22,11 +22,11 @@ import com.railwayteam.railways.content.conductor.ClientHandler;
 import com.zurrtum.create.AllBlocks;
 import com.zurrtum.create.client.infrastructure.model.CopycatModel;
 import com.zurrtum.create.content.decoration.copycat.CopycatBlock;
-import net.minecraft.client.renderer.block.model.BlockModelPart;
-import net.minecraft.client.renderer.block.model.BlockStateModel;
-import net.minecraft.util.RandomSource;
 import net.minecraft.client.renderer.block.BlockAndTintGetter;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModelPart;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.List;
@@ -40,7 +40,7 @@ public class CopycatVentModel extends CopycatModel {
     @Override
     protected void addPartsWithInfo(BlockAndTintGetter world, BlockPos pos, BlockState state,
                                     CopycatBlock block, BlockState material,
-                                    RandomSource random, List<BlockModelPart> parts) {
+                                    RandomSource random, List<BlockStateModelPart> parts) {
         if (ClientHandler.isPlayerMountedOnCamera() || state.getValue(VentBlock.CONDUCTOR_VISIBLE)) {
             // Show the vent grate model itself
             model.collectParts(random, parts);

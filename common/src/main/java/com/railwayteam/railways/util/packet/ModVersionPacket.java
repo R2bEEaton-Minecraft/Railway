@@ -46,8 +46,7 @@ public record ModVersionPacket(String version) implements S2CPacket {
       String msg = "Steam 'n' Rails version mismatch: Server is using version " + version + ", you are using version " + RailwaysBuildInfo.VERSION + ". This may cause problems.";
       Railways.LOGGER.warn(msg);
       player.sendSystemMessage(
-              Component.literal(msg).withStyle(ChatFormatting.DARK_RED),
-              false
+              Component.literal(msg).withStyle(ChatFormatting.DARK_RED)
       );
     }
     boolean useDevCape = CRConfigs.client().useDevCape.get();

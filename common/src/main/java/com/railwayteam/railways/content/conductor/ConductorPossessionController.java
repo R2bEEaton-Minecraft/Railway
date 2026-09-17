@@ -104,7 +104,7 @@ public class ConductorPossessionController {
 			positionReminder = 0;
 			dismount();
 			if (mc.levelRenderer != null)
-				mc.levelRenderer.allChanged();
+				mc.levelRenderer.resetLevelRenderData();
 		}
 	}
 
@@ -164,8 +164,8 @@ public class ConductorPossessionController {
 	@Environment(EnvType.CLIENT)
 	public static void setRenderPosition(Entity entity) {
 		if (entity instanceof ConductorEntity && cameraStorage != null) {
-			cameraStorage.viewCenterX = entity.chunkPosition().x;
-			cameraStorage.viewCenterZ = entity.chunkPosition().z;
+			cameraStorage.viewCenterX = entity.chunkPosition().x();
+			cameraStorage.viewCenterZ = entity.chunkPosition().z();
 		}
 	}
 

@@ -78,7 +78,7 @@ public class DyeableBlockEntity extends SmartBlockEntity implements IDyedBuffer 
     public InteractionResult applyDyeIfValid(ItemStack stack) {
         if (!(stack.getItem()instanceof DyeItem dyeItem))
             return InteractionResult.PASS;
-        DyeColor color = dyeItem.getDyeColor();
+        DyeColor color = stack.get(net.minecraft.core.component.DataComponents.DYE);
         if (color == this.color)
             return InteractionResult.PASS;
         if (level.isClientSide() && !isVirtual())

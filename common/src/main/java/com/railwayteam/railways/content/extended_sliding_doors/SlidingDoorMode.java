@@ -87,7 +87,7 @@ public enum SlidingDoorMode implements INamedIconOptions {
         public SlidingDoorValueBoxTransform() {
             super((state, d) -> {
                 Direction facing = state.getValue(SlidingDoorBlock.FACING);
-                boolean showAtAll = state.getValue(SlidingDoorBlock.VISIBLE) && !state.getValue(SlidingDoorBlock.OPEN);
+                boolean showAtAll = !state.getValue(SlidingDoorBlock.OPEN);
                 return showAtAll && (d == facing || d == facing.getOpposite());
             });
         }

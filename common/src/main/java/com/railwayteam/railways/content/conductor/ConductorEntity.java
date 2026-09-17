@@ -290,7 +290,7 @@ public class ConductorEntity extends AbstractGolem {
             for (Entity e2 : entity.getPassengers()) entity.positionRider(e2);
         });
         if (level() instanceof ServerLevel serverLevel) {
-            ChunkPos cp = new ChunkPos(this.blockPosition());
+            ChunkPos cp = ChunkPos.containing(this.blockPosition());
             serverLevel.getChunkSource().addTicketWithRadius(TicketType.FORCED, cp, 3);
         }
         firstGoodX = lastGoodX = x;
@@ -790,10 +790,10 @@ public class ConductorEntity extends AbstractGolem {
         if (level() instanceof ServerLevel serverLevel) {
             ServerPlayer player = currentlyViewing.get();
             if (player != null) {
-                ChunkPos cp = new ChunkPos(blockPosition());
+                ChunkPos cp = ChunkPos.containing(blockPosition());
                 int vd = serverLevel.getServer().getPlayerList().getViewDistance();
-                for (int x = cp.x - vd; x <= cp.x + vd; x++)
-                    for (int z = cp.z - vd; z <= cp.z + vd; z++)
+                for (int x = cp.x() - vd; x <= cp.x() + vd; x++)
+                    for (int z = cp.z() - vd; z <= cp.z() + vd; z++)
                         serverLevel.getChunkSource().addTicketWithRadius(TicketType.FORCED, new ChunkPos(x, z), 3);
             }
         }
@@ -872,8 +872,9 @@ public class ConductorEntity extends AbstractGolem {
     @Override
     protected @NotNull InteractionResult mobInteract(Player player, @NotNull InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
-        if (stack.getItem() instanceof DyeItem di) {
-            setColor(di.getDyeColor());
+        if (stack.getItem() instanceof DyeItem) {
+            DyeColor dye = stack.get(net.minecraft.core.component.DataComponents.DYE);
+            if (dye != null) setColor(dye);
             if (!player.isCreative()) stack.shrink(1);
             return InteractionResult.SUCCESS;
         } else if (stack.getItem() == AllBlocks.ANDESITE_CASING.asItem()) {

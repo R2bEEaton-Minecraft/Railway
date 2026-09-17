@@ -57,7 +57,7 @@ public class ConductorScenes {
     playerHead.set(DataComponents.PROFILE, ResolvableProfile.createUnresolved(playerName));
 
     ElementLink<EntityElement> player = scene.world().createEntity(w -> {
-      ArmorStand entity = EntityType.ARMOR_STAND.create(w, EntitySpawnReason.COMMAND);
+      ArmorStand entity = net.minecraft.world.entity.EntityTypes.ARMOR_STAND.create(w, EntitySpawnReason.COMMAND);
       entity.setPos(pos.x, pos.y, pos.z);
       entity.xo = pos.x;
       entity.yo = pos.y;
@@ -376,7 +376,7 @@ public class ConductorScenes {
 
     scene.idle(45);
 
-    ItemStack toolboxStack = new ItemStack(AllBlocks.LIME_TOOLBOX);
+    ItemStack toolboxStack = new ItemStack(AllBlocks.TOOLBOX.lime());
 
     scene.overlay().showControls(util.vector().topOf(conductorPos), Pointing.DOWN, 40)
             .rightClick()

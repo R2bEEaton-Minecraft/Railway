@@ -2,7 +2,7 @@ package com.railwayteam.railways.util.compat;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.zurrtum.create.foundation.blockEntity.SmartBlockEntity;
-import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 
 /**
@@ -15,6 +15,6 @@ public abstract class SmartBlockEntityRenderer<T extends SmartBlockEntity>
         super(context);
     }
 
-    protected void renderSafe(T blockEntity, float partialTicks, PoseStack poseStack, MultiBufferSource buffer, int light, int overlay) {
+    protected void renderSafe(T blockEntity, float partialTicks, PoseStack poseStack, SubmitNodeCollector buffer, int light, int overlay) {
     }
 }

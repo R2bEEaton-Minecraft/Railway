@@ -80,7 +80,7 @@ public class CopycatHeadstockBlockEntity extends CopycatBlockEntity implements I
     public InteractionResult applyDyeIfValid(ItemStack stack) {
         if (!(stack.getItem()instanceof DyeItem dyeItem))
             return InteractionResult.PASS;
-        DyeColor color = dyeItem.getDyeColor();
+        DyeColor color = stack.get(net.minecraft.core.component.DataComponents.DYE);
         if (color == this.color)
             return InteractionResult.PASS;
         if (level.isClientSide() && !isVirtual())

@@ -47,7 +47,7 @@ public class MinecartJukebox extends MinecartBlock {
     }
 
     public int getComparatorOutput() {
-        return JukeboxSong.fromStack(level().registryAccess(), disc)
+        return JukeboxSong.fromStack(disc)
             .map(Holder::value)
             .map(JukeboxSong::comparatorOutput)
             .orElse(0);
@@ -87,8 +87,8 @@ public class MinecartJukebox extends MinecartBlock {
 
     @NotNull
     @Override
-    public InteractionResult interact(@NotNull Player player, @NotNull InteractionHand hand) {
-        InteractionResult ret = super.interact(player, hand);
+    public InteractionResult interact(@NotNull Player player, @NotNull InteractionHand hand, @NotNull net.minecraft.world.phys.Vec3 location) {
+        InteractionResult ret = super.interact(player, hand, location);
         if (ret.consumesAction())
             return ret;
 
@@ -150,7 +150,7 @@ public class MinecartJukebox extends MinecartBlock {
         if (sound != null && !sound.isStopped())
             sound.requestStop();
 
-        JukeboxSong.fromStack(level().registryAccess(), disc)
+        JukeboxSong.fromStack(disc)
             .map(Holder::value)
             .ifPresent(this::startPlaying);
     }

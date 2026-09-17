@@ -11,7 +11,7 @@ import com.zurrtum.create.client.catnip.gui.element.GuiGameElement;
 import com.zurrtum.create.client.foundation.gui.AllGuiTextures;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
@@ -44,13 +44,13 @@ public class RadialTagCycleMenu extends AbstractSimiScreen {
     }
 
     @Override
-    protected void renderWindowBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+    protected void renderWindowBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTicks) {
         int alpha = ((int) (0x50 * Math.min(1, (ticksOpen + AnimationTickHolder.getPartialTicks()) / 20f))) << 24;
         graphics.fillGradient(0, 0, width, height, 0x101010 | alpha, 0x101010 | alpha);
     }
 
     @Override
-    protected void renderWindow(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+    protected void renderWindow(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTicks) {
         float fade = Mth.clamp((ticksOpen + AnimationTickHolder.getPartialTicks()) / 10f, 1 / 512f, 1);
         Matrix3x2fStack pose = graphics.pose();
 
@@ -122,10 +122,10 @@ public class RadialTagCycleMenu extends AbstractSimiScreen {
         return templateStack == null ? new ItemStack(item) : templateStack.transmuteCopy(item, 1);
     }
 
-    private void drawCentered(GuiGraphics graphics, Component title, int alpha) {
+    private void drawCentered(GuiGraphicsExtractor graphics, Component title, int alpha) {
         Matrix3x2fStack pose = graphics.pose();
         int color = 0xFFFFFF | (alpha << 24);
-        graphics.drawString(font, title, -font.width(title) / 2, -4, color);
+        graphics.centeredText(font, title, 0, -4, color);
         pose.popMatrix();
     }
 

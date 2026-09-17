@@ -108,10 +108,10 @@ public class ConductorWhistleItem extends TrackTargetingBlockItem {
 	}
 
 	private static InteractionResult fail(Player player, String message) {
+		player.sendOverlayMessage(Component.translatable("railways.whistle.failure." + message)
+			.withStyle(ChatFormatting.RED));
 		player.sendSystemMessage(Component.translatable("railways.whistle.failure." + message)
-			.withStyle(ChatFormatting.RED), true);
-		player.sendSystemMessage(Component.translatable("railways.whistle.failure." + message)
-			.withStyle(ChatFormatting.RED), false);
+			.withStyle(ChatFormatting.RED));
 		return InteractionResult.FAIL;
 	}
 
@@ -162,8 +162,8 @@ public class ConductorWhistleItem extends TrackTargetingBlockItem {
 				return InteractionResult.SUCCESS;
 			}
 
-			player.sendSystemMessage(Component.translatable("railways.whistle.not_owner")
-				.withStyle(ChatFormatting.RED), true);
+			player.sendOverlayMessage(Component.translatable("railways.whistle.not_owner")
+				.withStyle(ChatFormatting.RED));
 			return InteractionResult.FAIL;
 		}
 
@@ -254,8 +254,8 @@ public class ConductorWhistleItem extends TrackTargetingBlockItem {
 			withGraphLocation(level, pos, front, null, type, (overlap, location) -> result.setValue(overlap));
 
 			if (result.getValue().feedback != null) {
-				player.sendSystemMessage(CreateLang.translateDirect(result.getValue().feedback)
-					.withStyle(ChatFormatting.RED), true);
+				player.sendOverlayMessage(CreateLang.translateDirect(result.getValue().feedback)
+					.withStyle(ChatFormatting.RED));
 				AllSoundEvents.DENY.play(level, null, pos, .5f, 1);
 				return InteractionResult.FAIL;
 			}

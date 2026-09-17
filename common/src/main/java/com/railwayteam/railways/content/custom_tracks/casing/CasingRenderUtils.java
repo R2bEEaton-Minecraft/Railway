@@ -28,12 +28,13 @@ import com.zurrtum.create.client.flywheel.lib.model.baked.PartialModel;
 import com.zurrtum.create.content.trains.track.BezierConnection;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.geom.builders.UVPair;
-import net.minecraft.client.renderer.block.model.BakedQuad;
-import net.minecraft.client.renderer.block.model.BlockModelPart;
-import net.minecraft.client.renderer.block.model.BlockStateModel;
-import net.minecraft.client.renderer.block.model.SimpleModelWrapper;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModelPart;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.model.QuadCollection;
+import net.minecraft.client.resources.model.SimpleModelWrapper;
+import net.minecraft.client.resources.model.geometry.BakedQuad;
+import net.minecraft.client.resources.model.geometry.QuadCollection;
+import net.minecraft.client.resources.model.sprite.Material;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.RandomSource;
@@ -59,7 +60,7 @@ public abstract class CasingRenderUtils {
         reTexturedModels.clear();
         CRBlockPartials.registerCasingSpecs();
         if (Minecraft.getInstance().levelRenderer != null)
-            Minecraft.getInstance().levelRenderer.allChanged();
+            Minecraft.getInstance().levelRenderer.resetLevelRenderData();
     }
 
     public static PartialModel reTexture(PartialModel model, Block block) {
@@ -103,8 +104,8 @@ public abstract class CasingRenderUtils {
     public static TransformedInstance makeCasingInstance(PartialModel baseModel, Block casingBlock, InstancerProvider instancerProvider) {
         Pair<PartialModel, Block> key = Pair.of(baseModel, casingBlock);
         Model model = reTexturedModels.computeIfAbsent(key, ignored -> {
-            BlockStateModel casingModel = Minecraft.getInstance().getBlockRenderer().getBlockModel(casingBlock.defaultBlockState());
-            SimpleModelWrapper reTextured = reTexture(baseModel.get(), casingModel);
+            BlockStateModel casingModel = Minecraft.getInstance().getModelManager().getBlockStateModelSet().get(casingBlock.defaultBlockState());
+            BlockStateModel reTextured = reTexture(baseModel.get(), casingModel);
 
             return new BakedModelBuilder(reTextured)
                 .materialFunc((renderType, shaded, ambientOcclusion) -> {
@@ -122,16 +123,44 @@ public abstract class CasingRenderUtils {
         return instancerProvider.instancer(InstanceTypes.TRANSFORMED, model).createInstance();
     }
 
-    private static SimpleModelWrapper reTexture(SimpleModelWrapper baseModel, BlockStateModel spriteSourceModel) {
+    private static BlockStateModel reTexture(BlockStateModel baseModel, BlockStateModel spriteSourceModel) {
         QuadCollection.Builder builder = new QuadCollection.Builder();
         Map<Direction, BakedQuad> sourceQuads = findSourceQuads(spriteSourceModel);
-        TextureAtlasSprite particle = spriteSourceModel.particleIcon();
+        Material.Baked particle = spriteSourceModel.particleMaterial();
 
-        for (BakedQuad quad : baseModel.quads().getAll()) {
-            builder.addUnculledFace(copyQuad(quad, sourceQuads.getOrDefault(quad.direction(), sourceQuads.get(null))));
+        List<BlockStateModelPart> baseParts = new ArrayList<>();
+        baseModel.collectParts(RandomSource.create(42), baseParts);
+
+        boolean useAmbientOcclusion = false;
+        for (BlockStateModelPart part : baseParts) {
+            useAmbientOcclusion |= part.useAmbientOcclusion();
+            for (Direction dir : Direction.values()) {
+                for (BakedQuad quad : part.getQuads(dir)) {
+                    builder.addCulledFace(dir, copyQuad(quad, sourceQuads.getOrDefault(dir, sourceQuads.get(null))));
+                }
+            }
+            for (BakedQuad quad : part.getQuads(null)) {
+                builder.addUnculledFace(copyQuad(quad, sourceQuads.getOrDefault(quad.direction(), sourceQuads.get(null))));
+            }
         }
 
-        return new SimpleModelWrapper(builder.build(), baseModel.useAmbientOcclusion(), particle);
+        SimpleModelWrapper wrapper = new SimpleModelWrapper(builder.build(), useAmbientOcclusion, particle);
+        return new BlockStateModel() {
+            @Override
+            public void collectParts(RandomSource random, List<BlockStateModelPart> parts) {
+                parts.add(wrapper);
+            }
+
+            @Override
+            public Material.Baked particleMaterial() {
+                return wrapper.particleMaterial();
+            }
+
+            @Override
+            public int materialFlags() {
+                return wrapper.materialFlags();
+            }
+        };
     }
 
     private static Map<Direction, BakedQuad> findSourceQuads(BlockStateModel model) {
@@ -139,7 +168,9 @@ public abstract class CasingRenderUtils {
         BakedQuad[] unculled = new BakedQuad[1];
         RandomSource random = RandomSource.create(42);
 
-        for (BlockModelPart part : model.collectParts(random)) {
+        List<BlockStateModelPart> parts = new ArrayList<>();
+        model.collectParts(random, parts);
+        for (BlockStateModelPart part : parts) {
             for (Direction direction : Direction.values()) {
                 List<BakedQuad> quads = part.getQuads(direction);
                 if (!quads.isEmpty())
@@ -161,8 +192,20 @@ public abstract class CasingRenderUtils {
         if (sourceQuad == null)
             sourceQuad = baseQuad;
 
-        TextureAtlasSprite baseSprite = baseQuad.sprite();
-        TextureAtlasSprite targetSprite = sourceQuad.sprite();
+        BakedQuad.MaterialInfo baseInfo = baseQuad.materialInfo();
+        BakedQuad.MaterialInfo sourceInfo = sourceQuad.materialInfo();
+        TextureAtlasSprite baseSprite = baseInfo.sprite();
+        TextureAtlasSprite targetSprite = sourceInfo.sprite();
+
+        BakedQuad.MaterialInfo newInfo = new BakedQuad.MaterialInfo(
+            targetSprite,
+            baseInfo.layer(),
+            baseInfo.itemRenderType(),
+            baseInfo.tintIndex(),
+            baseInfo.shade(),
+            baseInfo.lightEmission()
+        );
+
         return new BakedQuad(
             baseQuad.position0(),
             baseQuad.position1(),
@@ -172,11 +215,8 @@ public abstract class CasingRenderUtils {
             transformUv(baseQuad.packedUV1(), baseSprite, targetSprite),
             transformUv(baseQuad.packedUV2(), baseSprite, targetSprite),
             transformUv(baseQuad.packedUV3(), baseSprite, targetSprite),
-            baseQuad.tintIndex(),
             baseQuad.direction(),
-            targetSprite,
-            baseQuad.shade(),
-            baseQuad.lightEmission()
+            newInfo
         );
     }
 

@@ -93,7 +93,7 @@ public class ClientEvents {
             .append(Component.literal("A new version (" + UpdateChecker.INSTANCE.getLatestVersion() + ") is available: "))
             .append(modrinthLink)
             .append(Component.literal(" | "))
-            .append(curseforgeLink), false);
+            .append(curseforgeLink));
     }
 
     private static MutableComponent linkComponent(String label, String url) {
@@ -111,10 +111,10 @@ public class ClientEvents {
 
     @MultiLoaderEvent
     public static void onKeyInput(int key, boolean pressed) {
-        if (Minecraft.getInstance().screen != null)
+        if (Minecraft.getInstance().gui.screen() != null)
             return;
         BogeyMenuEventsHandler.onKeyInput(key, pressed);
-        if (Minecraft.getInstance().screen != null)
+        if (Minecraft.getInstance().gui.screen() != null)
             return;
         TagCycleHandlerClient.onKeyInput(key, pressed);
     }

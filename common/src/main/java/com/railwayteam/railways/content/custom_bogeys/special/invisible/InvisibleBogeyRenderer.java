@@ -26,7 +26,7 @@ import org.jetbrains.annotations.Nullable;
 public class InvisibleBogeyRenderer implements BogeyRenderer {
     @Override
     public BogeyRenderState getRenderData(@Nullable CompoundTag bogeyData, float wheelAngle, float partialTick,
-                                          int packedLight, boolean inContraption) {
+                                          int packedLight, @Nullable net.minecraft.world.level.CardinalLighting cardinalLighting, boolean inContraption) {
         return (poseStack, queue) -> {};
     }
 }

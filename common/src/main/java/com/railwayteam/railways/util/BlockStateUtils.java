@@ -57,40 +57,16 @@ public class BlockStateUtils {
         throw new AssertionError();
     }
 
-    private static final Map<Block, DyeColor> WOOL_MAP = ImmutableMap.<Block, DyeColor>builder()
-        .putAll(ImmutableMap.of(
-            Blocks.RED_WOOL, DyeColor.RED,
-            Blocks.ORANGE_WOOL, DyeColor.ORANGE,
-            Blocks.YELLOW_WOOL, DyeColor.YELLOW,
-            Blocks.LIME_WOOL, DyeColor.LIME,
-            Blocks.GREEN_WOOL, DyeColor.GREEN,
-            Blocks.LIGHT_BLUE_WOOL, DyeColor.LIGHT_BLUE,
-            Blocks.CYAN_WOOL, DyeColor.CYAN,
-            Blocks.BLUE_WOOL, DyeColor.BLUE))
-        .putAll(ImmutableMap.of(
-            Blocks.PURPLE_WOOL, DyeColor.PURPLE,
-            Blocks.MAGENTA_WOOL, DyeColor.MAGENTA,
-            Blocks.PINK_WOOL, DyeColor.PINK,
-            Blocks.BROWN_WOOL, DyeColor.BROWN,
-            Blocks.BLACK_WOOL, DyeColor.BLACK,
-            Blocks.GRAY_WOOL, DyeColor.GRAY,
-            Blocks.LIGHT_GRAY_WOOL, DyeColor.LIGHT_GRAY,
-            Blocks.WHITE_WOOL, DyeColor.WHITE))
-        .build();
-
-    private static final Map<DyeColor, Block> WOOL_MAP_REVERSE = new HashMap<>();
-    static {
-        for (Map.Entry<Block, DyeColor> entry : WOOL_MAP.entrySet()) {
-            WOOL_MAP_REVERSE.put(entry.getValue(), entry.getKey());
-        }
-    }
-
     public static DyeColor getWoolColor(Block block) {
-        return WOOL_MAP.getOrDefault(block, DyeColor.WHITE);
+        for (DyeColor color : DyeColor.values()) {
+            if (Blocks.WOOL.pick(color) == block)
+                return color;
+        }
+        return DyeColor.WHITE;
     }
 
     public static Block getWoolBlock(DyeColor color) {
-        return WOOL_MAP_REVERSE.getOrDefault(color, Blocks.WHITE_WOOL);
+        return Blocks.WOOL.pick(color);
     }
 
     public static BlockState blockWithProperties(Block blockSource, BlockState propertySource) {

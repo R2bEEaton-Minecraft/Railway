@@ -52,8 +52,9 @@ public class MinecartWorkbench extends MinecartBlock implements MenuProvider {
   }
 
   @NotNull
-  public InteractionResult interact (@NotNull Player player, @NotNull InteractionHand hand) {
-    InteractionResult ret = super.interact(player, hand);
+  @Override
+  public InteractionResult interact (@NotNull Player player, @NotNull InteractionHand hand, @NotNull net.minecraft.world.phys.Vec3 location) {
+    InteractionResult ret = super.interact(player, hand, location);
     if (ret.consumesAction()) return ret;
     player.openMenu(this);
     if (!player.level.isClientSide()) {

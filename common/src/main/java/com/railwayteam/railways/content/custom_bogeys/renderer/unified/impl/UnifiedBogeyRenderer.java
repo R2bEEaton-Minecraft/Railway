@@ -63,14 +63,14 @@ public class UnifiedBogeyRenderer implements BogeyRenderer, BogeyDisplayHolder {
     }
     @Override
     public BogeyRenderState getRenderData(@Nullable CompoundTag bogeyData, float wheelAngle, float partialTick,
-                                          int packedLight, boolean inContraption) {
+                                          int packedLight, @org.jetbrains.annotations.Nullable net.minecraft.world.level.CardinalLighting cardinalLighting, boolean inContraption) {
         final Renderer renderer = renderers.get(inContraption);
         if (bogeyData == null)
             bogeyData = new CompoundTag();
         renderer.reset();
         renderer.display.update(bogeyData, wheelAngle);
         BogeyRenderState customState = customRenderer == null ? null
-            : customRenderer.getRenderData(bogeyData, wheelAngle, partialTick, packedLight, inContraption);
+            : customRenderer.getRenderData(bogeyData, wheelAngle, partialTick, packedLight, cardinalLighting, inContraption);
         List<Matrix4f> elementPoses = renderer.allElements.stream()
             .map(element -> new Matrix4f(element.pose))
             .toList();
@@ -85,11 +85,11 @@ public class UnifiedBogeyRenderer implements BogeyRenderer, BogeyDisplayHolder {
         implements BogeyRenderState, SubmitNodeCollector.CustomGeometryRenderer {
 
         @Override
-        public void render(PoseStack poseStack, SubmitNodeCollector queue) {
+        public void submit(PoseStack poseStack, SubmitNodeCollector queue) {
             poseStack.translate(0, -1.5 - 1 / 128f, 0);
             queue.submitCustomGeometry(poseStack, RenderTypes.cutoutMovingBlock(), this);
             if (customState != null)
-                customState.render(poseStack, queue);
+                customState.submit(poseStack, queue);
         }
 
         @Override
