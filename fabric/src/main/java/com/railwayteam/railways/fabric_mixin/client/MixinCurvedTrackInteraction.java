@@ -3,6 +3,7 @@ package com.railwayteam.railways.fabric_mixin.client;
 import com.railwayteam.railways.content.custom_tracks.casing.CasingChecker;
 import com.railwayteam.railways.content.custom_tracks.casing.SlabUseOnCurvePacket;
 import com.railwayteam.railways.content.handcar.HandcarItem;
+import com.railwayteam.railways.mixin_interfaces.IHasTrackCasing;
 import com.railwayteam.railways.registry.CRPackets;
 import com.railwayteam.railways.registry.CRTrackMaterials;
 import com.railwayteam.railways.util.AdventureUtils;
@@ -57,7 +58,11 @@ public abstract class MixinCurvedTrackInteraction {
             return;
         }
 
-        if (!held.isEmpty()) {
+        if (held.isEmpty()) {
+            IHasTrackCasing casing = (IHasTrackCasing) connection;
+            if (casing == null || casing.railways$getTrackCasing() == null)
+                return;
+        } else {
             if (!(held.getItem() instanceof BlockItem block))
                 return;
             if (!CasingChecker.isValid(block.getBlock()))

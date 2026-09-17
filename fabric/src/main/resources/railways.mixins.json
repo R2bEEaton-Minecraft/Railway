@@ -39,6 +39,8 @@
     "MixinNavigationSearchable",
     "MixinRollerBlockEntity",
     "MixinRollerMovementBehaviour",
+    "MixinTrackBlock",
+    "MixinTrackBlockEntity",
     "MixinTrackEdge",
     "MixinTravellingPoint",
     "MixinTrainCoupler",
