@@ -72,7 +72,8 @@ import com.tterrag.registrate.util.nullness.NonNullBiConsumer;
 import com.tterrag.registrate.util.nullness.NonNullUnaryOperator;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import com.zurrtum.create.catnip.data.Couple;
-import net.minecraft.advancements.criterion.StatePropertiesPredicate;
+import net.minecraft.advancements.predicates.StatePropertiesPredicate;
+import net.minecraft.tags.BlockItemTags;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.Registries;
@@ -288,7 +289,7 @@ public class BuilderTransformers {
             .tag(blockTags)
             .loot((lr, block) -> lr.add(block, lr.createDoorTable(block)))
             .item()
-            .tag(ItemTags.DOORS)
+            .tag(BlockItemTags.DOORS.item())
             .tag(itemTags)
             .transform(locometalDoorItemModel(color, type))
             .build();

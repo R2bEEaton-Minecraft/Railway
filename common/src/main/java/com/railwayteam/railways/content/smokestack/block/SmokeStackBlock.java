@@ -32,7 +32,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.DyeColor;
-import net.minecraft.world.item.DyeItem;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
@@ -103,8 +103,8 @@ public class SmokeStackBlock extends AbstractSmokeStackBlock<SmokeStackBlockEnti
     @Override
     protected InteractionResult useItemOn(ItemStack itemStack, BlockState pState, Level pLevel, BlockPos pPos, Player pPlayer,
                                           InteractionHand pHand, BlockHitResult pHit) {
-        if (itemStack.getItem() instanceof DyeItem dyeItem) {
-            DyeColor color = dyeItem.getDyeColor();
+        DyeColor color = itemStack.get(DataComponents.DYE);
+        if (color != null) {
             withBlockEntityDo(pLevel, pPos, te -> te.setColor(color));
             if (!pPlayer.isCreative()) {
                 itemStack.shrink(1);

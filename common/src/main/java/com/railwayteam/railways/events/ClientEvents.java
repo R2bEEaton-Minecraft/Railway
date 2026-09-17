@@ -88,7 +88,7 @@ public class ClientEvents {
         MutableComponent modrinthLink = linkComponent("Modrinth", UpdateChecker.INSTANCE.getDownloadUrl());
         MutableComponent curseforgeLink = linkComponent("CurseForge", UpdateChecker.INSTANCE.getCurseForgeUrl());
 
-        mc.player.displayClientMessage(Component.literal("[Steam 'n' Rails] ")
+        mc.player.sendSystemMessage(Component.literal("[Steam 'n' Rails] ")
             .withStyle(ChatFormatting.GOLD)
             .append(Component.literal("A new version (" + UpdateChecker.INSTANCE.getLatestVersion() + ") is available: "))
             .append(modrinthLink)

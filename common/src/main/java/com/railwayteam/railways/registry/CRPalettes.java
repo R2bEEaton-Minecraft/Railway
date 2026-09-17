@@ -616,7 +616,7 @@ public class CRPalettes {
     @SafeVarargs
     private static BlockEntry<?> locometalTrapdoor(TransformerProvider transformer, PalettesColor color, String colorString, String colorName, TagKey<Item>... tags) {
         TagKey<Item>[] trapdoorTags = Arrays.copyOf(tags, tags.length + 1);
-        trapdoorTags[trapdoorTags.length - 1] = ItemTags.TRAPDOORS;
+        trapdoorTags[trapdoorTags.length - 1] = net.minecraft.tags.BlockItemTags.TRAPDOORS.item();
         return REGISTRATE.block(joinUnderscore(colorString, "locometal_trapdoor"), PalettesTrapDoorBlock::new)
             .transform(transformer.get())
             .transform(BuilderTransformers.locometalTrapdoor(color))

@@ -77,7 +77,7 @@ public class CurvedTrackHandcarPlacementPacket implements C2SPacket {
             return;
 
         if (result.getValue().feedback != null) {
-            player.displayClientMessage(CreateLang.translateDirect(result.getValue().feedback)
+            player.sendSystemMessage(CreateLang.translateDirect(result.getValue().feedback)
                 .withStyle(ChatFormatting.RED), true);
             AllSoundEvents.DENY.play(player.level(), null, pos, .5f, 1);
             return;

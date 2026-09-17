@@ -27,7 +27,7 @@ import com.railwayteam.railways.registry.CRTags;
 import com.railwayteam.railways.util.ItemUtils;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.minecraft.MethodsReturnNonnullByDefault;
-import net.minecraft.advancements.CriteriaTriggers;
+import net.minecraft.advancements.triggers.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.Tag;
@@ -224,7 +224,7 @@ public abstract class PaintPitcherItem extends Item {
         }
 
         final BlockPos splashSource = hitPos.relative(hit.getDirection());
-        final Vec3 splashSourceVec = splashSource.getCenter();
+        final Vec3 splashSourceVec = Vec3.atCenterOf(splashSource);
 
         List<RepaintingTarget> paintTargets = new ArrayList<>();
 

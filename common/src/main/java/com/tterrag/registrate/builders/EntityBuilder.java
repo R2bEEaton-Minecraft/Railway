@@ -3,7 +3,6 @@ package com.tterrag.registrate.builders;
 import com.tterrag.registrate.Registrate;
 import com.tterrag.registrate.util.entry.EntityEntry;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
-import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityTypeBuilder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
@@ -49,8 +48,8 @@ public class EntityBuilder<T extends Entity, P> extends AbstractBuilder<EntityTy
 
     public EntityEntry<T> register() {
         ResourceKey<EntityType<?>> key = ResourceKey.create(Registries.ENTITY_TYPE, owner.id(name));
-        FabricEntityTypeBuilder<T> builder = FabricEntityTypeBuilder.create(category, factory)
-            .dimensions(EntityDimensions.scalable(width, height));
+        EntityType.Builder<T> builder = EntityType.Builder.of(factory, category)
+            .sized(width, height);
         properties.accept(builder);
         EntityType<T> type = builder.build(key);
         owner.registerVanilla(BuiltInRegistries.ENTITY_TYPE, name, type);

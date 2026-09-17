@@ -138,7 +138,7 @@ public abstract class TrackCouplerBlock extends Block implements IBE<TrackCouple
 			pos, state.getValue(MODE), newState.getValue(MODE), newState.getValue(POWERED));
 		Player player = context.getPlayer();
 		if (player != null)
-			player.displayClientMessage(newState.getValue(MODE).getTranslatedName(), true);
+			player.sendOverlayMessage(newState.getValue(MODE).getTranslatedName());
 		return InteractionResult.SUCCESS;
 	}
 }

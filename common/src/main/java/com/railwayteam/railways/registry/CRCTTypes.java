@@ -20,44 +20,14 @@ package com.railwayteam.railways.registry;
 
 import com.railwayteam.railways.Railways;
 import com.zurrtum.create.client.foundation.block.connected.CTType;
-import com.zurrtum.create.client.foundation.block.connected.CTTypeRegistry;
-import com.zurrtum.create.client.foundation.block.connected.ConnectedTextureBehaviour;
-import com.zurrtum.create.client.foundation.block.connected.ConnectedTextureBehaviour.ContextRequirement;
-import com.zurrtum.create.client.catnip.lang.Lang;
-import net.minecraft.resources.Identifier;
 
-public enum CRCTTypes implements CTType {
-    VERTICAL_PINKMACHINE(2, ContextRequirement.builder().vertical().build()) {
-        public int getTextureIndex(ConnectedTextureBehaviour.CTContext context) {
-            return !context.up && !context.down
-                ? 0 // single
-                : !context.up
-                ? 3 // top
-                : !context.down
-                ? 2 // bottom
-                : 1; // middle
+public class CRCTTypes {
+    public static final CTType VERTICAL_PINKMACHINE = new CTType(Railways.asResource("vertical_pinkmachine"), 2, CTType.VERTICAL) {
+        @Override
+        public int getTextureIndex(int flag) {
+            boolean up = (flag & UP_FLAG) != 0;
+            boolean down = (flag & DOWN_FLAG) != 0;
+            return !up && !down ? 0 : !up ? 3 : !down ? 2 : 1;
         }
-    }
-    ;
-
-    private final Identifier id;
-    private final int sheetSize;
-    private final ContextRequirement contextRequirement;
-
-    CRCTTypes(int sheetSize, ContextRequirement contextRequirement) {
-        this.id = Railways.asResource(Lang.asId(name()));
-        this.sheetSize = sheetSize;
-        this.contextRequirement = contextRequirement;
-
-        CTTypeRegistry.register(this);
-    }
-    public Identifier getId() {
-        return id;
-    }
-    public int getSheetSize() {
-        return sheetSize;
-    }
-    public ContextRequirement getContextRequirement() {
-        return contextRequirement;
-    }
+    };
 }
