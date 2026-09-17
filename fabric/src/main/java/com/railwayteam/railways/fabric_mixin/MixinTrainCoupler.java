@@ -95,7 +95,7 @@ public abstract class MixinTrainCoupler implements IOccupiedCouplers {
     }
 
     @Inject(
-        method = "lambda$collectInitiallyOccupiedSignalBlocks$28",
+        method = "lambda$collectInitiallyOccupiedSignalBlocks$1",
         at = @At("HEAD"),
         cancellable = true
     )

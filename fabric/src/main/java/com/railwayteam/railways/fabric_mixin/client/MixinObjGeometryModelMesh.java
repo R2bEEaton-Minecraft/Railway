@@ -1,6 +1,12 @@
 package com.railwayteam.railways.fabric_mixin.client;
 
 import com.zurrtum.create.client.model.obj.ObjMaterialLibrary;
+import net.minecraft.client.renderer.block.dispatch.ModelState;
+import net.minecraft.client.resources.model.ModelBaker;
+import net.minecraft.client.resources.model.ModelDebugName;
+import net.minecraft.client.resources.model.geometry.QuadCollection;
+import net.minecraft.client.resources.model.sprite.TextureSlots;
+import net.minecraft.util.context.ContextMap;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -21,7 +27,15 @@ public abstract class MixinObjGeometryModelMesh {
     public ObjMaterialLibrary.Material mat;
 
     @Inject(method = "addQuads", at = @At("HEAD"), cancellable = true, remap = false)
-    private void railways$skipUntexturedFaces(CallbackInfo ci) {
+    private void railways$skipUntexturedFaces(
+            QuadCollection.Builder builder,
+            TextureSlots textureSlots,
+            ModelBaker baker,
+            ModelState modelState,
+            ModelDebugName debugName,
+            ContextMap contextMap,
+            CallbackInfo ci
+    ) {
         if (mat != null && mat.diffuseColorMap == null)
             ci.cancel();
     }
