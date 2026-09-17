@@ -9,6 +9,7 @@
     "client.MixinCarriageContraptionVisual",
     "client.MixinCurvedTrackInteraction",
     "client.MixinKeyboardHandler",
+    "client.MixinMinecraft",
     "client.MixinObjGeometryModelMesh",
     "client.MixinSegmentAngles",
     "client.MixinTrackVisual",
