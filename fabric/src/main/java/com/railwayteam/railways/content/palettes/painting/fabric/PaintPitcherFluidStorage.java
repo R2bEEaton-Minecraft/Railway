@@ -68,11 +68,8 @@ class PaintPitcherFluidStorage implements SingleSlotStorage<FluidVariant> {
         if (!CRFluids.PAINT.get().isSame(resource.getFluid()))
             return null;
 
-        var customData = resource.getComponents().get(DataComponents.CUSTOM_DATA);
-        PalettesColor fluidColor = customData == null ? null : customData
-            .map(CustomData::copyTag)
-            .flatMap(PaintFluid::getColor)
-            .orElse(null);
+        CustomData customData = resource.getComponents().get(DataComponents.CUSTOM_DATA);
+        PalettesColor fluidColor = customData == null ? null : PaintFluid.getColor(customData.copyTag()).orElse(null);
         if (fluidColor == null)
             return null;
 
@@ -97,6 +94,7 @@ class PaintPitcherFluidStorage implements SingleSlotStorage<FluidVariant> {
         return ItemVariant.of(color.getItemEntry().get()
             .copyAsFilledStack(context.getItemVariant().toStack(), levels));
     }
+
     public long insert(FluidVariant resource, long maxAmount, TransactionContext transaction) {
         StoragePreconditions.notBlankNotNegative(resource, maxAmount);
 
@@ -119,6 +117,7 @@ class PaintPitcherFluidStorage implements SingleSlotStorage<FluidVariant> {
 
         return 0;
     }
+
     public long extract(FluidVariant resource, long maxAmount, TransactionContext transaction) {
         StoragePreconditions.notBlankNotNegative(resource, maxAmount);
 
@@ -137,9 +136,11 @@ class PaintPitcherFluidStorage implements SingleSlotStorage<FluidVariant> {
 
         return 0;
     }
+
     public boolean isResourceBlank() {
         return getLevels() == 0;
     }
+
     public FluidVariant getResource() {
         ItemStack stack = context.getItemVariant().toStack();
         if (!(stack.getItem() instanceof PaintPitcherItem item)) return FluidVariant.blank();
@@ -153,12 +154,15 @@ class PaintPitcherFluidStorage implements SingleSlotStorage<FluidVariant> {
                 .build()
         );
     }
+
     public long getAmount() {
         return getLevels() * FLUID_PER_LEVEL;
     }
+
     public long getCapacity() {
         return MAX_LEVELS * FLUID_PER_LEVEL;
     }
+
     public String toString() {
         return "PaintPitcherFluidStorage[" + context + "]";
     }

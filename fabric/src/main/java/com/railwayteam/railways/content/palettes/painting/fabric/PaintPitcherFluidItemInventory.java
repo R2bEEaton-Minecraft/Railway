@@ -32,11 +32,8 @@ class PaintPitcherFluidItemInventory extends FluidItemInventoryWrapper {
         if (fluid.isOf(Fluids.WATER)) return PitcherColor.SANDY_WATER;
         if (!fluid.isOf(CRFluids.PAINT.get())) return null;
 
-        var customData = fluid.getComponentChanges().get(DataComponents.CUSTOM_DATA);
-        PalettesColor color = customData == null ? null : customData
-            .map(CustomData::copyTag)
-            .flatMap(PaintFluid::getColor)
-            .orElse(null);
+        CustomData customData = fluid.getComponentChanges().split().added().get(DataComponents.CUSTOM_DATA);
+        PalettesColor color = customData == null ? null : PaintFluid.getColor(customData.copyTag()).orElse(null);
         return color == null ? null : new PitcherColor(color);
     }
 
@@ -101,7 +98,7 @@ class PaintPitcherFluidItemInventory extends FluidItemInventoryWrapper {
         DataComponentPatch components = DataComponentPatch.builder()
             .set(DataComponents.CUSTOM_DATA, CustomData.of(PaintFluid.setColor(new CompoundTag(), item.getColor())))
             .build();
-        return new FluidStack(CRFluids.PAINT.get(), drainableLevels * FLUID_PER_LEVEL, components);
+        return new FluidStack(CRFluids.PAINT.get(), (int) (drainableLevels * FLUID_PER_LEVEL), components);
     }
 
     @Override
@@ -112,5 +109,9 @@ class PaintPitcherFluidItemInventory extends FluidItemInventoryWrapper {
             return;
         }
         setFilled(color, Math.min(MAX_LEVELS, fluid.getAmount() / (int) FLUID_PER_LEVEL));
+    }
+
+    public PaintPitcherFluidItemInventory() {
+        super();
     }
 }

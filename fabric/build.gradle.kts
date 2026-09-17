@@ -16,6 +16,9 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+import java.io.File
+import java.util.zip.ZipFile
+
 architectury.fabric()
 
 loom {
@@ -37,9 +40,44 @@ loom {
     }
 }
 
+val fabricApiConfig: Configuration = configurations.create("fabricApi")
+
+val extractFabricApiJars by tasks.registering {
+    val outputDir = layout.buildDirectory.dir("fabric-api-extracted")
+    inputs.files(fabricApiConfig)
+    outputs.dir(outputDir)
+    doLast {
+        val out = outputDir.get().asFile
+        out.mkdirs()
+        for (file in fabricApiConfig.files) {
+            if (file.name.startsWith("fabric-api-") && file.name.endsWith(".jar")) {
+                val zip = ZipFile(file)
+                zip.entries().asSequence().forEach { entry ->
+                    if (entry.name.startsWith("META-INF/jars/") && entry.name.endsWith(".jar")) {
+                        val subJarName = entry.name.substringAfterLast("/")
+                        val target = File(out, subJarName)
+                        if (!target.exists()) {
+                            zip.getInputStream(entry).use { input ->
+                                target.outputStream().use { input.copyTo(it) }
+                            }
+                        }
+                    }
+                }
+                zip.close()
+            }
+        }
+    }
+}
+
+tasks.named("compileJava") {
+    dependsOn(extractFabricApiJars)
+}
+
 dependencies {
+    "fabricApi"("net.fabricmc.fabric-api:fabric-api:${"fabric_api_version"()}")
     implementation("net.fabricmc:fabric-loader:${"fabric_loader_version"()}")
     implementation("net.fabricmc.fabric-api:fabric-api:${"fabric_api_version"()}")
+    implementation(fileTree(layout.buildDirectory.dir("fabric-api-extracted")))
 
     // Create - dependencies are added transitively
     implementation(rootProject.extra["patchedCreateFlyFiles"]!!)
@@ -104,6 +142,7 @@ sourceSets.main {
         exclude("com/railwayteam/railways/base/data/fabric/CRTagGenImpl.java")
         exclude("com/railwayteam/railways/base/data/fabric/GeneratedEntriesProvider.java")
         exclude("com/railwayteam/railways/compat/emi/fabric/**")
+        exclude("com/railwayteam/railways/compat/jei/**")
         exclude("com/railwayteam/railways/base/data/recipe/fabric/**")
         exclude("com/railwayteam/railways/content/buffer/fabric/BufferModel.java")
         exclude("com/railwayteam/railways/content/buffer/headstock/fabric/CopycatHeadstockBarsModel.java")

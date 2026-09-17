@@ -54,7 +54,7 @@ public abstract class MixinGameRenderer {
         if (!ClientHandler.isPlayerMountedOnCamera())
             return;
 
-        boolean shouldRender = !minecraft.options.hideGui;
+        boolean shouldRender = !minecraft.gui.hud.isHidden();
         HitResult hitResult = minecraft.hitResult;
         if (hitResult != null && hitResult.getType() == HitResult.Type.BLOCK && minecraft.level != null
             && hitResult instanceof BlockHitResult blockHitResult) {

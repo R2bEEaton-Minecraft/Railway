@@ -23,20 +23,21 @@ import com.zurrtum.create.catnip.data.Iterate;
 import com.zurrtum.create.client.foundation.model.BakedModelHelper;
 import com.zurrtum.create.client.infrastructure.model.CopycatModel;
 import com.zurrtum.create.content.decoration.copycat.CopycatBlock;
-import net.minecraft.client.renderer.block.model.BakedQuad;
-import net.minecraft.client.renderer.block.model.BlockModelPart;
-import net.minecraft.client.renderer.block.model.BlockStateModel;
-import net.minecraft.client.renderer.block.model.SimpleModelWrapper;
-import net.minecraft.client.resources.model.QuadCollection;
+import net.minecraft.client.renderer.block.BlockAndTintGetter;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModelPart;
+import net.minecraft.client.resources.model.SimpleModelWrapper;
+import net.minecraft.client.resources.model.geometry.BakedQuad;
+import net.minecraft.client.resources.model.geometry.QuadCollection;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -48,39 +49,37 @@ public class CopycatHeadstockBlockStateModel extends CopycatModel {
 		super(state, unbaked);
 	}
 
-	public CopycatHeadstockBlockStateModel(BlockState state, BlockStateModel.Unbaked unbaked) {
-		this(state, unbaked.asRoot());
-	}
-
 	@Override
 	protected void addPartsWithInfo(BlockAndTintGetter world, BlockPos pos, BlockState state, CopycatBlock block,
-									BlockState material, RandomSource random, List<BlockModelPart> parts) {
+									BlockState material, RandomSource random, List<BlockStateModelPart> parts) {
 		addWrappedParts(random, parts);
-		OcclusionData occlusionData = gatherOcclusionData(world, pos, state, material, block);
-		addHeadstockParts(occlusionData, state, block, getMaterialParts(world, pos, material, random, getModelOf(material)), parts);
+		DirectionData directionData = gatherDirectionData(block, state);
+		addHeadstockParts(directionData, state, block, getMaterialParts(world, pos, material, random, getModelOf(material)), parts);
 	}
 
-	private void addWrappedParts(RandomSource random, List<BlockModelPart> parts) {
-		for (BlockModelPart part : model.collectParts(random)) {
+	private void addWrappedParts(RandomSource random, List<BlockStateModelPart> parts) {
+		List<BlockStateModelPart> modelParts = new ArrayList<>();
+		model.collectParts(random, modelParts);
+		for (BlockStateModelPart part : modelParts) {
 			QuadCollection.Builder builder = new QuadCollection.Builder();
 			addFilteredWrappedQuads(part.getQuads(null), builder::addUnculledFace);
 			for (Direction direction : Iterate.directions)
 				addFilteredWrappedQuads(part.getQuads(direction), quad -> builder.addCulledFace(direction, quad));
 			QuadCollection quads = builder.build();
 			if (!quads.getAll().isEmpty())
-				parts.add(new SimpleModelWrapper(quads, part.useAmbientOcclusion(), part.particleIcon()));
+				parts.add(new SimpleModelWrapper(quads, part.useAmbientOcclusion(), part.particleMaterial()));
 		}
 	}
 
 	private void addFilteredWrappedQuads(List<BakedQuad> quads, Consumer<BakedQuad> consumer) {
 		for (BakedQuad quad : quads) {
-			if (!COPYCAT_BASE_TEXTURE.equals(quad.sprite().contents().name()))
+			if (!COPYCAT_BASE_TEXTURE.equals(quad.materialInfo().sprite().contents().name()))
 				consumer.accept(quad);
 		}
 	}
 
-	private void addHeadstockParts(OcclusionData occlusionData, BlockState state, CopycatBlock block,
-								   List<BlockModelPart> original, List<BlockModelPart> parts) {
+	private void addHeadstockParts(DirectionData directionData, BlockState state, CopycatBlock block,
+								   List<BlockStateModelPart> original, List<BlockStateModelPart> parts) {
 		if (original.isEmpty())
 			return;
 
@@ -89,11 +88,11 @@ public class CopycatHeadstockBlockStateModel extends CopycatModel {
 		Vec3 normal = Vec3.atLowerCornerOf(facing.getUnitVec3i());
 		Vec3 normalScaled14 = normal.scale(14 / 16f);
 
-		for (BlockModelPart part : original) {
+		for (BlockStateModelPart part : original) {
 			QuadCollection.Builder builder = new QuadCollection.Builder();
 			addCroppedHeadstockQuads(facing, upsideDown, normal, normalScaled14, part.getQuads(null), builder::addUnculledFace);
 			for (Direction direction : Iterate.directions) {
-				if (occlusionData.isOccluded(direction))
+				if (directionData.isCull(direction))
 					continue;
 				addCroppedHeadstockQuads(
 					facing,
@@ -106,7 +105,7 @@ public class CopycatHeadstockBlockStateModel extends CopycatModel {
 						: quad -> builder.addCulledFace(direction, quad)
 				);
 			}
-			parts.add(new SimpleModelWrapper(builder.build(), part.useAmbientOcclusion(), part.particleIcon()));
+			parts.add(new SimpleModelWrapper(builder.build(), part.useAmbientOcclusion(), part.particleMaterial()));
 		}
 	}
 

@@ -10,10 +10,8 @@
     "client.MixinCurvedTrackInteraction",
     "client.MixinKeyboardHandler",
     "client.MixinObjGeometryModelMesh",
-    "client.MixinSectionCompiler",
     "client.MixinSegmentAngles",
     "client.MixinTrackVisual",
-    "client.MixinTrackTargetingClient",
     "client.MixinTrainHUD",
     "client.MixinRadialToolboxMenu",
     "client.MixinRollingModeScrollBehaviour",
@@ -48,14 +46,9 @@
     "conductor_possession.MixinEntity",
     "conductor_possession.ServerPlayerMixin",
     "MixinStationBlockEntity",
-    "MixinTrackBlock",
-    "MixinTrackBlockEntity",
-    "MixinTrackTargetingBlockItem",
-    "MixinTrackTargetingBlockItem$MixinOverlapResult",
-    "MixinToolboxHandler"
+    "MixinTracksCleaned"
   ],
   "injectors": {
-    "defaultRequire": 1,
-    "maxShiftBy": 5
+    "defaultRequire": 1
   }
 }
