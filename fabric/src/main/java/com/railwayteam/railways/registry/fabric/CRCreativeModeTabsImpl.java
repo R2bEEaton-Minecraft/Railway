@@ -80,6 +80,10 @@ public class CRCreativeModeTabsImpl {
         return new TabInfo(key, tab);
     }
 
+    public static boolean isInCreativeTab(RegistryEntry<?> entry, ResourceKey<CreativeModeTab> tab) {
+        return Railways.registrate().isInCreativeTab(entry, tab);
+    }
+
     public static void useBaseTab() {
         CreateRegistrate registrate = Railways.registrate();
         registrate.setCreativeTab(MAIN_TAB.key());
