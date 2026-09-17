@@ -38,61 +38,61 @@ loom {
 }
 
 dependencies {
-    modImplementation("net.fabricmc:fabric-loader:${"fabric_loader_version"()}")
-    modImplementation("net.fabricmc.fabric-api:fabric-api:${"fabric_api_version"()}")
+    implementation("net.fabricmc:fabric-loader:${"fabric_loader_version"()}")
+    implementation("net.fabricmc.fabric-api:fabric-api:${"fabric_api_version"()}")
 
     // Create - dependencies are added transitively
-    modImplementation(rootProject.extra["patchedCreateFlyFiles"]!!)
+    implementation(rootProject.extra["patchedCreateFlyFiles"]!!)
     compileOnly("com.tterrag.registrate:Registrate:MC1.20-1.3.11")
     compileOnly("com.google.code.findbugs:jsr305:3.0.2")
 
     // EMI has no release for Minecraft 1.21.11 yet. Keep the EMI compatibility
     // sources excluded until a matching API is available.
-    modCompileOnly("maven.modrinth:jei:${"jei_fabric_version"()}")
+    compileOnly("maven.modrinth:jei:${"jei_fabric_version"()}")
 
     // JEI (recipe viewer) - dev runtime only, for testing recipe-viewer compatibility
     if ("enable_jei"().toBoolean()) {
-        modLocalRuntime("maven.modrinth:jei:${"jei_fabric_version"()}")
+        runtimeOnly("maven.modrinth:jei:${"jei_fabric_version"()}")
     }
 
-    modCompileOnly("de.maxhenkel.voicechat:voicechat-api:${"voicechat_api_version"()}")
+    compileOnly("de.maxhenkel.voicechat:voicechat-api:${"voicechat_api_version"()}")
 
     if ("enable_simple_voice_chat"().toBoolean()) {
-        modLocalRuntime("maven.modrinth:simple-voice-chat:fabric-${"voicechat_version"()}")
+        runtimeOnly("maven.modrinth:simple-voice-chat:fabric-${"voicechat_version"()}")
     }
 
     // mod compat for tracks
     if ("enable_hexcasting"().toBoolean()) {
-        modLocalRuntime("at.petra-k.paucal:paucal-fabric-${"minecraft_version"()}:${"paucal_version"()}")
-        modLocalRuntime("at.petra-k.hexcasting:hexcasting-fabric-${"minecraft_version"()}:${"hexcasting_version"()}")
-        modLocalRuntime("vazkii.patchouli:Patchouli:${"minecraft_version"()}-${"patchouli_version"()}-FABRIC")
+        runtimeOnly("at.petra-k.paucal:paucal-fabric-${"minecraft_version"()}:${"paucal_version"()}")
+        runtimeOnly("at.petra-k.hexcasting:hexcasting-fabric-${"minecraft_version"()}:${"hexcasting_version"()}")
+        runtimeOnly("vazkii.patchouli:Patchouli:${"minecraft_version"()}-${"patchouli_version"()}-FABRIC")
     }
 
     if ("enable_byg"().toBoolean()) {
-        modLocalRuntime("maven.modrinth:biomesyougo:${"byg_version"()}-fabric")
-        modLocalRuntime("maven.modrinth:terrablender:${"terrablender_version_fabric"()}")
-        modLocalRuntime("maven.modrinth:geckolib:${"geckolib_version_fabric"()}")
-        modLocalRuntime("maven.modrinth:corgilib:${"corgilib_version_fabric"()}")
+        runtimeOnly("maven.modrinth:biomesyougo:${"byg_version"()}-fabric")
+        runtimeOnly("maven.modrinth:terrablender:${"terrablender_version_fabric"()}")
+        runtimeOnly("maven.modrinth:geckolib:${"geckolib_version_fabric"()}")
+        runtimeOnly("maven.modrinth:corgilib:${"corgilib_version_fabric"()}")
     }
 
     if ("enable_natures_spirit"().toBoolean()) {
-        modLocalRuntime("maven.modrinth:natures-spirit:${"natures_spirit_version"()}")
+        runtimeOnly("maven.modrinth:natures-spirit:${"natures_spirit_version"()}")
     }
 
     if ("enable_tweakeroo"().toBoolean()) {
-        modLocalRuntime("curse.maven:tweakeroo-297344:${"tweakeroo_version"()}")
-        modLocalRuntime("curse.maven:malilib-303119:${"malilib_version"()}")
+        runtimeOnly("curse.maven:tweakeroo-297344:${"tweakeroo_version"()}")
+        runtimeOnly("curse.maven:malilib-303119:${"malilib_version"()}")
     }
 
     if ("enable_sodium_rubidium"().toBoolean()) {
-        modLocalRuntime("maven.modrinth:sodium:${"sodium_version"()}")
-        modLocalRuntime("org.joml:joml:1.10.2")
-        modLocalRuntime("maven.modrinth:indium:${"indium_version"()}")
+        runtimeOnly("maven.modrinth:sodium:${"sodium_version"()}")
+        runtimeOnly("org.joml:joml:1.10.2")
+        runtimeOnly("maven.modrinth:indium:${"indium_version"()}")
     }
     if ("enable_iris"().toBoolean()) {
-        modLocalRuntime("maven.modrinth:iris:${"iris_version"()}")
-        modLocalRuntime("org.anarres:jcpp:1.4.14")
-        modLocalRuntime("io.github.douira:glsl-transformer:2.0.0-pre13")
+        runtimeOnly("maven.modrinth:iris:${"iris_version"()}")
+        runtimeOnly("org.anarres:jcpp:1.4.14")
+        runtimeOnly("io.github.douira:glsl-transformer:2.0.0-pre13")
     }
 
     compileOnly(annotationProcessor("io.github.llamalad7:mixinextras-common:${"mixin_extras_version"()}")!!)!!

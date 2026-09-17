@@ -135,7 +135,7 @@ allprojects {
 
     java {
         toolchain {
-            languageVersion.set(JavaLanguageVersion.of(21))
+            languageVersion.set(JavaLanguageVersion.of(25))
         }
     }
 
@@ -195,11 +195,16 @@ subprojects {
     @Suppress("UnstableApiUsage")
     dependencies {
         "minecraft"("com.mojang:minecraft:${"minecraft_version"()}")
-        // layered mappings - Mojmap names, parchment docs and parameters
-        "mappings"(loom.layered {
-            officialMojangMappings { nameSyntheticMembers = false }
-            parchment("org.parchmentmc.data:parchment-${"minecraft_version"()}:${"parchment_version"()}@zip")
-        })
+        // In Minecraft 26.x+, Mojang ships unobfuscated jars so mappings are no longer published/needed
+        if (!"minecraft_version"().startsWith("26.")) {
+            "mappings"(loom.layered {
+                officialMojangMappings { nameSyntheticMembers = false }
+                val parchmentVer = runCatching { "parchment_version"() }.getOrNull()
+                if (parchmentVer != null && parchmentVer != "null" && parchmentVer.isNotEmpty()) {
+                    parchment("org.parchmentmc.data:parchment-${"minecraft_version"()}:${parchmentVer}@zip")
+                }
+            })
+        }
 
         // Used to decompile mixin dumps, needs to be on the classpath
         // Uncomment if you want it to decompile mixin exports, beware it has very verbose logging.
@@ -237,8 +242,8 @@ subprojects {
                 destinationDirectory = layout.buildDirectory.dir("libs").get()
             }
             // The common remap task must not overwrite the jar it consumes.
-            tasks.named<RemapJarTask>("remapJar") {
-                archiveClassifier.set("remapped")
+            tasks.matching { it.name == "remapJar" }.configureEach {
+                (this as RemapJarTask).archiveClassifier.set("remapped")
             }
         }
         return@subprojects
@@ -260,17 +265,19 @@ subprojects {
         platformSetupLoomIde()
     }
 
-    val remapJar = tasks.named<RemapJarTask>("remapJar") {
-        from("${rootProject.projectDir}/LICENSE")
+    tasks.matching { it.name == "remapJar" }.configureEach {
+        val remapTask = this as RemapJarTask
+        remapTask.from("${rootProject.projectDir}/LICENSE")
         val shadowJar = project.tasks.named<ShadowJar>("shadowJar").get()
-        inputFile.set(shadowJar.archiveFile)
-        injectAccessWidener = true
-        dependsOn(shadowJar)
-        archiveClassifier = null
-        doLast {
-            transformJar(outputs.files.singleFile)
+        remapTask.inputFile.set(shadowJar.archiveFile)
+        remapTask.injectAccessWidener = true
+        remapTask.dependsOn(shadowJar)
+        remapTask.archiveClassifier.set(null as String?)
+        remapTask.doLast {
+            transformJar(remapTask.outputs.files.singleFile)
         }
     }
+    val remapJar = tasks.findByName("remapJar") ?: tasks.named("jar")
 
     val common: Configuration by configurations.creating
     val shadowCommon: Configuration by configurations.creating
@@ -282,8 +289,13 @@ subprojects {
         development.extendsFrom(common)
     }
 
+    val isUnobfuscated = providers.gradleProperty("fabric.loom.disableObfuscation").map { it.toBoolean() }.orElse(false).get()
     dependencies {
-        common(project(":common", "namedElements")) { isTransitive = false }
+        if (isUnobfuscated) {
+            common(project(":common")) { isTransitive = false }
+        } else {
+            common(project(":common", "namedElements")) { isTransitive = false }
+        }
         shadowCommon(project(":common", "transformProduction${capitalizedName}")) { isTransitive = false }
     }
 
@@ -351,7 +363,14 @@ subprojects {
             ReleaseType.STABLE;
         }
     configure<ModPublishExtension> {
-        file.set(remapJar.get().archiveFile)
+        if (remapJar is TaskProvider<*>) {
+            val task = remapJar.get()
+            if (task is org.gradle.api.tasks.bundling.AbstractArchiveTask) {
+                file.set(task.archiveFile)
+            }
+        } else if (remapJar is org.gradle.api.tasks.bundling.AbstractArchiveTask) {
+            file.set(remapJar.archiveFile)
+        }
         version.set(project.version.toString())
         changelog = ChangelogText.getChangelogText(rootProject).toString()
         type = releaseType
