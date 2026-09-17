@@ -45,8 +45,7 @@
     "MixinTrainHandcar",
     "conductor_possession.MixinEntity",
     "conductor_possession.ServerPlayerMixin",
-    "MixinStationBlockEntity",
-    "MixinTracksCleaned"
+    "MixinStationBlockEntity"
   ],
   "injectors": {
     "defaultRequire": 1
