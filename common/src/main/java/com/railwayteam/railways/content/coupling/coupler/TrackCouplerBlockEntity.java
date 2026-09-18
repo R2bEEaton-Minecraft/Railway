@@ -168,6 +168,8 @@ public class TrackCouplerBlockEntity extends SmartBlockEntity implements Transfo
             debugCoupler("powered: allowedMode={} edgePointsOk={} spacing={} primaryTarget={} secondaryTarget={} primaryGlobal={} secondaryGlobal={}",
                 getAllowedOperationMode(), edgePointsOk, edgeSpacing, getTargetTrack(edgePoint), getTargetTrack(secondEdgePoint),
                 edgePoint.getGlobalPosition(), secondEdgePoint.getGlobalPosition());
+            if (!edgePointsOk)
+                return;
             refreshOccupiedCouplers();
             OperationInfo info = getOperationInfo();
             debugCoupler("resolved operation={}", info.mode);
@@ -202,6 +204,8 @@ public class TrackCouplerBlockEntity extends SmartBlockEntity implements Transfo
     }
 
     private void refreshOccupiedCouplers() {
+        if (!edgePointsOk)
+            return;
         TrackGraphLocation loc1 = edgePoint.determineGraphLocation();
         TrackGraphLocation loc2 = secondEdgePoint.determineGraphLocation();
         if (loc1 == null || loc1.graph == null) {

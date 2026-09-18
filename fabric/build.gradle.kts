@@ -34,6 +34,15 @@ loom {
 
             environmentVariable("DATAGEN", "TRUE")
         }
+
+        create("gametest") {
+            server()
+
+            name = "Game Test"
+            vmArg("-Dfabric-api.gametest")
+            vmArg("-Dfabric-api.gametest.report-file=${layout.buildDirectory.file("gametest-report.xml").get().asFile.absolutePath}")
+            runDir = "build/gametest"
+        }
     }
 }
 
