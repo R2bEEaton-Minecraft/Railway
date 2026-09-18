@@ -21,6 +21,7 @@ package com.railwayteam.railways.gametest;
 import com.railwayteam.railways.content.semaphore.SemaphoreBlock;
 import com.railwayteam.railways.content.semaphore.SemaphoreBlockEntity;
 import com.railwayteam.railways.registry.CRBlocks;
+import com.zurrtum.create.AllBlocks;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -62,6 +63,25 @@ public class SemaphoreGameTests {
         helper.assertBlockPresent(CRBlocks.SEMAPHORE.get(), pos);
         helper.assertBlockProperty(pos, SemaphoreBlock.FULL, true);
         helper.assertBlockProperty(pos, SemaphoreBlock.UPSIDE_DOWN, true);
+        helper.succeed();
+    }
+
+    @GameTest(structure = RailwaysGameTestHelper.PLATFORM_8X8)
+    public void testSemaphoreSignalConnection(GameTestHelper helper) {
+        BlockPos signalPos = new BlockPos(2, 1, 2);
+        BlockPos girderPos = new BlockPos(2, 2, 2);
+        BlockPos semaphorePos = new BlockPos(2, 3, 2);
+
+        helper.setBlock(signalPos, AllBlocks.TRACK_SIGNAL.defaultBlockState());
+        helper.setBlock(girderPos, AllBlocks.METAL_GIRDER.defaultBlockState());
+        helper.setBlock(semaphorePos, CRBlocks.SEMAPHORE.get().defaultBlockState()
+                .setValue(SemaphoreBlock.FACING, Direction.NORTH));
+
+        helper.assertBlockPresent(CRBlocks.SEMAPHORE.get(), semaphorePos);
+        SemaphoreBlockEntity semaphoreBe = RailwaysGameTestHelper.assertBlockEntity(helper, semaphorePos, SemaphoreBlockEntity.class);
+        semaphoreBe.lazyTick();
+
+        helper.assertTrue(semaphoreBe.isValid, "Semaphore should successfully link to SignalBlockEntity down the mast");
         helper.succeed();
     }
 }
