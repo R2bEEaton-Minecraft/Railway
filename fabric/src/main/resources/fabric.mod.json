@@ -22,6 +22,18 @@
     ],
     "fabric-datagen": [
       "com.railwayteam.railways.fabric.RailwaysDataFabric"
+    ],
+    "fabric-gametest": [
+      "com.railwayteam.railways.gametest.TrackGameTests",
+      "com.railwayteam.railways.gametest.TrackBufferGameTests",
+      "com.railwayteam.railways.gametest.TrackSwitchGameTests",
+      "com.railwayteam.railways.gametest.SemaphoreGameTests",
+      "com.railwayteam.railways.gametest.CouplerGameTests",
+      "com.railwayteam.railways.gametest.ConductorGameTests",
+      "com.railwayteam.railways.gametest.LocomotiveGameTests",
+      "com.railwayteam.railways.gametest.MinecartGameTests",
+      "com.railwayteam.railways.gametest.PaletteGameTests",
+      "com.railwayteam.railways.gametest.RegistryIntegrityGameTests"
     ]
   },
   "mixins": [
