@@ -21,12 +21,16 @@ package com.railwayteam.railways.gametest;
 import com.railwayteam.railways.content.buffer.DyeableBlockEntity;
 import com.railwayteam.railways.content.buffer.StandardTrackBufferBlock;
 import com.railwayteam.railways.content.buffer.TrackBufferBlockEntity;
+import com.railwayteam.railways.content.buffer.headstock.CopycatHeadstockBlockEntity;
 import com.railwayteam.railways.registry.CRBlocks;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.TrapDoorBlock;
+import net.minecraft.world.level.block.state.BlockState;
 
 public class TrackBufferGameTests {
 
@@ -94,6 +98,52 @@ public class TrackBufferGameTests {
         helper.setBlock(linkPos, CRBlocks.LINK_AND_PIN.get().defaultBlockState()
                 .setValue(StandardTrackBufferBlock.FACING, Direction.NORTH));
         helper.assertBlockPresent(CRBlocks.LINK_AND_PIN.get(), linkPos);
+        helper.succeed();
+    }
+
+    @GameTest(structure = RailwaysGameTestHelper.PLATFORM_8X8)
+    public void testCopycatHeadstockDefaultHasNoCustomMaterial(GameTestHelper helper) {
+        BlockPos pos = new BlockPos(3, 1, 3);
+        helper.setBlock(pos, CRBlocks.COPYCAT_HEADSTOCK.get().defaultBlockState()
+                .setValue(StandardTrackBufferBlock.FACING, Direction.NORTH));
+        helper.assertBlockPresent(CRBlocks.COPYCAT_HEADSTOCK.get(), pos);
+
+        CopycatHeadstockBlockEntity be = RailwaysGameTestHelper.assertBlockEntity(helper, pos, CopycatHeadstockBlockEntity.class);
+        helper.assertFalse(be.hasCustomMaterial(), "Freshly placed copycat headstock should not have a custom material");
+        helper.succeed();
+    }
+
+    @GameTest(structure = RailwaysGameTestHelper.PLATFORM_8X8)
+    public void testCopycatHeadstockCustomTexture(GameTestHelper helper) {
+        BlockPos pos = new BlockPos(3, 1, 3);
+        helper.setBlock(pos, CRBlocks.COPYCAT_HEADSTOCK.get().defaultBlockState()
+                .setValue(StandardTrackBufferBlock.FACING, Direction.NORTH));
+        helper.assertBlockPresent(CRBlocks.COPYCAT_HEADSTOCK.get(), pos);
+
+        CopycatHeadstockBlockEntity be = RailwaysGameTestHelper.assertBlockEntity(helper, pos, CopycatHeadstockBlockEntity.class);
+        BlockState material = Blocks.BRICKS.defaultBlockState();
+        be.setMaterial(material);
+        helper.assertTrue(be.hasCustomMaterial(), "Copycat headstock should report a custom material after being set");
+        helper.assertTrue(be.getMaterial() == material, "Copycat headstock material should match the applied texture");
+        helper.succeed();
+    }
+
+    @GameTest(structure = RailwaysGameTestHelper.PLATFORM_8X8)
+    public void testCopycatHeadstockCustomTextureCycle(GameTestHelper helper) {
+        BlockPos pos = new BlockPos(3, 1, 3);
+        helper.setBlock(pos, CRBlocks.COPYCAT_HEADSTOCK.get().defaultBlockState()
+                .setValue(StandardTrackBufferBlock.FACING, Direction.NORTH));
+        helper.assertBlockPresent(CRBlocks.COPYCAT_HEADSTOCK.get(), pos);
+
+        CopycatHeadstockBlockEntity be = RailwaysGameTestHelper.assertBlockEntity(helper, pos, CopycatHeadstockBlockEntity.class);
+        // CopycatBlockEntity#cycleMaterial() only cycles a trapdoor's HALF when it is also open
+        be.setMaterial(Blocks.OAK_TRAPDOOR.defaultBlockState().setValue(TrapDoorBlock.OPEN, true));
+        helper.assertTrue(be.hasCustomMaterial(), "Copycat headstock should have a custom material set before cycling");
+
+        BlockState beforeCycle = be.getMaterial();
+        boolean cycled = be.cycleMaterial();
+        helper.assertTrue(cycled, "Cycling the copycat headstock's material variant should succeed for an open trapdoor material");
+        helper.assertTrue(be.getMaterial() != beforeCycle, "Cycling should change the stored material variant");
         helper.succeed();
     }
 }
