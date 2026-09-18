@@ -223,7 +223,6 @@ public class ClientPacketHandlers {
                 ConductorPossessionController.previousCameraType = null;
             }
 
-            mc.levelRenderer.resetLevelRenderData();
         }
     }
 }

@@ -19,26 +19,14 @@
 package com.railwayteam.railways.content.conductor;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.railwayteam.railways.registry.CRBlockPartials;
-import com.zurrtum.create.client.AllPartialModels;
-import com.zurrtum.create.client.catnip.render.CachedBuffers;
-import com.zurrtum.create.client.catnip.render.SuperByteBuffer;
-import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
+import net.minecraft.client.renderer.entity.layers.CustomHeadLayer;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
-import net.minecraft.client.renderer.rendertype.RenderSetup;
-import net.minecraft.client.renderer.rendertype.RenderType;
-import net.minecraft.resources.Identifier;
-import net.minecraft.world.level.block.Blocks;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 
 public class ConductorRemoteLayer extends RenderLayer<ConductorRenderState, ConductorRenderModel> {
-
-    private static final RenderType CUTOUT_BLOCKS = RenderType.create("railways_conductor_attachment",
-            RenderSetup.builder(RenderPipelines.CUTOUT_BLOCK)
-                    .withTexture("Sampler0", Identifier.withDefaultNamespace("textures/atlas/blocks.png"))
-                    .useLightmap()
-                    .createRenderSetup());
 
     public ConductorRemoteLayer(RenderLayerParent<ConductorRenderState, ConductorRenderModel> pRenderer) {
         super(pRenderer);
@@ -47,32 +35,17 @@ public class ConductorRemoteLayer extends RenderLayer<ConductorRenderState, Cond
     @Override
     public void submit(PoseStack poseStack, SubmitNodeCollector submitter, int packedLight,
                        ConductorRenderState state, float yRot, float xRot) {
-        if (state.job == ConductorEntity.Job.REMOTE_CONTROL) {
+        if (state.job == ConductorEntity.Job.REMOTE_CONTROL && state.antennaState != null) {
             poseStack.pushPose();
             getParentModel().getHead().translateAndRotate(poseStack);
-            renderPartial(submitter, poseStack,
-                    CachedBuffers.partial(CRBlockPartials.CONDUCTOR_ANTENNA, Blocks.AIR.defaultBlockState())
-                            .rotateXDegrees(180)
-                            .translate(3 / 16.0, 3.5 / 16.0, 0 / 16.0)
-                            .rotateZDegrees(-30)
-                            .light(packedLight));
+            state.antennaState.submit(RenderTypes.cutoutMovingBlock(), poseStack, submitter);
             poseStack.popPose();
-
-        } else if (state.job == ConductorEntity.Job.SPY) {
+        } else if (state.job == ConductorEntity.Job.SPY && !state.secondaryHeadRenderState.isEmpty()) {
             poseStack.pushPose();
             getParentModel().getHead().translateAndRotate(poseStack);
-            renderPartial(submitter, poseStack,
-                    CachedBuffers.partial(AllPartialModels.BLAZE_GOGGLES, Blocks.AIR.defaultBlockState())
-                            .rotateZDegrees(180)
-                            .translate(-8 / 16.0, 2 / 16.0, -8 / 16.0)
-                            .light(packedLight));
+            CustomHeadLayer.translateToHead(poseStack, CustomHeadLayer.Transforms.DEFAULT);
+            state.secondaryHeadRenderState.submit(poseStack, submitter, packedLight, OverlayTexture.NO_OVERLAY, state.outlineColor);
             poseStack.popPose();
         }
-    }
-
-    @SuppressWarnings("unchecked")
-    private static void renderPartial(SubmitNodeCollector submitter, PoseStack poseStack, SuperByteBuffer buf) {
-        submitter.submitCustomGeometry(poseStack, CUTOUT_BLOCKS,
-                (pose, consumer) -> buf.renderInto(pose, consumer));
     }
 }

@@ -59,8 +59,6 @@ public abstract class CasingRenderUtils {
     public static void clearModelCache() {
         reTexturedModels.clear();
         CRBlockPartials.registerCasingSpecs();
-        if (Minecraft.getInstance().levelRenderer != null)
-            Minecraft.getInstance().levelRenderer.resetLevelRenderData();
     }
 
     public static PartialModel reTexture(PartialModel model, Block block) {

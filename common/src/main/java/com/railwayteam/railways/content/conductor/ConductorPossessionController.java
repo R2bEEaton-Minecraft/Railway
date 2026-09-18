@@ -103,8 +103,6 @@ public class ConductorPossessionController {
 			wasMounted = false;
 			positionReminder = 0;
 			dismount();
-			if (mc.levelRenderer != null)
-				mc.levelRenderer.resetLevelRenderData();
 		}
 	}
 
