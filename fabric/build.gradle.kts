@@ -43,6 +43,15 @@ loom {
             vmArg("-Dfabric-api.gametest.report-file=${layout.buildDirectory.file("gametest-report.xml").get().asFile.absolutePath}")
             runDir = "build/gametest"
         }
+
+        create("gametestClient") {
+            client()
+
+            name = "Client Game Test World"
+            programArg("--quickPlaySingleplayer")
+            programArg("Railway GameTest World")
+            runDir = "run"
+        }
     }
 }
 
