@@ -36,6 +36,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
@@ -92,5 +93,19 @@ public class PalettesSlidingDoorBlock extends SlidingDoorBlock implements IWrenc
     }
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         super.createBlockStateDefinition(builder.add(WINDOWED));
+    }
+
+    /**
+     * Sliding/folding locometal doors are fully rendered by the Flywheel visual
+     * (see {@code MixinSlidingDoorVisual}/{@code MixinFoldingDoorVisual}), which
+     * is expected to be present whenever Flywheel is running (the default).
+     * The static blockstate model was showing up as a visible, un-animated
+     * duplicate alongside the Flywheel-rendered door, so skip normal terrain
+     * rendering for this block entirely rather than relying on Flywheel's
+     * chunk-section suppression to hide it.
+     */
+    @SuppressWarnings("deprecation")
+    public RenderShape getRenderShape(BlockState state) {
+        return RenderShape.INVISIBLE;
     }
 }

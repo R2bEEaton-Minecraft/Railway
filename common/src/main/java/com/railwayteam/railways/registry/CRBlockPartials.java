@@ -535,6 +535,13 @@ public class CRBlockPartials {
         }))
     );
 
+    public static final PalettesColorList<Couple<PartialModel>> SLIDING_DOORS = new PalettesColorList<>(
+        color -> Couple.createWithContext(windowed -> {
+            String windowStr = windowed ? "_windowed" : "";
+            return block("palettes/" + color.getSerializedName() + "/sliding_door/block" + windowStr);
+        })
+    );
+
     public static final PartialModel PAINT_STRIPPER_BLOB = item("palettes/paint_blob/sand");
 
     public static final PalettesColorList<PartialModel> PAINT_BLOBS = new PalettesColorList<>(

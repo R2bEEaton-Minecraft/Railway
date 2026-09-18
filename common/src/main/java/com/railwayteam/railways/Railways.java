@@ -19,6 +19,7 @@
 package com.railwayteam.railways;
 
 import com.railwayteam.railways.base.data.CRTagGen;
+import com.railwayteam.railways.base.data.LocometalDoorBlockStateGen;
 import com.railwayteam.railways.base.data.compat.emi.EmiExcludedTagGen;
 import com.railwayteam.railways.base.data.compat.emi.EmiRecipeDefaultsGen;
 import com.railwayteam.railways.base.registration.MultiRegistryCallback;
@@ -127,6 +128,7 @@ public class Railways {
     gen.addProvider(CRAdvancements::new);
     gen.addProvider(EmiExcludedTagGen::new);
     gen.addProvider(EmiRecipeDefaultsGen::new);
+    gen.addProvider(LocometalDoorBlockStateGen::new);
   }
 
   public static CreateRegistrate registrate() {

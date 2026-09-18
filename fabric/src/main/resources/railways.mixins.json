@@ -17,6 +17,8 @@
     "client.MixinRadialToolboxMenu",
     "client.MixinRollingModeScrollBehaviour",
     "client.MixinSlidingDoorRenderer",
+    "client.MixinSlidingDoorVisual",
+    "client.MixinFoldingDoorVisual",
     "client.MixinToolboxHandlerClient",
     "client.MixinToolboxScreen",
     "client.MixinTrackCouplerBlockEntityGoggles",

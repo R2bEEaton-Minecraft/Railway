@@ -54,7 +54,7 @@ public class CopycatHeadstockBlockStateModel extends CopycatModel {
 									BlockState material, RandomSource random, List<BlockStateModelPart> parts) {
 		addWrappedParts(random, parts);
 		DirectionData directionData = gatherDirectionData(block, state);
-		addHeadstockParts(directionData, state, block, getMaterialParts(world, pos, material, random, getModelOf(material)), parts);
+		addHeadstockParts(directionData, state, getMaterialParts(world, pos, material, random, getModelOf(material)), parts);
 	}
 
 	private void addWrappedParts(RandomSource random, List<BlockStateModelPart> parts) {
@@ -78,7 +78,7 @@ public class CopycatHeadstockBlockStateModel extends CopycatModel {
 		}
 	}
 
-	private void addHeadstockParts(DirectionData directionData, BlockState state, CopycatBlock block,
+	private void addHeadstockParts(DirectionData directionData, BlockState state,
 								   List<BlockStateModelPart> original, List<BlockStateModelPart> parts) {
 		if (original.isEmpty())
 			return;
@@ -92,15 +92,13 @@ public class CopycatHeadstockBlockStateModel extends CopycatModel {
 			QuadCollection.Builder builder = new QuadCollection.Builder();
 			addCroppedHeadstockQuads(facing, upsideDown, normal, normalScaled14, part.getQuads(null), builder::addUnculledFace);
 			for (Direction direction : Iterate.directions) {
-				if (directionData.isCull(direction))
-					continue;
 				addCroppedHeadstockQuads(
 					facing,
 					upsideDown,
 					normal,
 					normalScaled14,
 					part.getQuads(direction),
-					block.shouldFaceAlwaysRender(state, direction)
+					directionData.isUncull(direction)
 						? builder::addUnculledFace
 						: quad -> builder.addCulledFace(direction, quad)
 				);
