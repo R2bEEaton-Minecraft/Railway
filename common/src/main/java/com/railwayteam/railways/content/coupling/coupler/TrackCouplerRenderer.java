@@ -21,6 +21,7 @@ package com.railwayteam.railways.content.coupling.coupler;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.railwayteam.railways.registry.CRBlockPartials;
 import com.railwayteam.railways.util.CustomTrackOverlayRendering;
+import com.zurrtum.create.client.catnip.render.SuperByteBufferRenderState;
 import com.zurrtum.create.client.foundation.blockEntity.renderer.SmartBlockEntityRenderer;
 import com.zurrtum.create.content.trains.track.ITrackBlock;
 import com.zurrtum.create.content.trains.track.TrackTargetingBehaviour;
@@ -102,8 +103,10 @@ public class TrackCouplerRenderer extends SmartBlockEntityRenderer<TrackCouplerB
         state.trackState = trackState;
         state.targetDirection = target.getTargetDirection();
         state.targetBezier = target.getTargetBezier();
-        state.overlayModel = model;
-        state.offsetOverlayToSide = CustomTrackOverlayRendering.overlayWillOverlap(target);
+        boolean offsetOverlayToSide = CustomTrackOverlayRendering.overlayWillOverlap(target);
+        state.overlayState = CustomTrackOverlayRendering.extractOverlayRenderState(
+            level, targetPosition, trackState, state.targetDirection, state.targetBezier, model, 1.0f, offsetOverlayToSide
+        );
     }
 
     @Override
@@ -114,16 +117,16 @@ public class TrackCouplerRenderer extends SmartBlockEntityRenderer<TrackCouplerB
     }
 
     private static void submitEdgePoint(EdgePointRenderState state, PoseStack matrices, SubmitNodeCollector queue) {
-        if (state.overlayModel == null || state.level == null || state.targetPosition == null || state.trackState == null)
+        if (state.overlayState == null || state.level == null || state.targetPosition == null || state.trackState == null)
             return;
 
-        queue.submitCustomGeometry(matrices, RenderTypes.cutoutMovingBlock(), (pose, consumer) -> {
-            PoseStack overlayMatrices = new PoseStack();
-            overlayMatrices.translate(state.trackOffset.getX(), state.trackOffset.getY(), state.trackOffset.getZ());
-            CustomTrackOverlayRendering.renderOverlayInto(state.level, state.targetPosition, state.trackState,
-                state.targetDirection, state.targetBezier, overlayMatrices, state.overlayModel, 1,
-                state.offsetOverlayToSide, pose, consumer);
-        });
+        matrices.pushPose();
+        matrices.translate(state.trackOffset.getX(), state.trackOffset.getY(), state.trackOffset.getZ());
+        if (CustomTrackOverlayRendering.prepareTrackOverlay(state.level, state.targetPosition, state.trackState,
+            state.targetBezier, state.targetDirection, matrices)) {
+            state.overlayState.submit(RenderTypes.cutoutMovingBlock(), matrices, queue);
+        }
+        matrices.popPose();
     }
 
     public static class CouplerRenderState extends SmartBlockEntityRenderer.SmartRenderState {
@@ -143,8 +146,7 @@ public class TrackCouplerRenderer extends SmartBlockEntityRenderer<TrackCouplerB
         public @Nullable BlockState trackState;
         public @Nullable Direction.AxisDirection targetDirection;
         public @Nullable BezierTrackPointLocation targetBezier;
-        public @Nullable PartialModel overlayModel;
-        public boolean offsetOverlayToSide;
+        public @Nullable SuperByteBufferRenderState overlayState;
 
         public void clear() {
             level = null;
@@ -153,8 +155,7 @@ public class TrackCouplerRenderer extends SmartBlockEntityRenderer<TrackCouplerB
             trackState = null;
             targetDirection = null;
             targetBezier = null;
-            overlayModel = null;
-            offsetOverlayToSide = false;
+            overlayState = null;
         }
     }
 }

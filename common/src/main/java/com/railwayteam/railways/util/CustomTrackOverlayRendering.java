@@ -8,6 +8,8 @@ import com.railwayteam.railways.registry.CRBlockPartials;
 import com.railwayteam.railways.registry.CRBlockPartials.TrackCasingSpec;
 import com.railwayteam.railways.registry.CRTrackMaterials;
 import com.zurrtum.create.client.catnip.render.CachedBuffers;
+import com.zurrtum.create.client.catnip.render.SuperByteBuffer;
+import com.zurrtum.create.client.catnip.render.SuperByteBufferRenderState;
 import com.zurrtum.create.client.content.trains.track.TrackRenderer;
 import com.zurrtum.create.client.flywheel.lib.model.baked.PartialModel;
 import com.zurrtum.create.client.flywheel.lib.transform.TransformStack;
@@ -28,11 +30,14 @@ import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.Identifier;
+import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.util.Mth;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -80,43 +85,45 @@ public class CustomTrackOverlayRendering {
         boolean rendered = false;
         ms.pushPose();
         if (prepareTrackOverlay(level, pos, trackState, bezier, direction, ms)) {
-            queue.submitCustomGeometry(ms, RenderTypes.cutoutMovingBlock(), (pose, consumer) -> {
-                CachedBuffers.partial(model, trackState)
-                    .translate(.5, 0, .5)
-                    .scale(scale)
-                    .translate(offsetToSide ? .5 : -.5, 0, -.5)
-                    .light(net.minecraft.util.LightCoordsUtil.getLightCoords(level, pos))
-                    .renderInto(pose, consumer);
-            });
+            SuperByteBuffer sbb = CachedBuffers.partial(model, trackState)
+                .translate(.5, 0, .5)
+                .scale(scale)
+                .translate(offsetToSide ? .5 : -.5, 0, -.5)
+                .light(LightCoordsUtil.getLightCoords(level, pos));
+            if (level instanceof Level l) {
+                sbb.cardinalLighting(l);
+            }
+            SuperByteBufferRenderState renderState = sbb.extractRenderState();
+            renderState.submit(RenderTypes.cutoutMovingBlock(), ms, queue);
             rendered = true;
         }
         ms.popPose();
         return rendered;
     }
 
-    public static void renderOverlayInto(LevelAccessor level, BlockPos pos, BlockState trackState,
-                                         Direction.AxisDirection direction, BezierTrackPointLocation bezier,
-                                         PoseStack ms, PartialModel model, float scale, boolean offsetToSide,
-                                         PoseStack.Pose pose, VertexConsumer consumer) {
+    public static @Nullable SuperByteBufferRenderState extractOverlayRenderState(LevelAccessor level, BlockPos pos,
+                                                                                 BlockState trackState,
+                                                                                 Direction.AxisDirection direction,
+                                                                                 BezierTrackPointLocation bezier,
+                                                                                 PartialModel model, float scale,
+                                                                                 boolean offsetToSide) {
         if (model == null)
-            return;
+            return null;
 
-        ms.pushPose();
-        if (prepareTrackOverlay(level, pos, trackState, bezier, direction, ms)) {
-            CachedBuffers.partial(model, trackState)
-                .transform(ms.last())
-                .translate(.5, 0, .5)
-                .scale(scale)
-                .translate(offsetToSide ? .5 : -.5, 0, -.5)
-                .light(net.minecraft.util.LightCoordsUtil.getLightCoords(level, pos))
-                .renderInto(pose, consumer);
+        SuperByteBuffer sbb = CachedBuffers.partial(model, trackState)
+            .translate(.5, 0, .5)
+            .scale(scale)
+            .translate(offsetToSide ? .5 : -.5, 0, -.5)
+            .light(LightCoordsUtil.getLightCoords(level, pos));
+        if (level instanceof Level l) {
+            sbb.cardinalLighting(l);
         }
-        ms.popPose();
+        return sbb.extractRenderState();
     }
 
-    private static boolean prepareTrackOverlay(LevelAccessor level, BlockPos pos, BlockState state,
-                                               BezierTrackPointLocation bezierPoint, Direction.AxisDirection direction,
-                                               PoseStack ms) {
+    public static boolean prepareTrackOverlay(LevelAccessor level, BlockPos pos, BlockState state,
+                                              BezierTrackPointLocation bezierPoint, Direction.AxisDirection direction,
+                                              PoseStack ms) {
         Block block = state.getBlock();
         if (!(block instanceof ITrackBlock track))
             return false;

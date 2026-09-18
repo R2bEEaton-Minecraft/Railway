@@ -1,11 +1,13 @@
 package com.railwayteam.railways.content.switches;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
 import com.railwayteam.railways.registry.CRBlockPartials;
 import com.railwayteam.railways.util.CustomTrackOverlayRendering;
 import com.zurrtum.create.catnip.math.AngleHelper;
 import com.zurrtum.create.client.catnip.render.CachedBuffers;
 import com.zurrtum.create.client.catnip.render.SuperByteBuffer;
+import com.zurrtum.create.client.catnip.render.SuperByteBufferRenderState;
 import com.zurrtum.create.client.flywheel.lib.model.baked.PartialModel;
 import com.zurrtum.create.client.foundation.blockEntity.renderer.SmartBlockEntityRenderer;
 import com.zurrtum.create.content.trains.track.ITrackBlock;
@@ -48,16 +50,28 @@ public class TrackSwitchRenderer
         state.yRot = AngleHelper.horizontalAngle(blockState.getValue(TrackSwitchBlock.FACING));
         state.automatic = be.isAutomatic();
 
+        Level level = be.getLevel();
+
         if (state.automatic) {
-            state.flag = CachedBuffers.partial(CRBlockPartials.BRASS_SWITCH_FLAG, blockState);
+            SuperByteBuffer flagBuf = CachedBuffers.partial(CRBlockPartials.BRASS_SWITCH_FLAG, blockState)
+                .light(state.lightCoords);
+            if (level != null) flagBuf.cardinalLighting(level);
+            state.flag = flagBuf.extractRenderState();
             state.flagAngle = brassFlagAngle(be);
         } else {
-            state.flag = CachedBuffers.partial(CRBlockPartials.ANDESITE_SWITCH_FLAG, blockState);
-            state.handle = CachedBuffers.partial(CRBlockPartials.ANDESITE_SWITCH_HANDLE, blockState);
+            SuperByteBuffer flagBuf = CachedBuffers.partial(CRBlockPartials.ANDESITE_SWITCH_FLAG, blockState)
+                .light(state.lightCoords);
+            if (level != null) flagBuf.cardinalLighting(level);
+            state.flag = flagBuf.extractRenderState();
+
+            SuperByteBuffer handleBuf = CachedBuffers.partial(CRBlockPartials.ANDESITE_SWITCH_HANDLE, blockState)
+                .light(state.lightCoords);
+            if (level != null) handleBuf.cardinalLighting(level);
+            state.handle = handleBuf.extractRenderState();
+
             state.flagAngle = andesiteFlagAngle(be);
         }
 
-        Level level = be.getLevel();
         TrackTargetingBehaviour<TrackSwitch> target = be.edgePoint;
         if (level == null || target == null)
             return;
@@ -75,8 +89,11 @@ public class TrackSwitchRenderer
         state.trackState = trackState;
         state.targetDirection = target.getTargetDirection();
         state.targetBezier = target.getTargetBezier();
-        state.overlayModel = be.getOverlayModel();
-        state.offsetOverlayToSide = CustomTrackOverlayRendering.overlayWillOverlap(target);
+        PartialModel overlayModel = be.getOverlayModel();
+        boolean offsetOverlayToSide = CustomTrackOverlayRendering.overlayWillOverlap(target);
+        state.overlayState = CustomTrackOverlayRendering.extractOverlayRenderState(
+            level, targetPosition, trackState, state.targetDirection, state.targetBezier, overlayModel, 1.0f, offsetOverlayToSide
+        );
     }
 
     private static float brassFlagAngle(TrackSwitchBlockEntity be) {
@@ -100,43 +117,42 @@ public class TrackSwitchRenderer
         super.submit(state, matrices, queue, cameraState);
 
         if (state.flag != null) {
-            queue.submitCustomGeometry(matrices, RenderTypes.cutoutMovingBlock(), (pose, consumer) -> {
-                SuperByteBuffer flag = state.flag
-                    .rotateCenteredDegrees(state.yRot, Direction.Axis.Y)
-                    .light(state.lightCoords);
-
-                if (state.automatic) {
-                    flag
-                        .translate(0, -2.0 / 16, 0)
-                        .rotateCentered(1.5708f, Direction.UP)
-                        .translate(0.5, 8.5 / 16, 0.5)
-                        .rotate(state.flagAngle, Direction.NORTH)
-                        .translate(-0.5, -7.5 / 16, -0.5);
-                } else {
-                    flag.rotateCentered(state.flagAngle, Direction.UP);
-                }
-
-                flag.renderInto(pose, consumer);
-            });
+            matrices.pushPose();
+            matrices.translate(0.5, 0.5, 0.5);
+            matrices.mulPose(Axis.YP.rotationDegrees(-state.yRot));
+            if (state.automatic) {
+                matrices.translate(0, -2.0 / 16, 0);
+                matrices.mulPose(Axis.YP.rotation(1.5708f));
+                matrices.translate(0.0, 8.5 / 16 - 0.5, 0.0);
+                matrices.mulPose(Axis.ZP.rotation(-state.flagAngle));
+                matrices.translate(0.0, - (8.5 / 16 - 0.5), 0.0);
+                matrices.translate(0.0, 1.0 / 16, 0.0);
+            } else {
+                matrices.mulPose(Axis.YP.rotation(-state.flagAngle));
+            }
+            matrices.translate(-0.5, -0.5, -0.5);
+            state.flag.submit(RenderTypes.cutoutMovingBlock(), matrices, queue);
+            matrices.popPose();
         }
 
         if (state.handle != null) {
-            queue.submitCustomGeometry(matrices, RenderTypes.cutoutMovingBlock(), (pose, consumer) ->
-                state.handle
-                    .rotateCenteredDegrees(state.yRot, Direction.Axis.Y)
-                    .rotateCentered(-1.5708f, Direction.UP)
-                    .light(state.lightCoords)
-                    .renderInto(pose, consumer));
+            matrices.pushPose();
+            matrices.translate(0.5, 0.5, 0.5);
+            matrices.mulPose(Axis.YP.rotationDegrees(-state.yRot));
+            matrices.mulPose(Axis.YP.rotation(1.5708f));
+            matrices.translate(-0.5, -0.5, -0.5);
+            state.handle.submit(RenderTypes.cutoutMovingBlock(), matrices, queue);
+            matrices.popPose();
         }
 
-        if (state.overlayModel != null && state.level != null && state.targetPosition != null && state.trackState != null) {
-            queue.submitCustomGeometry(matrices, RenderTypes.cutoutMovingBlock(), (pose, consumer) -> {
-                PoseStack overlayMatrices = new PoseStack();
-                overlayMatrices.translate(state.trackOffset.getX(), state.trackOffset.getY(), state.trackOffset.getZ());
-                CustomTrackOverlayRendering.renderOverlayInto(state.level, state.targetPosition, state.trackState,
-                    state.targetDirection, state.targetBezier, overlayMatrices, state.overlayModel, 1,
-                    state.offsetOverlayToSide, pose, consumer);
-            });
+        if (state.overlayState != null && state.level != null && state.targetPosition != null && state.trackState != null) {
+            matrices.pushPose();
+            matrices.translate(state.trackOffset.getX(), state.trackOffset.getY(), state.trackOffset.getZ());
+            if (CustomTrackOverlayRendering.prepareTrackOverlay(state.level, state.targetPosition, state.trackState,
+                state.targetBezier, state.targetDirection, matrices)) {
+                state.overlayState.submit(RenderTypes.cutoutMovingBlock(), matrices, queue);
+            }
+            matrices.popPose();
         }
     }
 
@@ -144,8 +160,8 @@ public class TrackSwitchRenderer
         public float yRot;
         public boolean automatic;
         public float flagAngle;
-        public @Nullable SuperByteBuffer flag;
-        public @Nullable SuperByteBuffer handle;
+        public @Nullable SuperByteBufferRenderState flag;
+        public @Nullable SuperByteBufferRenderState handle;
 
         public @Nullable Level level;
         public @Nullable BlockPos targetPosition;
@@ -153,8 +169,7 @@ public class TrackSwitchRenderer
         public @Nullable BlockState trackState;
         public @Nullable Direction.AxisDirection targetDirection;
         public @Nullable com.zurrtum.create.infrastructure.component.BezierTrackPointLocation targetBezier;
-        public @Nullable PartialModel overlayModel;
-        public boolean offsetOverlayToSide;
+        public @Nullable SuperByteBufferRenderState overlayState;
 
         public void clear() {
             flag = null;
@@ -165,8 +180,7 @@ public class TrackSwitchRenderer
             trackState = null;
             targetDirection = null;
             targetBezier = null;
-            overlayModel = null;
-            offsetOverlayToSide = false;
+            overlayState = null;
         }
     }
 }

@@ -24,7 +24,9 @@ import com.zurrtum.create.client.AllPartialModels;
 import com.zurrtum.create.client.catnip.animation.AnimationTickHolder;
 import com.zurrtum.create.client.catnip.render.CachedBuffers;
 import com.zurrtum.create.client.catnip.render.SuperByteBuffer;
+import com.zurrtum.create.client.catnip.render.SuperByteBufferRenderState;
 import com.zurrtum.create.client.flywheel.lib.model.baked.PartialModel;
+import com.zurrtum.create.client.flywheel.lib.transform.TransformStack;
 import com.zurrtum.create.client.foundation.blockEntity.renderer.SmartBlockEntityRenderer;
 import com.zurrtum.create.client.foundation.render.CreateRenderTypes;
 import com.zurrtum.create.catnip.math.AngleHelper;
@@ -36,6 +38,7 @@ import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.core.Direction;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
@@ -56,6 +59,7 @@ public class SemaphoreRenderer extends SmartBlockEntityRenderer<SemaphoreBlockEn
                                    float tickProgress, Vec3 cameraPos,
                                    @Nullable ModelFeatureRenderer.CrumblingOverlay crumbling) {
         super.extractRenderState(be, state, tickProgress, cameraPos, crumbling);
+        state.clear();
         if (be.isRemoved()) return;
 
         BlockState blockState = be.getBlockState();
@@ -96,7 +100,12 @@ public class SemaphoreRenderer extends SmartBlockEntityRenderer<SemaphoreBlockEn
                 ? (yellow ? CRBlockPartials.SEMAPHORE_ARM_YELLOW_FLIPPED : CRBlockPartials.SEMAPHORE_ARM_RED_FLIPPED)
                 : (yellow ? CRBlockPartials.SEMAPHORE_ARM_YELLOW : CRBlockPartials.SEMAPHORE_ARM_RED);
         }
-        state.armBuf = CachedBuffers.partial(arm, blockState);
+
+        Level level = be.getLevel();
+        SuperByteBuffer armSbb = CachedBuffers.partial(arm, blockState)
+            .light(state.lightCoords);
+        if (level != null) armSbb.cardinalLighting(level);
+        state.arm = armSbb.extractRenderState();
 
         boolean top = pos < 0.2;
         boolean bottom = pos > 0.8;
@@ -116,16 +125,25 @@ public class SemaphoreRenderer extends SmartBlockEntityRenderer<SemaphoreBlockEn
             }
             state.lampTz = bottom ? 15 / 16.0f : 14 / 16.0f;
 
-            state.lampBuf = CachedBuffers.partial(AllPartialModels.SIGNAL_WHITE_CUBE, blockState);
+            state.lamp = CachedBuffers.partial(AllPartialModels.SIGNAL_WHITE_CUBE, blockState)
+                .light(0xF000F0)
+                .disableDiffuse()
+                .extractRenderState();
 
             // Glow: white when proceed (bottom), yellow/red when stop (top)
             PartialModel glow = bottom ? AllPartialModels.SIGNAL_WHITE_GLOW
                 : (yellow ? AllPartialModels.SIGNAL_YELLOW_GLOW : AllPartialModels.SIGNAL_RED_GLOW);
-            state.glowBuf = CachedBuffers.partial(glow, blockState);
+            state.glow = CachedBuffers.partial(glow, blockState)
+                .light(0xF000F0)
+                .disableDiffuse()
+                .extractRenderState();
 
             PartialModel lamp = bottom ? CRBlockPartials.SEMAPHORE_LAMP_WHITE
                 : (yellow ? CRBlockPartials.SEMAPHORE_LAMP_YELLOW : CRBlockPartials.SEMAPHORE_LAMP_RED);
-            state.lampColorBuf = CachedBuffers.partial(lamp, blockState);
+            state.lampColor = CachedBuffers.partial(lamp, blockState)
+                .light(0xF000F0)
+                .disableDiffuse()
+                .extractRenderState();
 
             state.translucentType = CreateRenderTypes.translucent();
             state.additiveType = CreateRenderTypes.additive();
@@ -137,48 +155,45 @@ public class SemaphoreRenderer extends SmartBlockEntityRenderer<SemaphoreBlockEn
                        SubmitNodeCollector queue, CameraRenderState cameraState) {
         super.submit(state, matrices, queue, cameraState);
 
-        if (state.armBuf != null) {
-            queue.submitCustomGeometry(matrices, RenderTypes.cutoutMovingBlock(), (pose, consumer) ->
-                state.armBuf
-                    .rotateCenteredDegrees(state.yRot, Direction.Axis.Y)
-                    .rotateCentered(state.armAngle, Direction.EAST)
-                    .light(state.lightCoords)
-                    .renderInto(pose, consumer));
+        if (state.arm != null) {
+            matrices.pushPose();
+            TransformStack.of(matrices)
+                .rotateCenteredDegrees(state.yRot, Direction.Axis.Y)
+                .rotateCentered(state.armAngle, Direction.EAST);
+            state.arm.submit(RenderTypes.cutoutMovingBlock(), matrices, queue);
+            matrices.popPose();
         }
 
         if (state.showLamp) {
-            if (state.lampBuf != null) {
-                queue.submitCustomGeometry(matrices, state.translucentType, (pose, consumer) ->
-                    state.lampBuf
-                        .rotateCenteredDegrees(state.yRot, Direction.Axis.Y)
-                        .translate(state.lampTx, state.lampTy, state.lampTz)
-                        .light(0xF000F0)
-                        .disableDiffuse()
-                        .renderInto(pose, consumer));
+            if (state.lamp != null && state.translucentType != null) {
+                matrices.pushPose();
+                TransformStack.of(matrices)
+                    .rotateCenteredDegrees(state.yRot, Direction.Axis.Y)
+                    .translate(state.lampTx, state.lampTy, state.lampTz);
+                state.lamp.submit(state.translucentType, matrices, queue);
+                matrices.popPose();
             }
 
             OrderedSubmitNodeCollector additiveQueue = queue.order(1);
 
-            if (state.glowBuf != null) {
-                additiveQueue.submitCustomGeometry(matrices, state.additiveType, (pose, consumer) ->
-                    state.glowBuf
-                        .rotateCenteredDegrees(state.yRot, Direction.Axis.Y)
-                        .translate(state.lampTx, state.lampTy, state.lampTz)
-                        .light(0xF000F0)
-                        .disableDiffuse()
-                        .scale(1.5f, 2f, 2f)
-                        .renderInto(pose, consumer));
+            if (state.glow != null && state.additiveType != null) {
+                matrices.pushPose();
+                TransformStack.of(matrices)
+                    .rotateCenteredDegrees(state.yRot, Direction.Axis.Y)
+                    .translate(state.lampTx, state.lampTy, state.lampTz)
+                    .scale(1.5f, 2f, 2f);
+                state.glow.submit(state.additiveType, matrices, additiveQueue);
+                matrices.popPose();
             }
 
-            if (state.lampColorBuf != null) {
-                additiveQueue.submitCustomGeometry(matrices, state.additiveType, (pose, consumer) ->
-                    state.lampColorBuf
-                        .rotateCenteredDegrees(state.yRot, Direction.Axis.Y)
-                        .translate(state.lampTx, state.lampTy, state.lampTz)
-                        .light(0xF000F0)
-                        .disableDiffuse()
-                        .scale(1 + 1 / 16f)
-                        .renderInto(pose, consumer));
+            if (state.lampColor != null && state.additiveType != null) {
+                matrices.pushPose();
+                TransformStack.of(matrices)
+                    .rotateCenteredDegrees(state.yRot, Direction.Axis.Y)
+                    .translate(state.lampTx, state.lampTy, state.lampTz)
+                    .scale(1 + 1 / 16f, 1 + 1 / 16f, 1 + 1 / 16f);
+                state.lampColor.submit(state.additiveType, matrices, additiveQueue);
+                matrices.popPose();
             }
         }
     }
@@ -186,13 +201,23 @@ public class SemaphoreRenderer extends SmartBlockEntityRenderer<SemaphoreBlockEn
     public static class SemaphoreRenderState extends SmartBlockEntityRenderer.SmartRenderState {
         public float yRot;
         public float armAngle;
-        public @Nullable SuperByteBuffer armBuf;
+        public @Nullable SuperByteBufferRenderState arm;
         public boolean showLamp;
         public float lampTx, lampTy, lampTz;
-        public @Nullable SuperByteBuffer lampBuf;
-        public @Nullable SuperByteBuffer glowBuf;
-        public @Nullable SuperByteBuffer lampColorBuf;
+        public @Nullable SuperByteBufferRenderState lamp;
+        public @Nullable SuperByteBufferRenderState glow;
+        public @Nullable SuperByteBufferRenderState lampColor;
         public @Nullable RenderType translucentType;
         public @Nullable RenderType additiveType;
+
+        public void clear() {
+            arm = null;
+            lamp = null;
+            glow = null;
+            lampColor = null;
+            showLamp = false;
+            translucentType = null;
+            additiveType = null;
+        }
     }
 }

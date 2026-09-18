@@ -22,11 +22,13 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.railwayteam.railways.registry.CRBlockPartials;
 import com.zurrtum.create.client.catnip.render.CachedBuffers;
 import com.zurrtum.create.client.catnip.render.SuperByteBuffer;
+import com.zurrtum.create.client.catnip.render.SuperByteBufferRenderState;
 import com.zurrtum.create.client.foundation.blockEntity.renderer.SmartBlockEntityRenderer;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
@@ -48,11 +50,18 @@ public class ConductorWhistleFlagRenderer
 								   float tickProgress, Vec3 cameraPos,
 								   @Nullable net.minecraft.client.renderer.feature.ModelFeatureRenderer.CrumblingOverlay crumbling) {
 		super.extractRenderState(be, state, tickProgress, cameraPos, crumbling);
+		state.clear();
 		if (be.isRemoved())
 			return;
 
-		state.flag = CachedBuffers.partial(CRBlockPartials.CONDUCTOR_WHISTLE_FLAGS.get(be.getColor()),
-			Blocks.AIR.defaultBlockState());
+		SuperByteBuffer flagBuf = CachedBuffers.partial(CRBlockPartials.CONDUCTOR_WHISTLE_FLAGS.get(be.getColor()),
+			Blocks.AIR.defaultBlockState())
+			.light(state.lightCoords);
+		Level level = be.getLevel();
+		if (level != null) {
+			flagBuf.cardinalLighting(level);
+		}
+		state.flag = flagBuf.extractRenderState();
 	}
 
 	@Override
@@ -61,14 +70,15 @@ public class ConductorWhistleFlagRenderer
 		super.submit(state, matrices, queue, cameraState);
 
 		if (state.flag != null) {
-			queue.submitCustomGeometry(matrices, RenderTypes.cutoutMovingBlock(),
-				(pose, consumer) -> state.flag
-					.light(state.lightCoords)
-					.renderInto(pose, consumer));
+			state.flag.submit(RenderTypes.cutoutMovingBlock(), matrices, queue);
 		}
 	}
 
 	public static class FlagRenderState extends SmartBlockEntityRenderer.SmartRenderState {
-		public @Nullable SuperByteBuffer flag;
+		public @Nullable SuperByteBufferRenderState flag;
+
+		public void clear() {
+			flag = null;
+		}
 	}
 }
