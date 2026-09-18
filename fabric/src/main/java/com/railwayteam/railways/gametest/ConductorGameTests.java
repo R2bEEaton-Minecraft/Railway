@@ -129,7 +129,7 @@ public class ConductorGameTests {
         Player player = helper.makeMockPlayer(GameType.SURVIVAL);
         player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(AllItems.GOGGLES));
 
-        InteractionResult result = player.interactOn(conductor, InteractionHand.MAIN_HAND);
+        InteractionResult result = player.interactOn(conductor, InteractionHand.MAIN_HAND, conductor.position());
         helper.assertTrue(result.consumesAction(), "Giving goggles to conductor should succeed");
         helper.assertTrue(conductor.getJob() == ConductorEntity.Job.SPY, "Conductor job should become SPY");
         helper.assertTrue(conductor.getSecondaryHeadStack().is(AllItems.GOGGLES), "Conductor secondary head stack should match AllItems.GOGGLES");
@@ -137,7 +137,7 @@ public class ConductorGameTests {
         // Shift-interact with empty hand retrieves goggles
         player.setShiftKeyDown(true);
         player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
-        player.interactOn(conductor, InteractionHand.MAIN_HAND);
+        player.interactOn(conductor, InteractionHand.MAIN_HAND, conductor.position());
         helper.assertTrue(conductor.getJob() == ConductorEntity.Job.DEFAULT, "Conductor job should revert to DEFAULT");
         helper.assertTrue(player.getItemInHand(InteractionHand.MAIN_HAND).is(AllItems.GOGGLES), "Player should have retrieved the goggles");
         helper.succeed();
@@ -152,14 +152,14 @@ public class ConductorGameTests {
         Player player = helper.makeMockPlayer(GameType.SURVIVAL);
         player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(AllBlocks.REDSTONE_LINK));
 
-        InteractionResult result = player.interactOn(conductor, InteractionHand.MAIN_HAND);
+        InteractionResult result = player.interactOn(conductor, InteractionHand.MAIN_HAND, conductor.position());
         helper.assertTrue(result.consumesAction(), "Giving redstone link to conductor should succeed");
         helper.assertTrue(conductor.getJob() == ConductorEntity.Job.REMOTE_CONTROL, "Conductor job should become REMOTE_CONTROL");
 
         // Shift-interact with empty hand retrieves redstone link
         player.setShiftKeyDown(true);
         player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
-        player.interactOn(conductor, InteractionHand.MAIN_HAND);
+        player.interactOn(conductor, InteractionHand.MAIN_HAND, conductor.position());
         helper.assertTrue(conductor.getJob() == ConductorEntity.Job.DEFAULT, "Conductor job should revert to DEFAULT");
         helper.assertTrue(player.getItemInHand(InteractionHand.MAIN_HAND).is(AllBlocks.REDSTONE_LINK.asItem()), "Player should have retrieved redstone link");
         helper.succeed();
