@@ -1,9 +1,13 @@
 package com.railwayteam.railways.fabric_mixin;
 
+import com.llamalad7.mixinextras.sugar.Local;
+import com.llamalad7.mixinextras.sugar.ref.LocalBooleanRef;
 import com.railwayteam.railways.content.bogey_menu.handler.BogeyMenuHandlerServer;
+import com.railwayteam.railways.content.handcar.HandcarBlock;
 import com.railwayteam.railways.registry.CRBogeyStyles;
 import com.railwayteam.railways.registry.CRTrackMaterials;
 import com.zurrtum.create.AllBogeyStyles;
+import com.zurrtum.create.content.trains.bogey.AbstractBogeyBlock;
 import com.zurrtum.create.content.trains.bogey.AbstractBogeyBlockEntity;
 import com.zurrtum.create.content.trains.bogey.BogeyStyle;
 import com.zurrtum.create.content.trains.station.StationBlockEntity;
@@ -18,11 +22,13 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 
 @Mixin(value = StationBlockEntity.class, remap = false)
 public class MixinStationBlockEntity {
@@ -46,6 +52,15 @@ public class MixinStationBlockEntity {
 			BogeyMenuHandlerServer.setCurrentPlayer(null);
 			railways$bogeysBeforeClick = Set.of();
 		}
+	}
+
+	// handcars are driven from the bogey itself, so they don't need a controls block
+	@Inject(method = "assemble", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;getBlockEntity(Lnet/minecraft/core/BlockPos;)Lnet/minecraft/world/level/block/entity/BlockEntity;", ordinal = 0))
+	private void railways$allowAssemblingHandcarsWithoutControls(UUID playerUUID, CallbackInfo ci,
+																 @Local(name = "typeOfFirstBogey") AbstractBogeyBlock<?> typeOfFirstBogey,
+																 @Local(name = "atLeastOneForwardControls") LocalBooleanRef atLeastOneForwardControls) {
+		if (typeOfFirstBogey instanceof HandcarBlock)
+			atLeastOneForwardControls.set(true);
 	}
 
 	@Unique

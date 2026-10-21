@@ -24,18 +24,26 @@ import com.railwayteam.railways.content.custom_tracks.monorail.MonorailTrackBloc
 import com.railwayteam.railways.content.custom_tracks.narrow_gauge.NarrowGaugeTrackBlock;
 import com.railwayteam.railways.content.custom_tracks.phantom.PhantomTrackBlock;
 import com.railwayteam.railways.content.custom_tracks.wide_gauge.WideGaugeTrackBlock;
+import com.zurrtum.create.AllItemTags;
 import com.zurrtum.create.AllTrackMaterials;
 import com.zurrtum.create.content.trains.track.TrackBlock;
 import com.zurrtum.create.content.trains.track.TrackMaterial;
+import net.minecraft.core.HolderSet;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
-import net.minecraft.world.level.ItemLike;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Blocks;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import static com.zurrtum.create.content.trains.track.TrackMaterialFactory.make;
 
@@ -43,6 +51,9 @@ public class CRTrackMaterials {
     private static final Map<TrackMaterial, Identifier> TYPES = new HashMap<>();
     private static final Map<TrackMaterial, Identifier> PARTICLES = new HashMap<>();
     private static final Map<TrackMaterial, String> LANG_NAMES = new HashMap<>();
+    private static final Map<TrackMaterial, Ingredient> SLEEPERS = new HashMap<>();
+    private static final Map<TrackMaterial, Ingredient> RAILS = new HashMap<>();
+    private static final Set<TrackMaterial> NO_RECIPE_GEN = new HashSet<>();
 
     public static final TrackMaterial
         ACACIA = make(Railways.asResource("acacia"))
@@ -297,6 +308,47 @@ public class CRTrackMaterials {
         TYPES.put(material, type);
         PARTICLES.put(material, particle);
         LANG_NAMES.put(material, langName);
+    }
+
+
+    public static void registerIngredients(TrackMaterial material, @Nullable Ingredient sleeper, @Nullable Ingredient rails, boolean noRecipeGen) {
+        if (sleeper != null) {
+            SLEEPERS.put(material, sleeper);
+        }
+        if (rails != null) {
+            RAILS.put(material, rails);
+        }
+        if (noRecipeGen) {
+            NO_RECIPE_GEN.add(material);
+        }
+    }
+
+    public static boolean hasSleeper(TrackMaterial material) {
+        return SLEEPERS.containsKey(material);
+    }
+
+    public static boolean hasRails(TrackMaterial material) {
+        return RAILS.containsKey(material);
+    }
+
+    public static boolean hasRecipeGen(TrackMaterial material) {
+        return !NO_RECIPE_GEN.contains(material);
+    }
+
+    public static Ingredient getSleeper(TrackMaterial material) {
+        Ingredient ing = SLEEPERS.get(material);
+        if (ing != null) {
+            return ing;
+        }
+        return Ingredient.of(HolderSet.emptyNamed(BuiltInRegistries.ITEM, AllItemTags.SLEEPERS));
+    }
+
+    public static Ingredient getRails(TrackMaterial material) {
+        Ingredient ing = RAILS.get(material);
+        if (ing != null) {
+            return ing;
+        }
+        return Ingredient.of(HolderSet.emptyNamed(BuiltInRegistries.ITEM, TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("create", "track_nuggets"))));
     }
 
     public static class CRTrackType {

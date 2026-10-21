@@ -27,6 +27,7 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
@@ -39,7 +40,7 @@ import java.util.Set;
 public class ConductorDemoCommand {
     public static ArgumentBuilder<CommandSourceStack, ?> register() {
         return Commands.literal("conductor_demo")
-            .requires(cs -> cs.hasPermission(2))
+            .requires(cs -> net.minecraft.commands.Commands.hasPermission(net.minecraft.commands.Commands.LEVEL_GAMEMASTERS).test(cs))
             .then(Commands.argument("pos", BlockPosArgument.blockPos())
                 .executes(ctx -> {
                     BlockPos origin = BlockPosArgument.getLoadedBlockPos(ctx, "pos");
@@ -54,7 +55,7 @@ public class ConductorDemoCommand {
                     int i = 0;
                     for (String name : customCapNames) {
                         ItemStack capStack = CRItems.ITEM_CONDUCTOR_CAP.get(DyeColor.values()[i++ % DyeColor.values().length]).asStack();
-                        capStack.setHoverName(Component.literal(name));
+                        capStack.set(DataComponents.CUSTOM_NAME, Component.literal(name));
 
                         spawnConductor(ctx.getSource().getLevel(), pos, capStack, null);
                         pos.move(Direction.NORTH);

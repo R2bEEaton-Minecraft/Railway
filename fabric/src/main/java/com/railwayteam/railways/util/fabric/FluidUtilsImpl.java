@@ -1,6 +1,6 @@
 package com.railwayteam.railways.util.fabric;
 
-import com.zurrtum.create.content.processing.recipe.ProcessingRecipe;
+import com.railwayteam.railways.content.fuel.tank.FuelTankBlockEntity;
 import com.zurrtum.create.content.processing.recipe.ProcessingRecipeBuilder;
 import com.zurrtum.create.infrastructure.fluids.FluidStack;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
@@ -15,16 +15,18 @@ import org.jetbrains.annotations.Nullable;
 
 public class FluidUtilsImpl {
     public static boolean canUseAsFuelStorage(BlockEntity be) {
-        return false;
+        return be instanceof FuelTankBlockEntity;
     }
 
     public static Fluid getFluid(Object o) {
         if (o instanceof FluidVariant fluidVariant)
             return fluidVariant.getFluid();
+        if (o instanceof FluidStack fluidStack)
+            return fluidStack.getFluid();
         return Fluids.EMPTY;
     }
 
-    public static void addFluidOutput(ProcessingRecipeBuilder<ProcessingRecipe<?>> b, Fluid fluid, long amount, @Nullable CompoundTag nbt) {
+    public static void addFluidOutput(ProcessingRecipeBuilder<?> b, Fluid fluid, long amount, @Nullable CompoundTag nbt) {
         DataComponentPatch components = nbt == null || nbt.isEmpty()
             ? DataComponentPatch.EMPTY
             : DataComponentPatch.builder()

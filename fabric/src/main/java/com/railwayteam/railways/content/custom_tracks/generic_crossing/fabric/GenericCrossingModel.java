@@ -1,6 +1,6 @@
 /*
  * Steam 'n' Rails
- * Copyright (c) 2022-2024 The Railways Team
+ * Copyright (c) 2022-2026 The Railways Team
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -18,77 +18,79 @@
 
 package com.railwayteam.railways.content.custom_tracks.generic_crossing.fabric;
 
+import com.railwayteam.railways.content.custom_tracks.generic_crossing.GenericCrossingBlock;
 import com.railwayteam.railways.mixin_interfaces.IGenericCrossingTrackBE;
+import com.zurrtum.create.catnip.data.Pair;
+import com.zurrtum.create.client.infrastructure.model.WrapperBlockStateModel;
+import com.zurrtum.create.content.trains.track.TrackBlock;
 import com.zurrtum.create.content.trains.track.TrackMaterial;
 import com.zurrtum.create.content.trains.track.TrackShape;
-import com.zurrtum.create.catnip.data.Pair;
-import net.fabricmc.fabric.api.renderer.v1.model.FabricBakedModel;
-import net.fabricmc.fabric.api.renderer.v1.render.RenderContext;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin;
 import net.minecraft.MethodsReturnNonnullByDefault;
-import net.minecraft.client.renderer.block.model.BakedQuad;
-import net.minecraft.client.renderer.block.model.ItemOverrides;
-import net.minecraft.client.renderer.block.model.ItemTransforms;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.client.renderer.block.BlockAndTintGetter;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModelPart;
+import net.minecraft.client.resources.model.sprite.Material;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.state.BlockState;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-import java.util.Collections;
+import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.List;
-import java.util.function.Supplier;
 
+@Environment(EnvType.CLIENT)
+@ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
-public class GenericCrossingModel implements BakedModel, FabricBakedModel {
-    private final BakedModel wrapped;
+public class GenericCrossingModel extends WrapperBlockStateModel {
 
-    public GenericCrossingModel(BakedModel wrapped) {
-        this.wrapped = wrapped;
-    }
-    public boolean isVanillaAdapter() {
-        return false;
-    }
-    public void emitBlockQuads(BlockAndTintGetter blockView, BlockState state, BlockPos pos, Supplier<RandomSource> randomSupplier, RenderContext context) {
-        if (blockView.getBlockEntity(pos) instanceof IGenericCrossingTrackBE genericCrossing) {
-            Pair<TrackMaterial, TrackShape> piece1 = genericCrossing.railways$getFirstCrossingPiece();
-            Pair<TrackMaterial, TrackShape> piece2 = genericCrossing.railways$getSecondCrossingPiece();
+	public GenericCrossingModel(BlockState state, BlockStateModel.UnbakedRoot unbaked) {
+		super(state, unbaked);
+	}
 
-            if (piece1 != null)
-                IGenericCrossingTrackBE.getModel(piece1).emitBlockQuads(blockView, state, pos, randomSupplier, context);
-            if (piece2 != null)
-                IGenericCrossingTrackBE.getModel(piece2).emitBlockQuads(blockView, state, pos, randomSupplier, context);
-        }
-    }
+	@Override
+	public void addPartsWithInfo(BlockAndTintGetter world, BlockPos pos, BlockState state, RandomSource random, List<BlockStateModelPart> parts) {
+		if (world.getBlockEntity(pos) instanceof IGenericCrossingTrackBE genericCrossing) {
+			Pair<TrackMaterial, TrackShape> piece1 = genericCrossing.railways$getFirstCrossingPiece();
+			Pair<TrackMaterial, TrackShape> piece2 = genericCrossing.railways$getSecondCrossingPiece();
 
-    // don't need to implement this, there's no item
-    public void emitItemQuads(ItemStack stack, Supplier<RandomSource> randomSupplier, RenderContext context) {}
-    public List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction direction, @NotNull RandomSource random) {
-        return Collections.emptyList();
-    }
-    public boolean useAmbientOcclusion() {
-        return false;
-    }
-    public boolean isGui3d() {
-        return false;
-    }
-    public boolean usesBlockLight() {
-        return true;
-    }
-    public boolean isCustomRenderer() {
-        return false;
-    }
-    public TextureAtlasSprite getParticleIcon() {
-        return wrapped.getParticleIcon();
-    }
-    public ItemTransforms getTransforms() {
-        return ItemTransforms.NO_TRANSFORMS;
-    }
-    public ItemOverrides getOverrides() {
-        return ItemOverrides.EMPTY;
-    }
+			if (piece1 != null) {
+				BlockStateModel model1 = IGenericCrossingTrackBE.getModel(piece1);
+				BlockState state1 = piece1.getFirst().getBlock().defaultBlockState().setValue(TrackBlock.SHAPE, piece1.getSecond());
+				WrapperBlockStateModel.addPartsWithInfo(model1, world, pos, state1, random, parts);
+			}
+			if (piece2 != null) {
+				BlockStateModel model2 = IGenericCrossingTrackBE.getModel(piece2);
+				BlockState state2 = piece2.getFirst().getBlock().defaultBlockState().setValue(TrackBlock.SHAPE, piece2.getSecond());
+				WrapperBlockStateModel.addPartsWithInfo(model2, world, pos, state2, random, parts);
+			}
+		} else {
+			super.addPartsWithInfo(world, pos, state, random, parts);
+		}
+	}
+
+	@Override
+	public Material.Baked particleMaterialWithInfo(BlockAndTintGetter world, BlockPos pos, BlockState state) {
+		if (world.getBlockEntity(pos) instanceof IGenericCrossingTrackBE genericCrossing) {
+			Pair<TrackMaterial, TrackShape> piece1 = genericCrossing.railways$getFirstCrossingPiece();
+			if (piece1 != null) {
+				BlockStateModel model1 = IGenericCrossingTrackBE.getModel(piece1);
+				if (model1 instanceof WrapperBlockStateModel wrapper) {
+					return wrapper.particleMaterialWithInfo(world, pos, state);
+				}
+				return model1.particleMaterial();
+			}
+		}
+		return super.particleMaterialWithInfo(world, pos, state);
+	}
+
+	public static void register() {
+		ModelLoadingPlugin.register(context -> context.modifyBlockModelBeforeBake().register((model, modifierContext) -> {
+			BlockState state = modifierContext.state();
+			if (state.getBlock() instanceof GenericCrossingBlock)
+				return new GenericCrossingModel(state, model);
+			return model;
+		}));
+	}
 }

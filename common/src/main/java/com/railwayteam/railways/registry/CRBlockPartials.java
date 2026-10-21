@@ -49,22 +49,27 @@ public class CRBlockPartials {
     public static final Set<String> NO_TILT_CAPS = new HashSet<>();
     public static final Map<String, Identifier> CUSTOM_CONDUCTOR_SKINS_FOR_NAME = new HashMap<>(); // for if a conductor is renamed, rather than the cap
 
+    /** Dev cap models are baked as block models, so their sprites must live in the block atlas (OBJ models keep the item path). */
+    private static String devCapModelPath(String modelLoc) {
+        return ("tiestoettoet".equals(modelLoc) || "cshcrafter".equals(modelLoc) ? "item/dev_caps/" : "block/dev_caps/") + modelLoc;
+    }
+
     public static void registerCustomCap(String itemName, String modelLoc) {
-        CUSTOM_CONDUCTOR_CAPS.put(itemName, PartialModel.of(Railways.asResource("item/dev_caps/"+modelLoc)));
+        CUSTOM_CONDUCTOR_CAPS.put(itemName, PartialModel.of(Railways.asResource(devCapModelPath(modelLoc))));
     }
 
     public static void registerCustomCap(String itemName, String modelLoc, boolean preventTilting) {
-        CUSTOM_CONDUCTOR_CAPS.put(itemName, PartialModel.of(Railways.asResource("item/dev_caps/"+modelLoc)));
+        CUSTOM_CONDUCTOR_CAPS.put(itemName, PartialModel.of(Railways.asResource(devCapModelPath(modelLoc))));
         if (preventTilting)
             NO_TILT_CAPS.add(itemName);
     }
 
     public static void registerCustomConductorOnlyCap(String itemName, String modelLoc) {
-        CUSTOM_CONDUCTOR_ONLY_CAPS.put(itemName, PartialModel.of(Railways.asResource("item/dev_caps/"+modelLoc)));
+        CUSTOM_CONDUCTOR_ONLY_CAPS.put(itemName, PartialModel.of(Railways.asResource(devCapModelPath(modelLoc))));
     }
 
     public static void registerCustomConductorOnlyCap(String itemName, String modelLoc, boolean preventTilting) {
-        CUSTOM_CONDUCTOR_ONLY_CAPS.put(itemName, PartialModel.of(Railways.asResource("item/dev_caps/"+modelLoc)));
+        CUSTOM_CONDUCTOR_ONLY_CAPS.put(itemName, PartialModel.of(Railways.asResource(devCapModelPath(modelLoc))));
         if (preventTilting)
             NO_TILT_CAPS.add(itemName);
     }

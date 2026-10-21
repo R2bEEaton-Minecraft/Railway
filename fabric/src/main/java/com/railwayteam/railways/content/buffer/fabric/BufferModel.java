@@ -1,6 +1,6 @@
 /*
  * Steam 'n' Rails
- * Copyright (c) 2022-2024 The Railways Team
+ * Copyright (c) 2022-2026 The Railways Team
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -18,39 +18,38 @@
 
 package com.railwayteam.railways.content.buffer.fabric;
 
-import com.mojang.math.Axis;
+import com.railwayteam.railways.content.buffer.BufferModelUtils;
 import com.railwayteam.railways.content.buffer.IDyedBuffer;
 import com.railwayteam.railways.content.buffer.IMaterialAdaptingBuffer;
 import com.railwayteam.railways.content.buffer.TrackBufferBlock;
-import com.zurrtum.create.foundation.model.BakedModelHelper;
+import com.zurrtum.create.catnip.data.Iterate;
+import com.zurrtum.create.client.foundation.model.BakedModelHelper;
+import com.zurrtum.create.client.infrastructure.model.WrapperBlockStateModel;
+import com.zurrtum.create.client.model.NormalsBakedQuad;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.fabricmc.fabric.api.renderer.v1.model.ForwardingBakedModel;
-import net.fabricmc.fabric.api.renderer.v1.render.RenderContext;
+import net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin;
 import net.minecraft.MethodsReturnNonnullByDefault;
-import net.minecraft.client.renderer.block.model.BakedQuad;
-import net.minecraft.client.renderer.block.model.ItemOverrides;
-import net.minecraft.client.renderer.block.model.ItemTransforms;
+import net.minecraft.client.renderer.block.BlockAndTintGetter;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModelPart;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.client.resources.model.SimpleModelWrapper;
+import net.minecraft.client.resources.model.geometry.BakedQuad;
+import net.minecraft.client.resources.model.geometry.QuadCollection;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtUtils;
-import net.minecraft.nbt.Tag;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.item.DyeColor;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix3f;
 import org.joml.Vector3f;
+import org.joml.Vector3fc;
 
 import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Supplier;
+import java.util.function.Consumer;
 import java.util.function.UnaryOperator;
 
 import static com.railwayteam.railways.content.buffer.BufferModelUtils.combineSwappers;
@@ -59,112 +58,107 @@ import static com.railwayteam.railways.content.buffer.BufferModelUtils.getSwappe
 @Environment(EnvType.CLIENT)
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
-public class BufferModel extends ForwardingBakedModel {
+public class BufferModel extends WrapperBlockStateModel {
+	private static final Matrix3f DIAGONAL_TRANSFORM = new Matrix3f().rotationY((float) Math.toRadians(-45));
 
-    public BufferModel(BakedModel wrapped) {
-        this.wrapped  = wrapped;
-    }
+	public BufferModel(BlockState state, BlockStateModel.UnbakedRoot unbaked) {
+		super(state, unbaked);
+	}
 
-    private static final Matrix3f diagonalTransform = getDiagonalRotationMatrix();
-    private static final RenderContext.QuadTransform diagonalTransformer = quad -> {
-        Vector3f faceNormal = quad.faceNormal();
-        faceNormal.mulTranspose(diagonalTransform);
-        for (int i = 0; i < 4; i++) {
-            Vector3f vertexPos = quad.copyPos(i, new Vector3f());
-            vertexPos.sub(new Vector3f(0.5f, 0.5f, 0.5f));
-            vertexPos.mulTranspose(diagonalTransform);
-            vertexPos.add(new Vector3f(0.5f, 0.5f, 0.5f));
-            quad.pos(i, vertexPos);
-            quad.normal(i, faceNormal);
-        }
-        
-        return true;
-    };
-    public void emitBlockQuads(BlockAndTintGetter blockView, BlockState state, BlockPos pos, Supplier<RandomSource> randomSupplier, RenderContext context) {
-        boolean isDiagonal = false;
-        
-        if (state.getBlock() instanceof TrackBufferBlock)
-            isDiagonal = state.getValue(TrackBufferBlock.DIAGONAL);
-        
-        if (isDiagonal) context.pushTransform(diagonalTransformer);
-        
-        UnaryOperator<TextureAtlasSprite> materialSwapper = null;
-        UnaryOperator<TextureAtlasSprite> colorSwapper = null;
+	@Override
+	public void addPartsWithInfo(BlockAndTintGetter world, BlockPos pos, BlockState state, RandomSource random, List<BlockStateModelPart> parts) {
+		boolean isDiagonal = state.getBlock() instanceof TrackBufferBlock && state.getValue(TrackBufferBlock.DIAGONAL);
 
-        if (blockView.getBlockEntity(pos) instanceof IDyedBuffer be) {
-            colorSwapper = getSwapper(be.getColor());
-        }
+		UnaryOperator<TextureAtlasSprite> materialSwapper = null;
+		UnaryOperator<TextureAtlasSprite> colorSwapper = null;
 
-        if (blockView.getBlockEntity(pos) instanceof IMaterialAdaptingBuffer be) {
-            materialSwapper = getSwapper(be.getMaterial());
-        }
+		if (world.getBlockEntity(pos) instanceof IDyedBuffer be) {
+			colorSwapper = getSwapper(be.getColor());
+		}
 
-        if (materialSwapper != null || colorSwapper != null) {
-            new SpriteReplacingBakedModel(combineSwappers(materialSwapper, colorSwapper)).emitBlockQuads(blockView, state, pos, randomSupplier, context);
-        } else {
-            super.emitBlockQuads(blockView, state, pos, randomSupplier, context);
-        }
-        if (isDiagonal) context.popTransform();
-    }
+		if (world.getBlockEntity(pos) instanceof IMaterialAdaptingBuffer be) {
+			materialSwapper = getSwapper(be.getMaterial());
+		}
 
-    private static Matrix3f getDiagonalRotationMatrix() {
-        Matrix3f matrix = new Matrix3f();
-        matrix.mul(Axis.YP.rotationDegrees(45).get(new Matrix3f()));
-        return matrix;
-    }
-    public void emitItemQuads(ItemStack stack, Supplier<RandomSource> randomSupplier, RenderContext context) {
-        UnaryOperator<TextureAtlasSprite> materialSwapper = null;
-        UnaryOperator<TextureAtlasSprite> colorSwapper = null;
+		UnaryOperator<TextureAtlasSprite> swapper = combineSwappers(materialSwapper, colorSwapper);
 
-        if (stack.hasTag()) {
-            CompoundTag tag = stack.getTag();
-            if (tag.contains("BlockEntityTag")) {
-                CompoundTag blockEntityTag = tag.getCompound("BlockEntityTag").orElse(new CompoundTag());
-                if (blockEntityTag.contains("Material")) {
-                    materialSwapper = getSwapper(NbtUtils.readBlockState(BuiltInRegistries.BLOCK.asLookup(), blockEntityTag.getCompound("Material").orElse(new CompoundTag())));
-                }
-                if (blockEntityTag.contains("Color")) {
-                    colorSwapper = getSwapper(DyeColor.byId(blockEntityTag.getInt("Color")));
-                }
-            }
-        }
-        if (materialSwapper != null || colorSwapper != null) {
-            new SpriteReplacingBakedModel(combineSwappers(materialSwapper, colorSwapper)).emitItemQuads(stack, randomSupplier, context);
-        } else {
-            super.emitItemQuads(stack, randomSupplier, context);
-        }
-    }
+		if (!isDiagonal && swapper == null) {
+			super.addPartsWithInfo(world, pos, state, random, parts);
+			return;
+		}
 
-    private class SpriteReplacingBakedModel implements BakedModel {
+		List<BlockStateModelPart> baseParts = new ArrayList<>();
+		super.addPartsWithInfo(world, pos, state, random, baseParts);
 
-        private final UnaryOperator<TextureAtlasSprite> spriteSwapper;
+		for (BlockStateModelPart part : baseParts) {
+			QuadCollection.Builder builder = new QuadCollection.Builder();
+			processQuads(part.getQuads(null), isDiagonal, swapper, builder::addUnculledFace);
+			for (Direction direction : Iterate.directions) {
+				Consumer<BakedQuad> consumer = isDiagonal ? builder::addUnculledFace : (q -> builder.addCulledFace(direction, q));
+				processQuads(part.getQuads(direction), isDiagonal, swapper, consumer);
+			}
+			QuadCollection quads = builder.build();
+			if (!quads.getAll().isEmpty()) {
+				parts.add(new SimpleModelWrapper(quads, part.useAmbientOcclusion(), part.particleMaterial()));
+			}
+		}
+	}
 
-        private SpriteReplacingBakedModel(UnaryOperator<TextureAtlasSprite> spriteSwapper) {
-            this.spriteSwapper = spriteSwapper;
-        }
-        public List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction direction, RandomSource random) {
-            return BakedModelHelper.swapSprites(wrapped.getQuads(state, direction, random), this.spriteSwapper);
-        }
-        public boolean useAmbientOcclusion() {
-            return wrapped.useAmbientOcclusion();
-        }
-        public boolean isGui3d() {
-            return wrapped.isGui3d();
-        }
-        public boolean usesBlockLight() {
-            return wrapped.usesBlockLight();
-        }
-        public boolean isCustomRenderer() {
-            return wrapped.isCustomRenderer();
-        }
-        public TextureAtlasSprite getParticleIcon() {
-            return wrapped.getParticleIcon();
-        }
-        public ItemTransforms getTransforms() {
-            return wrapped.getTransforms();
-        }
-        public ItemOverrides getOverrides() {
-            return wrapped.getOverrides();
-        }
-    }
+	private static void processQuads(List<BakedQuad> quads, boolean isDiagonal, @Nullable UnaryOperator<TextureAtlasSprite> swapper, Consumer<BakedQuad> consumer) {
+		if (quads.isEmpty())
+			return;
+
+		List<BakedQuad> processed = quads;
+		if (swapper != null) {
+			processed = BakedModelHelper.swapSprites(processed, swapper);
+		}
+
+		for (BakedQuad quad : processed) {
+			if (isDiagonal) {
+				consumer.accept(transformDiagonal(quad));
+			} else {
+				consumer.accept(quad);
+			}
+		}
+	}
+
+	private static BakedQuad transformDiagonal(BakedQuad quad) {
+		Vector3f pos0 = transformVertex(quad.position0(), DIAGONAL_TRANSFORM);
+		Vector3f pos1 = transformVertex(quad.position1(), DIAGONAL_TRANSFORM);
+		Vector3f pos2 = transformVertex(quad.position2(), DIAGONAL_TRANSFORM);
+		Vector3f pos3 = transformVertex(quad.position3(), DIAGONAL_TRANSFORM);
+
+		BakedQuad transformed = new BakedQuad(
+			pos0, pos1, pos2, pos3,
+			quad.packedUV0(), quad.packedUV1(), quad.packedUV2(), quad.packedUV3(),
+			quad.direction(), quad.materialInfo()
+		);
+
+		if (((Object) quad) instanceof NormalsBakedQuad nSource) {
+			Vector3f n0 = new Vector3f(nSource.create$getNormal0()).mul(DIAGONAL_TRANSFORM);
+			Vector3f n1 = new Vector3f(nSource.create$getNormal1()).mul(DIAGONAL_TRANSFORM);
+			Vector3f n2 = new Vector3f(nSource.create$getNormal2()).mul(DIAGONAL_TRANSFORM);
+			Vector3f n3 = new Vector3f(nSource.create$getNormal3()).mul(DIAGONAL_TRANSFORM);
+			BakedModelHelper.setNormals(transformed, new Vector3f[]{n0, n1, n2, n3});
+		}
+
+		return transformed;
+	}
+
+	private static Vector3f transformVertex(Vector3fc vertex, Matrix3f matrix) {
+		Vector3f pos = new Vector3f(vertex);
+		pos.sub(0.5f, 0.5f, 0.5f);
+		matrix.transform(pos);
+		pos.add(0.5f, 0.5f, 0.5f);
+		return pos;
+	}
+
+	public static void register() {
+		ModelLoadingPlugin.register(context -> context.modifyBlockModelBeforeBake().register((model, modifierContext) -> {
+			BlockState state = modifierContext.state();
+			if (state.getBlock() instanceof TrackBufferBlock)
+				return new BufferModel(state, model);
+			return model;
+		}));
+	}
 }

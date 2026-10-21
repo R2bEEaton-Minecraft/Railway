@@ -50,7 +50,7 @@ public class FillPaintCommand {
 
     public static ArgumentBuilder<CommandSourceStack, ?> register(CommandBuildContext context) {
         return literal("fill_paint")
-            .requires(cs -> cs.hasPermission(2))
+            .requires(cs -> net.minecraft.commands.Commands.hasPermission(net.minecraft.commands.Commands.LEVEL_GAMEMASTERS).test(cs))
             .then(argument("from", BlockPosArgument.blockPos())
                 .then(argument("to", BlockPosArgument.blockPos())
                     .then(argument("color", enumArgument(PalettesColor.class))
@@ -117,7 +117,7 @@ public class FillPaintCommand {
         @Nullable PalettesColor colorToReplace
     ) throws CommandSyntaxException {
         int targetedVolume = area.getXSpan() * area.getYSpan() * area.getZSpan();
-        int max = source.getLevel().getGameRules().getInt(GameRules.RULE_COMMAND_MODIFICATION_BLOCK_LIMIT);
+        int max = source.getLevel().getGameRules().get(GameRules.MAX_BLOCK_MODIFICATIONS);
         if (targetedVolume > max) {
             throw ERROR_AREA_TOO_LARGE.create(max, targetedVolume);
         }

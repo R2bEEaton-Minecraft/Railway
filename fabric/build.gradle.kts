@@ -157,21 +157,7 @@ dependencies {
 
 sourceSets.main {
     java {
-        exclude("com/railwayteam/railways/base/data/fabric/CRTagGenImpl.java")
-        exclude("com/railwayteam/railways/base/data/fabric/GeneratedEntriesProvider.java")
         exclude("com/railwayteam/railways/compat/emi/fabric/**")
-        exclude("com/railwayteam/railways/compat/jei/**")
-        exclude("com/railwayteam/railways/base/data/recipe/fabric/**")
-        exclude("com/railwayteam/railways/content/buffer/fabric/BufferModel.java")
-        exclude("com/railwayteam/railways/content/buffer/headstock/fabric/CopycatHeadstockBarsModel.java")
-        exclude("com/railwayteam/railways/content/buffer/headstock/fabric/CopycatHeadstockModel.java")
-        exclude("com/railwayteam/railways/content/custom_tracks/generic_crossing/fabric/GenericCrossingModel.java")
-        exclude("com/railwayteam/railways/content/fuel/psi/**")
-        exclude("com/railwayteam/railways/content/fuel/tank/**")
-        exclude("com/railwayteam/railways/content/palettes/boiler/fabric/BoilerBigOutlinesImpl.java")
-        exclude("com/railwayteam/railways/content/palettes/boiler/fabric/BoilerBlockPlacementHelperImpl.java")
-        exclude("com/railwayteam/railways/content/palettes/boiler/fabric/ObjModelBuilder.java")
-        exclude("com/railwayteam/railways/fabric/events/ClientEventsFabric.java")
         exclude("com/railwayteam/railways/fabric/mixin/**")
     }
 }

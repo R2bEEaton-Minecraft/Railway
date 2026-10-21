@@ -18,19 +18,38 @@
 
 package com.railwayteam.railways.base.data;
 
-import com.railwayteam.railways.registry.CREntities;
-import com.zurrtum.create.api.data.TrainHatInfoProvider;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import net.minecraft.data.CachedOutput;
+import net.minecraft.data.DataProvider;
 import net.minecraft.data.PackOutput;
-import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.NotNull;
 
-public class RailwaysHatOffsetGenerator extends TrainHatInfoProvider {
-    public RailwaysHatOffsetGenerator(PackOutput output) {
-        super(output);
+import java.nio.file.Path;
+import java.util.concurrent.CompletableFuture;
+
+public class RailwaysHatOffsetGenerator implements DataProvider {
+    private final PackOutput packOutput;
+
+    public RailwaysHatOffsetGenerator(PackOutput packOutput) {
+        this.packOutput = packOutput;
     }
-    protected void createOffsets() {
-        makeInfoFor(CREntities.CONDUCTOR.get(), new Vec3(0f, -1f, 0f));
+
+    @Override
+    public @NotNull CompletableFuture<?> run(@NotNull CachedOutput output) {
+        JsonObject json = new JsonObject();
+        JsonArray offset = new JsonArray();
+        offset.add(0.0);
+        offset.add(-1.0);
+        offset.add(0.0);
+        json.add("offset", offset);
+
+        Path path = packOutput.getOutputFolder().resolve("assets/railways/train_hat_info/conductor.json");
+        return DataProvider.saveStable(output, json, path);
     }
-    public String getName() {
+
+    @Override
+    public @NotNull String getName() {
         return "Steam 'n' Rails Train Hat Information";
     }
 }

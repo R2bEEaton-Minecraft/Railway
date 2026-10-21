@@ -26,7 +26,15 @@ import com.railwayteam.railways.registry.CREntities;
 import com.railwayteam.railways.registry.CRItems;
 import com.railwayteam.railways.registry.CRTrackMaterials;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
+import com.railwayteam.railways.Railways;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.level.block.Block;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class RegistryIntegrityGameTests {
 
@@ -71,6 +79,38 @@ public class RegistryIntegrityGameTests {
         helper.assertTrue(CRItems.REMOTE_LENS.get() != null, "Remote lens item must be registered");
         helper.assertTrue(CRItems.ITEM_BENCHCART.get() != null, "Workbench cart item must be registered");
         helper.assertTrue(CRItems.ITEM_JUKEBOXCART.get() != null, "Jukebox cart item must be registered");
+        helper.succeed();
+    }
+
+    @GameTest(structure = RailwaysGameTestHelper.PLATFORM_8X8)
+    public void testBlockLootTablesLoaded(GameTestHelper helper) {
+        var lootTables = helper.getLevel().getServer().reloadableRegistries().lookup().lookupOrThrow(Registries.LOOT_TABLE);
+        List<String> missing = new ArrayList<>();
+        for (Block block : BuiltInRegistries.BLOCK) {
+            Identifier id = BuiltInRegistries.BLOCK.getKey(block);
+            if (!Railways.MOD_ID.equals(id.getNamespace()))
+                continue;
+            block.getLootTable().ifPresent(key -> {
+                if (lootTables.get(key).isEmpty())
+                    missing.add(id.getPath());
+            });
+        }
+        helper.assertTrue(missing.isEmpty(), "Blocks without a loaded loot table (" + missing.size() + "): " + missing.stream().limit(10).toList());
+        helper.succeed();
+    }
+
+    @GameTest(structure = RailwaysGameTestHelper.PLATFORM_8X8)
+    public void testAdvancementsLoaded(GameTestHelper helper) {
+        var advancements = helper.getLevel().getServer().getAdvancements();
+        helper.assertTrue(advancements.get(Railways.asResource("root")) != null, "root advancement must load");
+        helper.assertTrue(advancements.get(Railways.asResource("strange_tea")) != null, "strange_tea advancement must load");
+        List<String> extra = advancements.getAllAdvancements().stream()
+            .map(holder -> holder.id())
+            .filter(id -> Railways.MOD_ID.equals(id.getNamespace()) && !id.getPath().startsWith("recipes/"))
+            .map(Identifier::getPath)
+            .filter(path -> !path.equals("root") && !path.equals("strange_tea"))
+            .toList();
+        helper.assertTrue(extra.isEmpty(), "Unexpected non-recipe advancements (duplicate root tab?): " + extra);
         helper.succeed();
     }
 }

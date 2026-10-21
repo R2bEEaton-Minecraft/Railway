@@ -23,6 +23,7 @@ import com.railwayteam.railways.registry.CRTags.AllBlockTags;
 import com.railwayteam.railways.registry.CRTags.AllItemTags;
 import com.zurrtum.create.foundation.data.TagGen;
 import com.tterrag.registrate.providers.RegistrateTagsProvider;
+import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
@@ -75,8 +76,9 @@ public class CRTagGen {
 		return tagAppender(prov, tag.tag);
 	}
 
+	@ExpectPlatform
 	public static <T> TagAppender<T> tagAppender(RegistrateTagsProvider<T> prov, TagKey<T> tag) {
-		return new TagAppender<>();
+		throw new AssertionError();
 	}
 
 	public static class TagAppender<T> {

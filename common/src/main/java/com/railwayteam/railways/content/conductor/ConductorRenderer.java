@@ -25,6 +25,8 @@ public class ConductorRenderer extends MobRenderer<ConductorEntity, ConductorRen
         addLayer(new ConductorRemoteLayer(this));
         addLayer(new ConductorFlagLayer(this));
         addLayer(new ConductorToolboxLayer(this));
+        addLayer(new ConductorSecondaryHeadLayer(this));
+        addLayer(new ConductorElytraLayer(this, ctx.getModelSet(), ctx.getEquipmentRenderer()));
     }
 
     @Override
@@ -41,6 +43,15 @@ public class ConductorRenderer extends MobRenderer<ConductorEntity, ConductorRen
         state.texture = textureFor(conductor, state.headStack);
 
         state.isRiding = conductor.isPassenger();
+
+        // Elytra (ConductorElytraLayer)
+        state.isPassenger = state.isRiding;
+        state.isFallFlying = conductor.isFallFlying();
+        state.isCrouching = conductor.isCrouching();
+        state.elytraRotX = conductor.elytraAnimationState.getRotX(partialTick);
+        state.elytraRotY = conductor.elytraAnimationState.getRotY(partialTick);
+        state.elytraRotZ = conductor.elytraAnimationState.getRotZ(partialTick);
+        state.chestEquipment = conductor.getItemBySlot(EquipmentSlot.CHEST);
         state.isHoldingSchedules = conductor.isHoldingSchedulesClient();
 
         // Secondary head item (e.g. goggles)

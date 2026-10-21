@@ -20,16 +20,15 @@ package com.railwayteam.railways.base.data.recipe.processing;
 
 import com.railwayteam.railways.Railways;
 import com.railwayteam.railways.base.data.recipe.RailwaysRecipeProvider;
-import com.zurrtum.create.content.processing.recipe.ProcessingRecipe;
-import com.zurrtum.create.content.processing.recipe.ProcessingRecipeBuilder;
-import com.zurrtum.create.content.processing.recipe.ProcessingRecipeSerializer;
-import com.zurrtum.create.foundation.recipe.IRecipeTypeInfo;
 import com.zurrtum.create.catnip.platform.CatnipServices;
+import com.zurrtum.create.content.processing.recipe.ProcessingRecipeBuilder;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.PackOutput;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.ItemLike;
 import org.jetbrains.annotations.NotNull;
 
@@ -67,14 +66,13 @@ public abstract class RailwaysProcessingRecipeGen extends RailwaysRecipeProvider
 	 * Create a processing recipe with a single itemstack ingredient, using its id
 	 * as the name of the recipe
 	 */
-	protected <T extends ProcessingRecipe<?>> GeneratedRecipe create(String namespace,
+	protected <T> GeneratedRecipe create(String namespace,
 		Supplier<ItemLike> singleIngredient, UnaryOperator<ProcessingRecipeBuilder<T>> transform) {
-		ProcessingRecipeSerializer<T> serializer = getSerializer();
 		GeneratedRecipe generatedRecipe = c -> {
 			ItemLike itemLike = singleIngredient.get();
 			transform
-				.apply(new ProcessingRecipeBuilder<>(serializer.getFactory(),
-					new Identifier(namespace, CatnipServices.REGISTRIES.getKeyOrThrow(itemLike.asItem())
+				.apply(new ProcessingRecipeBuilder<T>(getFactory(),
+					Identifier.fromNamespaceAndPath(namespace, CatnipServices.REGISTRIES.getKeyOrThrow(itemLike.asItem())
 						.getPath())).withItemIngredients(Ingredient.of(itemLike)))
 				.build(c);
 		};
@@ -86,16 +84,15 @@ public abstract class RailwaysProcessingRecipeGen extends RailwaysRecipeProvider
 	 * Create a processing recipe with a single itemstack ingredient, using its id
 	 * as the name of the recipe
 	 */
-	<T extends ProcessingRecipe<?>> GeneratedRecipe create(Supplier<ItemLike> singleIngredient,
+	<T> GeneratedRecipe create(Supplier<ItemLike> singleIngredient,
 		UnaryOperator<ProcessingRecipeBuilder<T>> transform) {
 		return create(Railways.MOD_ID, singleIngredient, transform);
 	}
 
-	protected <T extends ProcessingRecipe<?>> GeneratedRecipe createWithDeferredId(Supplier<Identifier> name,
+	protected <T> GeneratedRecipe createWithDeferredId(Supplier<Identifier> name,
 		UnaryOperator<ProcessingRecipeBuilder<T>> transform) {
-		ProcessingRecipeSerializer<T> serializer = getSerializer();
 		GeneratedRecipe generatedRecipe =
-			c -> transform.apply(new ProcessingRecipeBuilder<>(serializer.getFactory(), name.get()))
+			c -> transform.apply(new ProcessingRecipeBuilder<T>(getFactory(), name.get()))
 				.build(c);
 		all.add(generatedRecipe);
 		return generatedRecipe;
@@ -105,7 +102,7 @@ public abstract class RailwaysProcessingRecipeGen extends RailwaysRecipeProvider
 	 * Create a new processing recipe, with recipe definitions provided by the
 	 * function
 	 */
-	protected <T extends ProcessingRecipe<?>> GeneratedRecipe create(Identifier name,
+	protected <T> GeneratedRecipe create(Identifier name,
 		UnaryOperator<ProcessingRecipeBuilder<T>> transform) {
 		return createWithDeferredId(() -> name, transform);
 	}
@@ -114,16 +111,18 @@ public abstract class RailwaysProcessingRecipeGen extends RailwaysRecipeProvider
 	 * Create a new processing recipe, with recipe definitions provided by the
 	 * function
 	 */
-	<T extends ProcessingRecipe<?>> GeneratedRecipe create(String name,
+	<T> GeneratedRecipe create(String name,
 		UnaryOperator<ProcessingRecipeBuilder<T>> transform) {
 		return create(Railways.asResource(name), transform);
 	}
 
-	protected abstract IRecipeTypeInfo getRecipeType();
+	protected abstract RecipeType<?> getRecipeType();
 
-	protected <T extends ProcessingRecipe<?>> ProcessingRecipeSerializer<T> getSerializer() {
-		return getRecipeType().getSerializer();
+	protected Identifier getRecipeTypeId() {
+		return BuiltInRegistries.RECIPE_TYPE.getKey(getRecipeType());
 	}
+
+	protected abstract <T> ProcessingRecipeBuilder.ProcessingRecipeFactory<T> getFactory();
 
 	protected Supplier<Identifier> idWithSuffix(Supplier<ItemLike> item, String suffix) {
 		return () -> {
@@ -132,9 +131,4 @@ public abstract class RailwaysProcessingRecipeGen extends RailwaysRecipeProvider
 			return Railways.asResource(registryName.getPath() + suffix);
 		};
 	}
-	public @NotNull String getName() {
-		return "Railways' Processing Recipes: " + getRecipeType().getId()
-			.getPath();
-	}
-
 }

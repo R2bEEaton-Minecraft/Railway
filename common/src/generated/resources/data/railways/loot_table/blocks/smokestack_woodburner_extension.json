@@ -1,0 +1,5 @@
+{
+  "type": "minecraft:block",
+  "pools": [],
+  "random_sequence": "railways:blocks/smokestack_woodburner_extension"
+}

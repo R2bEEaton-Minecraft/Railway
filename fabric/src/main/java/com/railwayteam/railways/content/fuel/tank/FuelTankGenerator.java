@@ -1,6 +1,6 @@
 /*
  * Steam 'n' Rails
- * Copyright (c) 2022-2024 The Railways Team
+ * Copyright (c) 2022-2025 The Railways Team
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -18,15 +18,14 @@
 
 package com.railwayteam.railways.content.fuel.tank;
 
-import com.zurrtum.create.foundation.data.AssetLookup;
 import com.zurrtum.create.foundation.data.SpecialBlockStateGen;
-import com.tterrag.registrate.providers.DataGenContext;
-import com.tterrag.registrate.providers.RegistrateBlockstateProvider;
-import io.github.fabricators_of_create.porting_lib.models.generators.ModelFile;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.properties.Property;
 
+/**
+ * Blockstate model selection for fuel tanks. The checked-in blockstate
+ * ({@code assets/railways/blockstates/fuel_tank.json}) follows this mapping;
+ * {@link FuelTankBlock#LIGHT_LEVEL} is ignored.
+ */
 public class FuelTankGenerator extends SpecialBlockStateGen {
     private final String prefix;
 
@@ -37,19 +36,14 @@ public class FuelTankGenerator extends SpecialBlockStateGen {
     public FuelTankGenerator(String prefix) {
         this.prefix = prefix;
     }
-    protected Property<?>[] getIgnoredProperties() {
-        return new Property<?>[] { FuelTankBlock.LIGHT_LEVEL };
+
+    public String getModelPath(BlockState state) {
+        return "block/" + (prefix.isEmpty() ? "fuel_tank/block_" : prefix) + getModelName(state);
     }
-    protected int getXRotation(BlockState state) {
-        return 0;
-    }
-    protected int getYRotation(BlockState state) {
-        return 0;
-    }
-    public <T extends Block> ModelFile getModel(DataGenContext<Block, T> ctx, RegistrateBlockstateProvider prov,
-                                                BlockState state) {
-        Boolean top = state.getValue(FuelTankBlock.TOP);
-        Boolean bottom = state.getValue(FuelTankBlock.BOTTOM);
+
+    public static String getModelName(BlockState state) {
+        boolean top = state.getValue(FuelTankBlock.TOP);
+        boolean bottom = state.getValue(FuelTankBlock.BOTTOM);
         FuelTankBlock.Shape shape = state.getValue(FuelTankBlock.SHAPE);
 
         String shapeName = "middle";
@@ -60,18 +54,6 @@ public class FuelTankGenerator extends SpecialBlockStateGen {
         else if (bottom)
             shapeName = "bottom";
 
-        String modelName = shapeName + (shape == FuelTankBlock.Shape.PLAIN ? "" : "_" + shape.getSerializedName());
-
-        if (!prefix.isEmpty())
-            return prov.models()
-                    .withExistingParent(prefix + modelName, prov.modLoc("block/fuel_tank/block_" + modelName))
-                    .texture("0", prov.modLoc("block/" + prefix + "casing"))
-                    .texture("1", prov.modLoc("block/" + prefix + "fuel_tank"))
-                    .texture("3", prov.modLoc("block/" + prefix + "fuel_tank_window"))
-                    .texture("4", prov.modLoc("block/" + prefix + "casing"))
-                    .texture("5", prov.modLoc("block/" + prefix + "fuel_tank_window_single"))
-                    .texture("particle", prov.modLoc("block/" + prefix + "fuel_tank"));
-
-        return AssetLookup.partialBaseModel(ctx, prov, modelName);
+        return shapeName + (shape == FuelTankBlock.Shape.PLAIN ? "" : "_" + shape.getSerializedName());
     }
 }

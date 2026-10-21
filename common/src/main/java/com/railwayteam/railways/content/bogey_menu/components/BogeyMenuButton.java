@@ -1,6 +1,6 @@
 /*
  * Steam 'n' Rails
- * Copyright (c) 2022-2024 The Railways Team
+ * Copyright (c) 2022-2026 The Railways Team
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -18,7 +18,7 @@
 
 package com.railwayteam.railways.content.bogey_menu.components;
 
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
@@ -29,5 +29,5 @@ public class BogeyMenuButton extends Button {
     }
 
     @Override // NO-OP, We take care of rendering ourselves as buttons for text doesn't update properly
-    public void render(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) { }
+    protected void extractContents(@NotNull GuiGraphicsExtractor extractor, int mouseX, int mouseY, float partialTick) { }
 }

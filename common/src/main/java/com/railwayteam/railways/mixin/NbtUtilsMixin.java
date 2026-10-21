@@ -33,7 +33,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(NbtUtils.class)
 public class NbtUtilsMixin {
     // moved general updating to MixinDataFixTypes.java
-    @Inject(method = "addDataVersion", at = @At("HEAD"))
+    @Inject(method = "addDataVersion(Lnet/minecraft/nbt/CompoundTag;I)Lnet/minecraft/nbt/CompoundTag;", at = @At("HEAD"))
     private static void addModDataVersions(CompoundTag tag, int dataVersion, CallbackInfoReturnable<CompoundTag> cir) {
         DataFixesInternals.get().addModDataVersions(tag);
     }

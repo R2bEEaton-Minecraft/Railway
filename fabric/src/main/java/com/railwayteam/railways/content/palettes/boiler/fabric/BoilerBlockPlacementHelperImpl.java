@@ -1,6 +1,6 @@
 /*
  * Steam 'n' Rails
- * Copyright (c) 2022-2024 The Railways Team
+ * Copyright (c) 2022-2026 The Railways Team
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -18,11 +18,11 @@
 
 package com.railwayteam.railways.content.palettes.boiler.fabric;
 
-import com.jamieswhiteshirt.reachentityattributes.ReachEntityAttributes;
 import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 
 public class BoilerBlockPlacementHelperImpl {
     public static Attribute getAttribute() {
-        return ReachEntityAttributes.REACH;
+        return Attributes.BLOCK_INTERACTION_RANGE.value();
     }
 }

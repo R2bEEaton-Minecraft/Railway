@@ -25,6 +25,7 @@ import com.railwayteam.railways.base.data.BuilderTransformers;
 import com.railwayteam.railways.base.data.compat.emi.EmiRecipeDefaultsGen;
 import com.railwayteam.railways.content.palettes.FloatingMetalLadderBlock;
 import com.railwayteam.railways.content.palettes.PalettesColor;
+import com.railwayteam.railways.content.animated_flywheel.FlywheelMovementBehaviour;
 import com.railwayteam.railways.content.palettes.PalettesFlywheelBlock;
 import com.railwayteam.railways.content.palettes.RotatedPillarWindowBlock;
 import com.railwayteam.railways.content.palettes.boiler.BoilerBlock;
@@ -529,6 +530,7 @@ public class CRPalettes {
         return REGISTRATE.block(joinUnderscore(colorString, "locometal_flywheel"), PalettesFlywheelBlock.create(color))
             .transform(transformer.get())
             .transform(BuilderTransformers.locoMetalFlywheel(color, tags))
+            .onRegister(movementBehaviour(FlywheelMovementBehaviour.INSTANCE))
             .lang(joinSpace(colorName, "Locometal Flywheel"))
             .register();
     }

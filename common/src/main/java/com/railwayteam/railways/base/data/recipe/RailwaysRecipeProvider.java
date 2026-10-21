@@ -29,35 +29,84 @@ import com.railwayteam.railways.registry.CRBlocks;
 import com.railwayteam.railways.registry.CRFluids;
 import com.railwayteam.railways.registry.CRItems;
 import com.railwayteam.railways.registry.CRTags;
+import com.zurrtum.create.AllBlocks;
+import com.zurrtum.create.AllItems;
 import com.zurrtum.create.foundation.fluid.FluidIngredient;
+import net.minecraft.advancements.Advancement;
+import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.PackOutput;
+import net.minecraft.data.recipes.RecipeBuilder;
+import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Blocks;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
-import java.util.function.Consumer;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
 public abstract class RailwaysRecipeProvider implements DataProvider {
 
+    protected final PackOutput packOutput;
     protected final List<GeneratedRecipe> all = new ArrayList<>();
 
     public RailwaysRecipeProvider(PackOutput pOutput) {
+        this.packOutput = pOutput;
     }
+
+    @Override
     public @NotNull CompletableFuture<?> run(@NotNull CachedOutput output) {
-        return CompletableFuture.completedFuture(null);
+        PackOutput.PathProvider recipePathProvider = packOutput.createRegistryElementsPathProvider(Registries.RECIPE);
+        PackOutput.PathProvider advancementPathProvider = packOutput.createRegistryElementsPathProvider(Registries.ADVANCEMENT);
+        List<CompletableFuture<?>> futures = new ArrayList<>();
+        Set<ResourceKey<Recipe<?>>> seen = new HashSet<>();
+
+        HolderLookup.Provider registries = RegistryAccess.fromRegistryOfRegistries(BuiltInRegistries.REGISTRY);
+
+        RecipeOutput recipeOutput = new RecipeOutput() {
+            @Override
+            public void accept(ResourceKey<Recipe<?>> key, Recipe<?> recipe, AdvancementHolder advancement) {
+                if (!seen.add(key)) {
+                    throw new IllegalStateException("Duplicate recipe " + key.identifier());
+                }
+                futures.add(DataProvider.saveStable(output, registries, Recipe.CODEC, recipe, recipePathProvider.json(key.identifier())));
+                if (advancement != null) {
+                    futures.add(DataProvider.saveStable(output, registries, Advancement.CODEC, advancement.value(), advancementPathProvider.json(advancement.id())));
+                }
+            }
+
+            @Override
+            public Advancement.Builder advancement() {
+                return Advancement.Builder.recipeAdvancement().parent(RecipeBuilder.ROOT_RECIPE_ADVANCEMENT);
+            }
+
+            @Override
+            public void includeRootAdvancement() {
+            }
+        };
+
+        for (GeneratedRecipe recipe : all) {
+            recipe.register(recipeOutput);
+        }
+        Railways.LOGGER.info(getName() + " registered " + all.size() + " recipe" + (all.size() == 1 ? "" : "s"));
+        return CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new));
     }
 
     protected GeneratedRecipe register(GeneratedRecipe recipe) {
@@ -67,7 +116,7 @@ public abstract class RailwaysRecipeProvider implements DataProvider {
 
     @FunctionalInterface
     public interface GeneratedRecipe {
-        void register(Consumer<Object> consumer);
+        void register(RecipeOutput consumer);
     }
 
     @SuppressWarnings("SameReturnValue")
@@ -77,7 +126,7 @@ public abstract class RailwaysRecipeProvider implements DataProvider {
         }
 
         public static ItemLike precisionMechanism() {
-            return Items.IRON_INGOT;
+            return AllItems.PRECISION_MECHANISM;
         }
 
         public static TagKey<Item> ironNugget() {
@@ -93,11 +142,11 @@ public abstract class RailwaysRecipeProvider implements DataProvider {
         }
 
         public static ItemLike girder() {
-            return Blocks.IRON_BLOCK;
+            return AllBlocks.METAL_GIRDER;
         }
 
         public static ItemLike metalBracket() {
-            return Items.IRON_INGOT;
+            return AllBlocks.METAL_BRACKET;
         }
 
         public static TagKey<Item> ironSheet() {
@@ -119,27 +168,27 @@ public abstract class RailwaysRecipeProvider implements DataProvider {
         public static ItemLike lever() { return Items.LEVER; }
 
         public static ItemLike cogwheel() {
-            return Items.OAK_BUTTON;
+            return AllBlocks.COGWHEEL;
         }
 
         public static ItemLike railwayCasing() {
-            return Blocks.IRON_BLOCK;
+            return AllBlocks.RAILWAY_CASING;
         }
 
         public static ItemLike brassCasing() {
-            return Blocks.COPPER_BLOCK.weathering().unaffected();
+            return AllBlocks.BRASS_CASING;
         }
 
         public static ItemLike andesiteCasing() {
-            return Blocks.ANDESITE;
+            return AllBlocks.ANDESITE_CASING;
         }
 
         public static ItemLike propeller() {
-            return Items.IRON_INGOT;
+            return AllItems.PROPELLER;
         }
 
         public static ItemLike electronTube() {
-            return Items.REDSTONE;
+            return AllItems.ELECTRON_TUBE;
         }
 
         public static TagKey<Item> copperIngot() {
@@ -159,7 +208,7 @@ public abstract class RailwaysRecipeProvider implements DataProvider {
         }
 
         public static ItemLike industrialIron() {
-            return Blocks.IRON_BLOCK;
+            return AllBlocks.INDUSTRIAL_IRON_BLOCK;
         }
 
         public static TagKey<Item> brassSheet() {
@@ -171,7 +220,7 @@ public abstract class RailwaysRecipeProvider implements DataProvider {
         }
 
         public static ItemLike contraptionControls() {
-            return Items.LEVER;
+            return AllBlocks.CONTRAPTION_CONTROLS;
         }
 
         public static ItemLike stick() {
@@ -179,11 +228,11 @@ public abstract class RailwaysRecipeProvider implements DataProvider {
         }
 
         public static ItemLike andesiteAlloy() {
-            return Items.IRON_INGOT;
+            return AllItems.ANDESITE_ALLOY;
         }
 
         public static ItemLike smallCog() {
-            return Items.OAK_BUTTON;
+            return AllBlocks.COGWHEEL;
         }
 
         public static ItemLike ironBlock() {
@@ -211,7 +260,7 @@ public abstract class RailwaysRecipeProvider implements DataProvider {
         }
 
         public static ItemLike shaft() {
-            return Items.STICK;
+            return AllBlocks.SHAFT;
         }
 
         public static ItemLike smallBuffer() {
@@ -239,23 +288,27 @@ public abstract class RailwaysRecipeProvider implements DataProvider {
         }
 
         public static ItemLike copycatPanel() {
-            return Blocks.OAK_PLANKS;
+            return AllBlocks.COPYCAT_PANEL;
         }
 
         public static ItemLike sturdySheet() {
-            return Items.IRON_INGOT;
+            return AllItems.STURDY_SHEET;
         }
 
         public static ItemLike chute() {
-            return Blocks.HOPPER;
+            return AllBlocks.CHUTE;
         }
 
         public static ItemLike flywheel() {
-            return Blocks.IRON_BLOCK;
+            return AllBlocks.FLYWHEEL;
         }
 
         public static TagKey<Item> woodenDoors() {
             return ItemTags.WOODEN_DOORS;
+        }
+
+        public static TagKey<Item> ironDoors() {
+            return TagKey.create(Registries.ITEM, Identifier.parse("minecraft:doors"));
         }
 
         public static TagKey<Item> woodenTrapdoors() {

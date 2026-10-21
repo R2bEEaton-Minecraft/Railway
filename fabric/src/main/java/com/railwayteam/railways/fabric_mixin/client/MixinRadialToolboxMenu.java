@@ -39,7 +39,7 @@ public abstract class MixinRadialToolboxMenu extends AbstractSimiScreen {
     private State state;
 
     @Inject(method = "lambda$removed$0", at = @At("HEAD"), cancellable = true)
-    private static void railways$sendMountedToolboxDisposeAllPacketsToAll(ToolboxBlockEntity te, CallbackInfo ci) {
+    private void railways$sendMountedToolboxDisposeAllPacketsToAll(ToolboxBlockEntity te, CallbackInfo ci) {
         if (te instanceof MountedToolbox mounted) {
             CRPackets.PACKETS.send(new MountedToolboxDisposeAllPacket(mounted.getParent()));
             ci.cancel();

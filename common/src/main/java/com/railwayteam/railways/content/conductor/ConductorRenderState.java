@@ -2,7 +2,7 @@ package com.railwayteam.railways.content.conductor;
 
 import com.railwayteam.railways.Railways;
 import com.zurrtum.create.client.catnip.render.SuperByteBufferRenderState;
-import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
+import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.DyeColor;
@@ -10,7 +10,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 
-public class ConductorRenderState extends LivingEntityRenderState {
+// Humanoid state so the vanilla WingsLayer (ConductorElytraLayer) can render elytras
+public class ConductorRenderState extends HumanoidRenderState {
     public DyeColor color = ConductorEntity.defaultColor();
     public ItemStack headStack = ItemStack.EMPTY;
     public ConductorEntity.Job job = ConductorEntity.Job.DEFAULT;

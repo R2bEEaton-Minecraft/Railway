@@ -1,6 +1,6 @@
 /*
  * Steam 'n' Rails
- * Copyright (c) 2025 The Railways Team
+ * Copyright (c) 2022-2025 The Railways Team
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -18,21 +18,25 @@
 
 package com.railwayteam.railways.content.fuel.tank;
 
+import com.zurrtum.create.AllClientHandle;
 import com.zurrtum.create.api.behaviour.movement.MovementBehaviour;
+import com.zurrtum.create.catnip.animation.LerpedFloat;
 import com.zurrtum.create.content.contraptions.behaviour.MovementContext;
-import net.minecraft.world.level.block.entity.BlockEntity;
 
 public class FuelTankMovementBehavior extends MovementBehaviour {
+    @Override
     public boolean mustTickWhileDisabled() {
         return true;
     }
-    public void tick(MovementContext context) {
-        if(!context.world.isClientSide())
-            return;
 
-        BlockEntity be = context.contraption.getOrCreateClientContraptionLazy().getBlockEntity(context.localPos);
-        if(be instanceof FuelTankBlockEntity fuelTank) {
-            fuelTank.getFluidLevel().tickChaser();
+    @Override
+    public void tick(MovementContext context) {
+        if (!context.world.isClientSide())
+            return;
+        if (AllClientHandle.INSTANCE.getBlockEntityClientSide(context.contraption, context.localPos) instanceof FuelTankBlockEntity tank) {
+            LerpedFloat fluidLevel = tank.getFluidLevel();
+            if (fluidLevel != null)
+                fluidLevel.tickChaser();
         }
     }
 }

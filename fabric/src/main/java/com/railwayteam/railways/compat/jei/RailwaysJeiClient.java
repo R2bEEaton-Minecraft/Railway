@@ -30,9 +30,9 @@ import mezz.jei.api.IModPlugin;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.gui.builder.IRecipeSlotBuilder;
 import mezz.jei.api.gui.ingredient.IRecipeSlotView;
+import mezz.jei.api.recipe.IRecipeManager;
 import mezz.jei.api.runtime.IJeiRuntime;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.crafting.RecipeHolder;
@@ -51,26 +51,26 @@ public class RailwaysJeiClient implements IModPlugin {
 	}
 
 	public static void register() {
-		SequencedAssemblyCategory.registerCustomSequencedAssemblyRenderer(
-			AllRecipeTypes.CUTTING.getId(),
-			CuttingRecipe.class,
-			(recipe, type) -> {
-				Identifier id = BuiltInRegistries.RECIPE_SERIALIZER.getKey(recipe.getSerializer());
-				if (isRailwaysTrack(id)) {
-					return new CuttingSequencedAssemblyRenderer();
-				}
-				return null;
-			}
+		SequencedAssemblyCategory.registerRenderer(
+			AllRecipeTypes.CUTTING,
+			new CuttingSequencedAssemblyRenderer()
 		);
 	}
 
 	@Override
 	public void onRuntimeAvailable(IJeiRuntime jeiRuntime) {
-		List<RecipeHolder<CuttingRecipe>> cuttingRecipes = JeiClientPlugin.getAllRecipes(AllRecipeTypes.CUTTING.getType());
-		List<RecipeHolder<PressingRecipe>> pressingRecipes = JeiClientPlugin.getAllRecipes(AllRecipeTypes.PRESSING.getType());
+		IRecipeManager recipeManager = jeiRuntime.getRecipeManager();
+		List<RecipeHolder<CuttingRecipe>> cuttingToHide = recipeManager.createRecipeLookup(JeiClientPlugin.SAWING)
+			.get()
+			.filter(recipe -> isRailwaysTrack(recipe.id().identifier()))
+			.toList();
+		recipeManager.hideRecipes(JeiClientPlugin.SAWING, cuttingToHide);
 
-		cuttingRecipes.removeIf(recipe -> isRailwaysTrack(recipe.id()));
-		pressingRecipes.removeIf(recipe -> isRailwaysTrack(recipe.id()));
+		List<RecipeHolder<PressingRecipe>> pressingToHide = recipeManager.createRecipeLookup(JeiClientPlugin.PRESSING)
+			.get()
+			.filter(recipe -> isRailwaysTrack(recipe.id().identifier()))
+			.toList();
+		recipeManager.hideRecipes(JeiClientPlugin.PRESSING, pressingToHide);
 	}
 
 	private static boolean isRailwaysTrack(Identifier id) {

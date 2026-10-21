@@ -32,7 +32,7 @@ import net.minecraft.network.chat.Style;
 public class TrainInfoCommand {
   public static ArgumentBuilder<CommandSourceStack, ?> register() {
     return Commands.literal("train_uuid")
-      .requires(cs -> cs.hasPermission(2))
+      .requires(cs -> net.minecraft.commands.Commands.hasPermission(net.minecraft.commands.Commands.LEVEL_GAMEMASTERS).test(cs))
       .then(Commands.argument("name", StringArgumentType.string())
         .executes(ctx -> {
           String trainName = StringArgumentType.getString(ctx, "name");
@@ -48,7 +48,7 @@ public class TrainInfoCommand {
             .append("' has UUID: "+train.id+", "+count+", total trains found.").append(Component.literal(" [Copy]").withStyle(
                 Style.EMPTY
                     .withColor(ChatFormatting.GOLD)
-                    .withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, train.id.toString()))
+                    .withClickEvent(new ClickEvent.CopyToClipboard(train.id.toString()))
               )), true);
           return 1;
         }));

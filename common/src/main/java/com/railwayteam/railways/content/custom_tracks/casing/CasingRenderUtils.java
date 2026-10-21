@@ -10,11 +10,11 @@
 
 package com.railwayteam.railways.content.custom_tracks.casing;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.railwayteam.railways.registry.CRBlockPartials;
 import com.railwayteam.railways.registry.CRTrackMaterials;
 import com.zurrtum.create.catnip.data.Pair;
+import com.zurrtum.create.client.catnip.render.SuperBufferFactory;
+import com.zurrtum.create.client.catnip.render.SuperByteBuffer;
 import com.zurrtum.create.client.flywheel.api.instance.InstancerProvider;
 import com.zurrtum.create.client.flywheel.api.material.CardinalLightingMode;
 import com.zurrtum.create.client.flywheel.api.model.Model;
@@ -38,15 +38,14 @@ import net.minecraft.client.resources.model.sprite.Material;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static com.zurrtum.create.client.catnip.render.SpriteShiftEntry.getUnInterpolatedU;
 import static com.zurrtum.create.client.catnip.render.SpriteShiftEntry.getUnInterpolatedV;
@@ -54,18 +53,34 @@ import static com.railwayteam.railways.registry.CRTrackMaterials.CRTrackType.NAR
 import static com.railwayteam.railways.registry.CRTrackMaterials.CRTrackType.WIDE_GAUGE;
 
 public abstract class CasingRenderUtils {
-    private static final Map<Pair<PartialModel, Block>, Model> reTexturedModels = new HashMap<>();
+    private static final Map<Pair<PartialModel, Block>, BlockStateModel> reTexturedBlockModels = new ConcurrentHashMap<>();
+    private static final Map<Pair<PartialModel, Block>, Model> reTexturedModels = new ConcurrentHashMap<>();
+    private static final Map<Pair<PartialModel, Block>, SuperByteBuffer> reTexturedBuffers = new HashMap<>();
 
     public static void clearModelCache() {
+        reTexturedBlockModels.clear();
         reTexturedModels.clear();
+        reTexturedBuffers.clear();
         CRBlockPartials.registerCasingSpecs();
     }
 
-    public static PartialModel reTexture(PartialModel model, Block block) {
-        return model;
+    /**
+     * The casing partial (e.g. a flat slab) with every quad re-mapped onto the matching sprite of the casing block.
+     */
+    public static BlockStateModel reTexture(PartialModel baseModel, Block casingBlock) {
+        return reTexturedBlockModels.computeIfAbsent(Pair.of(baseModel, casingBlock), ignored -> {
+            BlockStateModel casingModel = Minecraft.getInstance().getModelManager().getBlockStateModelSet().get(casingBlock.defaultBlockState());
+            return reTexture(baseModel.get(), casingModel);
+        });
     }
 
-    public static void renderBezierCasings(PoseStack ms, Level level, PartialModel texturedPartial, BlockState state, VertexConsumer vb, BezierConnection bc) {
+    /**
+     * Buffer for the non-Flywheel (block entity renderer) path. The returned buffer is shared, transform it and
+     * immediately extract a render state from it.
+     */
+    public static SuperByteBuffer casingBuffer(PartialModel baseModel, Block casingBlock) {
+        return reTexturedBuffers.computeIfAbsent(Pair.of(baseModel, casingBlock), key ->
+            SuperBufferFactory.getInstance().createForBlock(reTexture(baseModel, casingBlock), casingBlock.defaultBlockState()));
     }
 
     public static List<Vec3> casingPositions(BezierConnection bc) {
@@ -102,8 +117,7 @@ public abstract class CasingRenderUtils {
     public static TransformedInstance makeCasingInstance(PartialModel baseModel, Block casingBlock, InstancerProvider instancerProvider) {
         Pair<PartialModel, Block> key = Pair.of(baseModel, casingBlock);
         Model model = reTexturedModels.computeIfAbsent(key, ignored -> {
-            BlockStateModel casingModel = Minecraft.getInstance().getModelManager().getBlockStateModelSet().get(casingBlock.defaultBlockState());
-            BlockStateModel reTextured = reTexture(baseModel.get(), casingModel);
+            BlockStateModel reTextured = reTexture(baseModel, casingBlock);
 
             return new BakedModelBuilder(reTextured)
                 .materialFunc((renderType, shaded, ambientOcclusion) -> {

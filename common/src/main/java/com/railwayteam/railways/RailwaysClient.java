@@ -19,6 +19,7 @@
 package com.railwayteam.railways;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.railwayteam.railways.content.animated_flywheel.FlywheelMovementRenderBehaviour;
 import com.railwayteam.railways.base.reload.ClientResourceReloadCallback;
 import com.railwayteam.railways.content.buffer.BufferModelUtils;
 import com.railwayteam.railways.content.conductor.ConductorCapModel;
@@ -105,6 +106,7 @@ public class RailwaysClient {
 
     CRDevCaps.register();
     BufferModelUtils.register();
+    FlywheelMovementRenderBehaviour.register();
 
     CRFluids.initRendering();
 

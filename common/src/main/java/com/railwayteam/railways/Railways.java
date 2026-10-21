@@ -18,8 +18,13 @@
 
 package com.railwayteam.railways;
 
+
 import com.railwayteam.railways.base.data.CRTagGen;
 import com.railwayteam.railways.base.data.LocometalDoorBlockStateGen;
+import com.railwayteam.railways.base.data.RailwaysHatOffsetGenerator;
+import com.railwayteam.railways.base.data.lang.CRLangGen;
+import com.railwayteam.railways.base.data.recipe.RailwaysMechanicalCraftingRecipeGen;
+import com.railwayteam.railways.base.data.recipe.RailwaysStandardRecipeGen;
 import com.railwayteam.railways.base.data.compat.emi.EmiExcludedTagGen;
 import com.railwayteam.railways.base.data.compat.emi.EmiRecipeDefaultsGen;
 import com.railwayteam.railways.base.registration.MultiRegistryCallback;
@@ -122,13 +127,15 @@ public class Railways {
   public static void gatherData(DataGenerator.PackGenerator gen) {
     REGISTRATE.addDataGenerator(ProviderType.BLOCK_TAGS, CRTagGen::generateBlockTags);
     REGISTRATE.addDataGenerator(ProviderType.ITEM_TAGS, CRTagGen::generateItemTags);
-    // TODO 1.21: recipe/lang/hat datagen depends on APIs removed by Create 6 / Minecraft 1.21.
-    // Keep runtime compilation moving; restore these providers after the client launches.
 
     gen.addProvider(CRAdvancements::new);
     gen.addProvider(EmiExcludedTagGen::new);
     gen.addProvider(EmiRecipeDefaultsGen::new);
     gen.addProvider(LocometalDoorBlockStateGen::new);
+    gen.addProvider(RailwaysHatOffsetGenerator::new);
+    gen.addProvider(CRLangGen::new);
+    gen.addProvider(RailwaysStandardRecipeGen::new);
+    gen.addProvider(RailwaysMechanicalCraftingRecipeGen::new);
   }
 
   public static CreateRegistrate registrate() {

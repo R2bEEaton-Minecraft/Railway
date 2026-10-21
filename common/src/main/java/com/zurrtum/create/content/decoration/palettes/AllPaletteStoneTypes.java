@@ -22,10 +22,16 @@ public enum AllPaletteStoneTypes {
     TUFF(Blocks.TUFF),
     VERIDIUM(Blocks.DYED_TERRACOTTA.green());
 
+    private final Block fallback;
     private final VariantSet variants;
 
     AllPaletteStoneTypes(Block fallback) {
+        this.fallback = fallback;
         this.variants = new VariantSet(fallback);
+    }
+
+    public Supplier<Block> getBaseBlock() {
+        return () -> fallback;
     }
 
     public VariantSet getVariants() {

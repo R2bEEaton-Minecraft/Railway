@@ -22,8 +22,11 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.railwayteam.railways.Railways;
 import com.railwayteam.railways.RailwaysClient;
 import com.railwayteam.railways.base.reload.ClientResourceReloadListener;
+import com.railwayteam.railways.content.buffer.fabric.BufferModel;
 import com.railwayteam.railways.content.buffer.headstock.fabric.CopycatHeadstockModelRegistration;
 import com.railwayteam.railways.content.conductor.fabric.ConductorCapItemRenderer;
+import com.railwayteam.railways.content.custom_tracks.generic_crossing.fabric.GenericCrossingModel;
+import com.railwayteam.railways.content.fuel.fabric.FuelClientRegistration;
 import com.railwayteam.railways.events.ClientEvents;
 import com.railwayteam.railways.registry.CRParticleTypes;
 import net.fabricmc.api.ClientModInitializer;
@@ -54,7 +57,10 @@ import java.util.function.Supplier;
 public class RailwaysClientImpl implements ClientModInitializer {
 	public void onInitializeClient() {
 		CopycatHeadstockModelRegistration.register();
+		BufferModel.register();
+		GenericCrossingModel.register();
 		RailwaysClient.init();
+		FuelClientRegistration.register();
 		if (FabricLoader.getInstance().isModLoaded("jei")) {
 			registerJeiCompat();
 		}
@@ -73,25 +79,37 @@ public class RailwaysClientImpl implements ClientModInitializer {
 		}
 	}
 
+	// this is only used on forge, fabric handles it in fabric.mod.json
+	public static void registerBuiltinPack(String id, String name) {
+		ModContainer container = FabricLoader.getInstance().getModContainer(Railways.MOD_ID).orElseThrow();
+		ResourceManagerHelper.registerBuiltinResourcePack(Railways.asResource(id), container, Component.literal(name), ResourcePackActivationType.ALWAYS_ENABLED);
+	}
+
+	public static void registerClientCommands(Consumer<CommandDispatcher<SharedSuggestionProvider>> consumer) {
+		ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
+			consumer.accept((CommandDispatcher) dispatcher);
+		});
+	}
+
+	public static <T extends Entity> void registerEntityRenderer(EntityType<? extends T> type, EntityRendererProvider<T> provider) {
+		EntityRenderers.register(type, provider);
+	}
+
+	public static void registerModelLayer(ModelLayerLocation layer, Supplier<LayerDefinition> definition) {
+		ModelLayerRegistry.registerModelLayer(layer, definition::get);
+	}
+
 	private static void registerClientEvents() {
-		ClientTickEvents.START_CLIENT_TICK.register(ClientEvents::onClientTickStart);
-		ClientTickEvents.END_CLIENT_TICK.register(ClientEvents::onClientTickEnd);
-		ClientLevelEvents.AFTER_CLIENT_LEVEL_CHANGE.register((mc, level) -> ClientEvents.onClientWorldLoad(level));
-		ResourceManagerHelper.get(PackType.SERVER_DATA).registerReloadListener(new SimpleSynchronousResourceReloadListener() {
-			@Override
-			public Identifier getFabricId() {
-				return Railways.asResource("client_events");
-			}
+		ClientTickEvents.START_CLIENT_TICK.register(client -> ClientEvents.onClientTickStart(client));
+		ClientTickEvents.END_CLIENT_TICK.register(client -> ClientEvents.onClientTickEnd(client));
+		ClientLevelEvents.AFTER_CLIENT_LEVEL_CHANGE.register((client, level) -> ClientEvents.onClientWorldLoad(level));
+
+		ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(new SimpleSynchronousResourceReloadListener() {
+			private final Identifier id = Railways.asResource("client_resource_reload_listener");
 
 			@Override
-			public void onResourceManagerReload(ResourceManager resourceManager) {
-				ClientEvents.onTagsUpdated();
-			}
-		});
-		ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(new SimpleSynchronousResourceReloadListener() {
-			@Override
 			public Identifier getFabricId() {
-				return Railways.asResource("client_resource_reload");
+				return id;
 			}
 
 			@Override
@@ -99,26 +117,5 @@ public class RailwaysClientImpl implements ClientModInitializer {
 				ClientResourceReloadListener.INSTANCE.onResourceManagerReload(resourceManager);
 			}
 		});
-	}
-
-	@SuppressWarnings({"unchecked", "rawtypes"}) // jank!
-	public static void registerClientCommands(Consumer<CommandDispatcher<SharedSuggestionProvider>> consumer) {
-		ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
-			CommandDispatcher<SharedSuggestionProvider> casted = (CommandDispatcher) dispatcher;
-			consumer.accept(casted);
-		});
-	}
-
-	public static void registerModelLayer(ModelLayerLocation layer, Supplier<LayerDefinition> definition) {
-		ModelLayerRegistry.registerModelLayer(layer, definition::get);
-	}
-
-	public static <T extends Entity> void registerEntityRenderer(EntityType<? extends T> type, EntityRendererProvider<T> provider) {
-		EntityRenderers.register(type, provider);
-	}
-
-	public static void registerBuiltinPack(String id, String name) {
-		ModContainer mod = FabricLoader.getInstance().getModContainer(Railways.MOD_ID).orElseThrow();
-		ResourceManagerHelper.registerBuiltinResourcePack(Railways.asResource(id), mod, Component.literal(name), ResourcePackActivationType.NORMAL);
 	}
 }

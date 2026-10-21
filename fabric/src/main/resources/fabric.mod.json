@@ -20,6 +20,9 @@
     "client": [
       "com.railwayteam.railways.fabric.RailwaysClientImpl"
     ],
+    "jei_mod_plugin": [
+      "com.railwayteam.railways.compat.jei.RailwaysJeiClient"
+    ],
     "fabric-datagen": [
       "com.railwayteam.railways.fabric.RailwaysDataFabric"
     ],
@@ -33,7 +36,8 @@
       "com.railwayteam.railways.gametest.LocomotiveGameTests",
       "com.railwayteam.railways.gametest.MinecartGameTests",
       "com.railwayteam.railways.gametest.PaletteGameTests",
-      "com.railwayteam.railways.gametest.RegistryIntegrityGameTests"
+      "com.railwayteam.railways.gametest.RegistryIntegrityGameTests",
+      "com.railwayteam.railways.gametest.FuelGameTests"
     ]
   },
   "mixins": [

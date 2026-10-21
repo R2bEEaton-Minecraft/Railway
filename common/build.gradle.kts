@@ -79,14 +79,6 @@ tasks.processResources {
 
 sourceSets.main {
     java {
-        exclude("com/railwayteam/railways/base/data/lang/**")
-        exclude("com/railwayteam/railways/base/data/RailwaysHatOffsetGenerator.java")
-        exclude("com/railwayteam/railways/base/data/recipe/EnumRecipeList.java")
-        exclude("com/railwayteam/railways/base/data/recipe/RailwaysMechanicalCraftingRecipeGen.java")
-        exclude("com/railwayteam/railways/base/data/recipe/RailwaysSequencedAssemblyRecipeBuilder.java")
-        exclude("com/railwayteam/railways/base/data/recipe/RailwaysSequencedAssemblyRecipeGen.java")
-        exclude("com/railwayteam/railways/base/data/recipe/RailwaysStandardRecipeGen.java")
-        exclude("com/railwayteam/railways/base/data/recipe/processing/**")
         exclude("com/railwayteam/railways/mixin/AccessorTrainPacket.java")
         exclude("com/railwayteam/railways/mixin/Mixin*.java")
         exclude("com/railwayteam/railways/mixin/MixinTrainPacket.java")
@@ -100,15 +92,7 @@ sourceSets.main {
         exclude("com/railwayteam/railways/mixin/MixinProcessingRecipeSerializer.java")
         exclude("com/railwayteam/railways/mixin/MixinStationEditPacket.java")
         exclude("com/railwayteam/railways/mixin/MixinWalkNodeEvaluator.java")
-        exclude("com/railwayteam/railways/content/custom_tracks/casing/RuntimeFakePartialModel.java")
-        exclude("com/railwayteam/railways/content/custom_tracks/casing/SpriteCopyingBakedModel.java")
-        exclude("com/railwayteam/railways/content/conductor/ConductorElytraLayer.java")
         // ConductorFlagLayer, ConductorRemoteLayer, ConductorToolboxLayer ported to 1.21.11 API
-        exclude("com/railwayteam/railways/content/conductor/ConductorSecondaryHeadLayer.java")
-        exclude("com/railwayteam/railways/content/bogey_menu/components/**")
-        exclude("com/railwayteam/railways/content/animated_flywheel/FlywheelMovementBehaviour.java")
-        exclude("com/railwayteam/railways/registry/advancement/**")
-        exclude("com/railwayteam/railways/registry/commands/**")
         exclude("com/railwayteam/railways/util/client/ClientTextUtils.java")
         exclude("com/railwayteam/railways/util/DebugRendererExtensions.java")
     }

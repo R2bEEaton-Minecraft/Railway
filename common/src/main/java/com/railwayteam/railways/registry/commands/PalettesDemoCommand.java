@@ -19,6 +19,7 @@
 package com.railwayteam.railways.registry.commands;
 
 import com.mojang.brigadier.builder.ArgumentBuilder;
+import com.mojang.serialization.MapCodec;
 import com.railwayteam.railways.Railways;
 import com.railwayteam.railways.content.palettes.PalettesColor;
 import com.railwayteam.railways.registry.CRPalettes;
@@ -42,7 +43,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessor;
-import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessorType;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate.StructureBlockInfo;
 import org.jetbrains.annotations.NotNull;
@@ -57,7 +57,7 @@ public class PalettesDemoCommand {
     @SuppressWarnings("OptionalGetWithoutIsPresent")
     public static ArgumentBuilder<CommandSourceStack, ?> register() {
         return Commands.literal("palettes_demo")
-            .requires(cs -> cs.hasPermission(2))
+            .requires(cs -> net.minecraft.commands.Commands.hasPermission(net.minecraft.commands.Commands.LEVEL_GAMEMASTERS).test(cs))
             .then(Commands.argument("pos", BlockPosArgument.blockPos())
                 .executes(ctx -> {
                     final BlockPos origin0 = BlockPosArgument.getLoadedBlockPos(ctx, "pos");
@@ -75,7 +75,7 @@ public class PalettesDemoCommand {
                                 origin,
                                 origin,
                                 new StructurePlaceSettings().addProcessor(new LocometalSubstituteProcessor(palettesColor)),
-                                level.random,
+                                level.getRandom(),
                                 Block.UPDATE_CLIENTS
                             );
 
@@ -105,8 +105,7 @@ public class PalettesDemoCommand {
 
                     ctx.getSource().sendSuccess(() -> Component.literal("Placed palettes blocks. Click ")
                         .append(Component.literal("[here]").withStyle(Style.EMPTY
-                            .withClickEvent(new ClickEvent(
-                                ClickEvent.Action.SUGGEST_COMMAND,
+                            .withClickEvent(new ClickEvent.SuggestCommand(
                                 "/fill " +
                                     origin0.getX() + " " + origin0.getY() + " " + origin0.getZ() + " " +
                                     finalCorner.getX() + " " + finalCorner.getY() + " " + finalCorner.getZ() + " air")
@@ -118,7 +117,7 @@ public class PalettesDemoCommand {
                 }));
     }
 
-    private static class LocometalSubstituteProcessor extends StructureProcessor {
+    private static class LocometalSubstituteProcessor implements StructureProcessor {
         private final PalettesColor color;
 
         public LocometalSubstituteProcessor(PalettesColor color) {
@@ -128,25 +127,23 @@ public class PalettesDemoCommand {
             @NotNull LevelReader level,
             @NotNull BlockPos blockPos,
             @NotNull BlockPos pos,
+            @NotNull BlockPos pivot,
             @NotNull StructureBlockInfo blockInfo,
-            @NotNull StructureBlockInfo relativeBlockInfo,
             @NotNull StructurePlaceSettings settings
         ) {
-            StructureBlockInfo superInfo = super.processBlock(level, blockPos, pos, blockInfo, relativeBlockInfo, settings);
-            if (superInfo == null) return null;
-
-            Pair<Styles, PalettesColor> styleInfo = CRPalettes.getStyleForBlock(superInfo.state.getBlock());
+            Pair<Styles, PalettesColor> styleInfo = CRPalettes.getStyleForBlock(blockInfo.state().getBlock());
             if (styleInfo != null) {
                 return new StructureBlockInfo(
-                    superInfo.pos(),
-                    blockWithProperties(styleInfo.getFirst().get(color).get(), superInfo.state),
-                    superInfo.nbt()
+                    blockInfo.pos(),
+                    blockWithProperties(styleInfo.getFirst().get(color).get(), blockInfo.state()),
+                    blockInfo.nbt()
                 );
             }
-            return superInfo;
+            return blockInfo;
         }
-        protected @NotNull StructureProcessorType<?> getType() {
-            return StructureProcessorType.NOP; // not actually a NOP, but this won't ever be serialized
+        @Override
+        public MapCodec<? extends StructureProcessor> codec() {
+            return MapCodec.unit(this);
         }
     }
 }

@@ -13,27 +13,50 @@
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
- * along with this program. If not, see <https://www.gnu.org/licenses/>.
- */
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.\n */
 
 package com.railwayteam.railways.base.data.lang;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.railwayteam.railways.Railways;
 import com.railwayteam.railways.registry.CRAdvancements;
 import com.railwayteam.railways.registry.CRPalettes;
 import com.railwayteam.railways.registry.CRTags;
 import com.zurrtum.create.foundation.utility.FilesHelper;
-import com.tterrag.registrate.providers.RegistrateLangProvider;
-import com.zurrtum.create.client.ponder.foundation.PonderIndex;
+import net.minecraft.data.CachedOutput;
+import net.minecraft.data.DataProvider;
+import net.minecraft.data.PackOutput;
+import org.jetbrains.annotations.NotNull;
 
+import java.nio.file.Path;
 import java.util.Map;
+import java.util.TreeMap;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
 
-public class CRLangGen {
-    public static void generate(RegistrateLangProvider provider) {
-        BiConsumer<String, String> langConsumer = provider::add;
+public class CRLangGen implements DataProvider {
+    private final PackOutput packOutput;
+
+    public CRLangGen(PackOutput packOutput) {
+        this.packOutput = packOutput;
+    }
+
+    @Override
+    public @NotNull CompletableFuture<?> run(@NotNull CachedOutput output) {
+        Map<String, String> entries = new TreeMap<>();
+
+        // Load existing en_us.json if available so pre-existing translations are retained
+        try {
+            JsonElement existing = FilesHelper.loadJsonResource("assets/railways/lang/en_us.json");
+            if (existing != null && existing.isJsonObject()) {
+                for (Map.Entry<String, JsonElement> entry : existing.getAsJsonObject().entrySet()) {
+                    entries.put(entry.getKey(), entry.getValue().getAsString());
+                }
+            }
+        } catch (Exception ignored) {
+        }
+
+        BiConsumer<String, String> langConsumer = entries::put;
 
         provideDefaultLang("interface", langConsumer);
         provideDefaultLang("tooltips", langConsumer);
@@ -41,7 +64,19 @@ public class CRLangGen {
         CRAdvancements.provideLang(langConsumer);
         CRTags.provideLangEntries(langConsumer);
         CRPalettes.provideLangEntries(langConsumer);
-        PonderIndex.getLangAccess().provideLang(Railways.MOD_ID, langConsumer);
+
+        JsonObject jsonObject = new JsonObject();
+        for (Map.Entry<String, String> entry : entries.entrySet()) {
+            jsonObject.addProperty(entry.getKey(), entry.getValue());
+        }
+
+        Path path = packOutput.getOutputFolder().resolve("assets/railways/lang/en_us.json");
+        return DataProvider.saveStable(output, jsonObject, path);
+    }
+
+    @Override
+    public @NotNull String getName() {
+        return "Steam 'n' Rails Language Provider";
     }
 
     private static void provideDefaultLang(String fileName, BiConsumer<String, String> consumer) {

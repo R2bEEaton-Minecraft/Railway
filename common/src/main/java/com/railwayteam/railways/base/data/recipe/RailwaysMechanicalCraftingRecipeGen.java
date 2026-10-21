@@ -22,21 +22,29 @@ import com.railwayteam.railways.Railways;
 import com.railwayteam.railways.base.data.compat.emi.EmiRecipeDefaultsGen;
 import com.railwayteam.railways.base.data.recipe.EnumRecipeList.PalettesRecipeList;
 import com.railwayteam.railways.registry.CRPalettes.Styles;
-import com.zurrtum.create.api.data.recipe.MechanicalCraftingRecipeBuilder;
-import dev.architectury.injectables.annotations.ExpectPlatform;
 import com.zurrtum.create.catnip.platform.CatnipServices;
+import com.zurrtum.create.content.kinetics.crafter.MechanicalCraftingRecipe;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.PackOutput;
-import net.minecraft.data.recipes.RecipeProvider;
+import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.ShapedRecipePattern;
 import net.minecraft.world.level.ItemLike;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
 @SuppressWarnings("unused")
-public abstract class RailwaysMechanicalCraftingRecipeGen extends RailwaysRecipeProvider {
+public class RailwaysMechanicalCraftingRecipeGen extends RailwaysRecipeProvider {
     PalettesRecipeList BOILERS = new PalettesRecipeList(color -> create(() -> Styles.BOILER.get(color).get())
         .returns(4)
         .setEmiDefault(color.isNetherite())
@@ -85,7 +93,7 @@ public abstract class RailwaysMechanicalCraftingRecipeGen extends RailwaysRecipe
             .patternLine(" #/# ")
             .patternLine("  #  ")));
 
-    protected RailwaysMechanicalCraftingRecipeGen(PackOutput pPackoutput) {
+    public RailwaysMechanicalCraftingRecipeGen(PackOutput pPackoutput) {
         super(pPackoutput);
     }
 
@@ -128,10 +136,8 @@ public abstract class RailwaysMechanicalCraftingRecipeGen extends RailwaysRecipe
             String path = loc.getPath();
             while (path.contains("//"))
                 path = path.replaceAll("//", "/");
-            return new Identifier(loc.getNamespace(), path);
+            return Identifier.fromNamespaceAndPath(loc.getNamespace(), path);
         }
-
-
 
         GeneratedRecipe recipe(UnaryOperator<MechanicalCraftingRecipeBuilder> builder) {
             return register(consumer -> {
@@ -148,10 +154,45 @@ public abstract class RailwaysMechanicalCraftingRecipeGen extends RailwaysRecipe
         }
     }
 
-    @ExpectPlatform
-    public static RecipeProvider create(PackOutput gen) {
-        throw new AssertionError();
+    public static class MechanicalCraftingRecipeBuilder {
+        private final ItemLike result;
+        private final int amount;
+        private final Map<Character, Ingredient> key = new HashMap<>();
+        private final List<String> pattern = new ArrayList<>();
+
+        public MechanicalCraftingRecipeBuilder(ItemLike result, int amount) {
+            this.result = result;
+            this.amount = amount;
+        }
+
+        public static MechanicalCraftingRecipeBuilder shapedRecipe(ItemLike result, int amount) {
+            return new MechanicalCraftingRecipeBuilder(result, amount);
+        }
+
+        public MechanicalCraftingRecipeBuilder key(char symbol, ItemLike item) {
+            this.key.put(symbol, Ingredient.of(item));
+            return this;
+        }
+
+        public MechanicalCraftingRecipeBuilder key(char symbol, Ingredient ingredient) {
+            this.key.put(symbol, ingredient);
+            return this;
+        }
+
+        public MechanicalCraftingRecipeBuilder patternLine(String line) {
+            this.pattern.add(line);
+            return this;
+        }
+
+        public void build(RecipeOutput consumer, Identifier location) {
+            ShapedRecipePattern shapedPattern = ShapedRecipePattern.of(this.key, this.pattern);
+            ItemStackTemplate template = new ItemStackTemplate(this.result.asItem(), this.amount);
+            MechanicalCraftingRecipe recipe = new MechanicalCraftingRecipe(shapedPattern, template, false);
+            consumer.accept(ResourceKey.create(Registries.RECIPE, location), recipe, null);
+        }
     }
+
+    @Override
     public @NotNull String getName() {
         return "Steam 'n' Rails Mechanical Crafting Recipes";
     }

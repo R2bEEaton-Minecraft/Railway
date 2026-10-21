@@ -48,7 +48,7 @@ import static net.minecraft.commands.Commands.literal;
 public class ShadowRealmCommand {
     public static ArgumentBuilder<CommandSourceStack, ?> register() {
         return literal("shadow_realm")
-            .requires(cs -> cs.hasPermission(2))
+            .requires(cs -> net.minecraft.commands.Commands.hasPermission(net.minecraft.commands.Commands.LEVEL_GAMEMASTERS).test(cs))
             .then(banish())
             .then(restore())
             .then(kill());

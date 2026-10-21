@@ -1,6 +1,6 @@
 /*
  * Steam 'n' Rails
- * Copyright (c) 2022-2024 The Railways Team
+ * Copyright (c) 2022-2025 The Railways Team
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -19,70 +19,23 @@
 package com.railwayteam.railways.content.fuel.tank;
 
 import com.railwayteam.railways.registry.CRSpriteShifts;
-import com.zurrtum.create.api.connectivity.ConnectivityHandler;
-import com.zurrtum.create.content.fluids.tank.FluidTankCTBehaviour;
-import com.zurrtum.create.client.foundation.block.connected.CTModel;
-import com.zurrtum.create.client.foundation.block.connected.CTSpriteShiftEntry;
-import com.zurrtum.create.catnip.data.Iterate;
-import net.fabricmc.fabric.api.renderer.v1.render.RenderContext;
-import net.minecraft.client.resources.model.BakedModel;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.util.RandomSource;
-import net.minecraft.world.level.BlockAndTintGetter;
+import com.zurrtum.create.client.content.fluids.tank.FluidTankCTBehaviour;
+import com.zurrtum.create.client.infrastructure.model.FluidTankModel;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModel.UnbakedRoot;
 import net.minecraft.world.level.block.state.BlockState;
 
-import java.util.Arrays;
-import java.util.function.Supplier;
+/**
+ * Connected-texture model for fuel tanks. Reuses Create's fluid tank CT model (which also culls the
+ * faces between connected tanks) with the Railways fuel tank sprite shifts.
+ */
+public final class FuelTankModel {
+    private static FluidTankCTBehaviour behaviour;
 
-public class FuelTankModel extends CTModel {
-    public static FuelTankModel standard(BakedModel originalModel) {
-        return new FuelTankModel(originalModel, CRSpriteShifts.FUEL_TANK, CRSpriteShifts.FUEL_TANK_TOP,
-                CRSpriteShifts.FUEL_TANK_INNER);
+    private FuelTankModel() {}
+
+    public static FluidTankModel standard(BlockState state, UnbakedRoot unbaked) {
+        if (behaviour == null)
+            behaviour = new FluidTankCTBehaviour(CRSpriteShifts.FUEL_TANK, CRSpriteShifts.FUEL_TANK_TOP, CRSpriteShifts.FUEL_TANK_INNER);
+        return new FluidTankModel(state, unbaked, behaviour);
     }
-
-    private FuelTankModel(BakedModel originalModel, CTSpriteShiftEntry side, CTSpriteShiftEntry top,
-                           CTSpriteShiftEntry inner) {
-        super(originalModel, new FluidTankCTBehaviour(side, top, inner));
-    }
-    public void emitBlockQuads(BlockAndTintGetter blockView, BlockState state, BlockPos pos, Supplier<RandomSource> randomSupplier, RenderContext context) {
-        FuelTankModel.CullData cullData = new FuelTankModel.CullData();
-        for (Direction d : Iterate.horizontalDirections)
-            cullData.setCulled(d, ConnectivityHandler.isConnected(blockView, pos, pos.relative(d)));
-
-        context.pushTransform(quad -> {
-            Direction cullFace = quad.cullFace();
-            if (cullFace != null && cullData.isCulled(cullFace)) {
-                return false;
-            }
-            quad.cullFace(null);
-            return true;
-        });
-        super.emitBlockQuads(blockView, state, pos, randomSupplier, context);
-        context.popTransform();
-    }
-
-    private static class CullData {
-        boolean[] culledFaces;
-
-        public CullData() {
-            culledFaces = new boolean[4];
-            Arrays.fill(culledFaces, false);
-        }
-
-        void setCulled(Direction face, boolean cull) {
-            if (face.getAxis()
-                    .isVertical())
-                return;
-            culledFaces[face.get2DDataValue()] = cull;
-        }
-
-        boolean isCulled(Direction face) {
-            if (face.getAxis()
-                    .isVertical())
-                return false;
-            return culledFaces[face.get2DDataValue()];
-        }
-    }
-
 }

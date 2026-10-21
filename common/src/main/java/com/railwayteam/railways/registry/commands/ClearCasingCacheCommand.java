@@ -30,7 +30,7 @@ import static com.railwayteam.railways.multiloader.ClientCommands.sendSuccess;
 public class ClearCasingCacheCommand {
   public static ArgumentBuilder<SharedSuggestionProvider, ?> register() {
     return literal("clear_casing_cache")
-        .requires(cs -> cs.hasPermission(0))
+        .requires(cs -> net.minecraft.commands.Commands.hasPermission(net.minecraft.commands.Commands.LEVEL_ALL).test(cs))
         .executes(ctx -> {
           Env.CLIENT.runIfCurrent(() -> CasingRenderUtils::clearModelCache);
 

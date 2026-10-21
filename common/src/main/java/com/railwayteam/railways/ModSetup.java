@@ -18,6 +18,7 @@
 
 package com.railwayteam.railways;
 
+import com.railwayteam.railways.content.animated_flywheel.FlywheelMovementBehaviour;
 import com.railwayteam.railways.compat.tracks.mods.*;
 import com.railwayteam.railways.content.custom_tracks.casing.CasingCollisionUtils;
 import com.railwayteam.railways.multiloader.Env;
@@ -66,6 +67,7 @@ public class ModSetup {
     CRExtraRegistration.register();
     CasingCollisionUtils.register();
     CRInteractionBehaviours.register();
+    FlywheelMovementBehaviour.register();
     CRPortalTracks.register();
 
     // Compat

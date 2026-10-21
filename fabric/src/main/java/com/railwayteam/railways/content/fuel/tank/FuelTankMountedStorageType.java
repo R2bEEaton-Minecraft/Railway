@@ -1,6 +1,6 @@
 /*
  * Steam 'n' Rails
- * Copyright (c) 2025 The Railways Team
+ * Copyright (c) 2022-2025 The Railways Team
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -26,15 +26,14 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 
 public class FuelTankMountedStorageType extends MountedFluidStorageType<FuelTankMountedStorage> {
-	public FuelTankMountedStorageType() {
-		super(FuelTankMountedStorage.CODEC);
-	}
-	@Nullable
-	public FuelTankMountedStorage mount(Level level, BlockState state, BlockPos pos, @Nullable BlockEntity be) {
-		if (be instanceof FuelTankBlockEntity tank && tank.isController()) {
-			return FuelTankMountedStorage.fromTank(tank);
-		}
+    public FuelTankMountedStorageType() {
+        super(FuelTankMountedStorage.CODEC);
+    }
 
-		return null;
-	}
+    @Override
+    public @Nullable FuelTankMountedStorage mount(Level level, BlockState state, BlockPos pos, @Nullable BlockEntity be) {
+        if (be instanceof FuelTankBlockEntity tank && tank.isController())
+            return FuelTankMountedStorage.fromTank(tank);
+        return null;
+    }
 }

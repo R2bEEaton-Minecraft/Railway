@@ -31,15 +31,18 @@ import com.railwayteam.railways.registry.CRPalettes;
 import com.railwayteam.railways.registry.CRPalettes.StyledList;
 import com.railwayteam.railways.util.FluidUtils;
 import com.zurrtum.create.AllRecipeTypes;
-import com.zurrtum.create.content.decoration.palettes.AllPaletteStoneTypes;
-import com.zurrtum.create.content.processing.recipe.HeatCondition;
-import com.zurrtum.create.foundation.fluid.FluidIngredient;
-import com.zurrtum.create.foundation.fluid.FluidTagIngredient;
 import com.zurrtum.create.catnip.platform.CatnipServices;
+import com.zurrtum.create.content.decoration.palettes.AllPaletteStoneTypes;
+import com.zurrtum.create.content.kinetics.mixer.MixingRecipe;
+import com.zurrtum.create.content.processing.recipe.HeatCondition;
+import com.zurrtum.create.content.processing.recipe.ProcessingRecipeBuilder;
+import com.zurrtum.create.foundation.fluid.FluidTagIngredient;
 import net.minecraft.data.PackOutput;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.Identifier;
 import net.minecraft.tags.FluidTags;
+import net.minecraft.world.item.crafting.RecipeType;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Supplier;
 
@@ -50,7 +53,7 @@ public class RailwaysMixingRecipeGen extends RailwaysProcessingRecipeGen {
             () -> {
                 Identifier loc = Railways.asResource("palettes/dyeing/" + CatnipServices.REGISTRIES.getKeyOrThrow(style.get(color).asItem()).getPath());
                 if (style != CRPalettes.Styles.FLYWHEEL) {
-                    EmiRecipeDefaultsGen.DEFAULT_RECIPES.add(Railways.asResource(getRecipeType().getId().getPath() + "/" + loc.getPath()));
+                    EmiRecipeDefaultsGen.DEFAULT_RECIPES.add(Railways.asResource(getRecipeTypeId().getPath() + "/" + loc.getPath()));
                 }
                 return loc;
             },
@@ -111,14 +114,34 @@ public class RailwaysMixingRecipeGen extends RailwaysProcessingRecipeGen {
     public RailwaysMixingRecipeGen(PackOutput output) {
         super(output);
     }
-    protected AllRecipeTypes getRecipeType() {
+
+    @Override
+    public @NotNull String getName() {
+        return "Railways' Mixing Recipes";
+    }
+
+    @Override
+    protected RecipeType<?> getRecipeType() {
         return AllRecipeTypes.MIXING;
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    protected <T> ProcessingRecipeBuilder.ProcessingRecipeFactory<T> getFactory() {
+        return params -> (T) new MixingRecipe(
+            params.duration(),
+            params.results(),
+            params.fluidResults(),
+            params.heat(),
+            params.fluidIngredients(),
+            params.ingredients()
+        );
     }
 
     private Supplier<Identifier> paintLoc(PalettesColor color) {
         return () -> {
             Identifier loc = Railways.asResource("palettes/dye/" + color.getSerializedName());
-            EmiRecipeDefaultsGen.DEFAULT_RECIPES.add(Railways.asResource(getRecipeType().getId().getPath() + "/" + loc.getPath()));
+            EmiRecipeDefaultsGen.DEFAULT_RECIPES.add(Railways.asResource(getRecipeTypeId().getPath() + "/" + loc.getPath()));
             return loc;
         };
     }
@@ -147,7 +170,7 @@ public class RailwaysMixingRecipeGen extends RailwaysProcessingRecipeGen {
                         + colorA.getSerializedName()
                         + "_" + colorB.getSerializedName());
                 if (makeDefault) {
-                    EmiRecipeDefaultsGen.DEFAULT_RECIPES.add(Railways.asResource(getRecipeType().getId().getPath() + "/" + loc.getPath()));
+                    EmiRecipeDefaultsGen.DEFAULT_RECIPES.add(Railways.asResource(getRecipeTypeId().getPath() + "/" + loc.getPath()));
                 }
                 return loc;
             },

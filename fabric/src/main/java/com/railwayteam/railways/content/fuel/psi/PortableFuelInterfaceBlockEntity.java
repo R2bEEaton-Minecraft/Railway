@@ -18,98 +18,143 @@
 
 package com.railwayteam.railways.content.fuel.psi;
 
-import com.railwayteam.railways.mixin_interfaces.IContraptionFuel;
+import com.railwayteam.railways.mixin_interfaces.IFuelInventory;
 import com.zurrtum.create.api.contraption.storage.fluid.MountedFluidStorageWrapper;
 import com.zurrtum.create.content.contraptions.Contraption;
 import com.zurrtum.create.content.contraptions.actors.psi.PortableStorageInterfaceBlockEntity;
-import com.zurrtum.create.foundation.utility.fabric.ListeningStorageView;
-import com.zurrtum.create.foundation.utility.fabric.ProcessingIterator;
-import io.github.fabricators_of_create.porting_lib.transfer.WrappedStorage;
-import io.github.fabricators_of_create.porting_lib.transfer.callbacks.TransactionCallback;
-import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
-import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
-import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
-import net.fabricmc.fabric.api.transfer.v1.storage.base.SidedStorageBlockEntity;
-import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
+import com.zurrtum.create.foundation.fluid.FluidTank;
+import com.zurrtum.create.infrastructure.fluids.CombinedTankWrapper;
+import com.zurrtum.create.infrastructure.fluids.FluidInventory;
+import com.zurrtum.create.infrastructure.fluids.FluidStack;
+import com.zurrtum.create.infrastructure.fluids.SidedFluidInventory;
+import com.zurrtum.create.infrastructure.transfer.SlotRangeCache;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Iterator;
 
-public class PortableFuelInterfaceBlockEntity extends PortableStorageInterfaceBlockEntity implements SidedStorageBlockEntity {
+public class PortableFuelInterfaceBlockEntity extends PortableStorageInterfaceBlockEntity {
 
-    protected InterfaceFluidHandler capability;
+    public final InterfaceFluidHandler capability = new InterfaceFluidHandler();
 
     public PortableFuelInterfaceBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
-        capability = createEmptyHandler();
     }
+
+    @Override
     public void startTransferringTo(Contraption contraption, float distance) {
-        MountedFluidStorageWrapper fuels = ((IContraptionFuel) contraption).railways$getFluidFuels();
-        capability.setWrapped(fuels != null ? fuels : Storage.empty());
+        MountedFluidStorageWrapper fuels = contraption.getStorage() instanceof IFuelInventory fuelInventory
+            ? fuelInventory.railways$getFluidFuels()
+            : null;
+        if (fuels != null)
+            capability.setInventory(fuels);
+        else
+            capability.setEmpty();
         super.startTransferringTo(contraption, distance);
     }
-    protected void invalidateCapability() {
-        capability.setWrapped(Storage.empty());
-    }
+
+    @Override
     protected void stopTransferring() {
-        capability.setWrapped(Storage.empty());
+        capability.setEmpty();
         super.stopTransferring();
     }
 
-    private InterfaceFluidHandler createEmptyHandler() {
-        return new InterfaceFluidHandler(Storage.empty());
-    }
-    public Storage<FluidVariant> getFluidStorage(@Nullable Direction face) {
-        return capability;
-    }
+    /**
+     * Exposes only the fuel tanks of the connected contraption, and only while connected.
+     */
+    public class InterfaceFluidHandler implements SidedFluidInventory {
+        private static final FluidTank EMPTY = new FluidTank(0);
+        private int[] slots = SlotRangeCache.EMPTY;
+        private FluidInventory wrapped = EMPTY;
 
-    boolean isConnected() {
-        int timeUnit = getTransferTimeout();
-        return transferTimer >= ANIMATION && transferTimer <= timeUnit + ANIMATION;
-    }
-
-    public class InterfaceFluidHandler extends WrappedStorage<FluidVariant> {
-
-        public InterfaceFluidHandler(Storage<FluidVariant> wrapped) {
-            super(wrapped);
+        @Override
+        public int[] getAvailableSlots(@Nullable Direction side) {
+            return slots;
         }
-        public long insert(FluidVariant resource, long maxAmount, TransactionContext transaction) {
+
+        @Override
+        public boolean canExtract(int slot, FluidStack stack, @Nullable Direction dir) {
+            return wrapped != EMPTY && canTransfer() && ((SidedFluidInventory) wrapped).canExtract(slot, stack, dir);
+        }
+
+        @Override
+        public boolean canInsert(int slot, FluidStack stack, @Nullable Direction dir) {
+            return wrapped != EMPTY && isConnected() && ((SidedFluidInventory) wrapped).canInsert(slot, stack, dir);
+        }
+
+        public void setInventory(CombinedTankWrapper wrapped) {
+            this.wrapped = wrapped;
+            this.slots = wrapped.getAvailableSlots(null);
+        }
+
+        public void setEmpty() {
+            this.wrapped = EMPTY;
+            this.slots = SlotRangeCache.EMPTY;
+        }
+
+        public boolean hasInventory() {
+            return wrapped != EMPTY;
+        }
+
+        @Override
+        public int size() {
+            return slots.length;
+        }
+
+        @Override
+        public int getMaxAmountPerStack() {
+            return wrapped.getMaxAmountPerStack();
+        }
+
+        @Override
+        public int getMaxAmount(FluidStack stack) {
+            return wrapped.getMaxAmount(stack);
+        }
+
+        @Override
+        public FluidStack getStack(int slot) {
+            return wrapped.getStack(slot);
+        }
+
+        @Override
+        public void setStack(int slot, FluidStack stack) {
+            wrapped.setStack(slot, stack);
+        }
+
+        @Override
+        public int insert(FluidStack stack, int maxAmount, @Nullable Direction side) {
             if (!isConnected())
                 return 0;
-            long fill = wrapped.insert(resource, maxAmount, transaction);
-            if (fill > 0)
-                TransactionCallback.onSuccess(transaction, this::keepAlive);
-            return fill;
-        }
-        public long extract(FluidVariant resource, long maxAmount, TransactionContext transaction) {
-            if (!canTransfer())
-                return 0;
-            long drain = wrapped.extract(resource, maxAmount, transaction);
-            if (drain != 0)
-                TransactionCallback.onSuccess(transaction, this::keepAlive);
-            return drain;
-        }
-        public @Nullable StorageView<FluidVariant> exactView(FluidVariant resource) {
-            return listen(super.exactView(resource));
-        }
-        public Iterator<StorageView<FluidVariant>> iterator() {
-            return new ProcessingIterator<>(super.iterator(), this::listen);
+            int insert = wrapped.insert(stack, maxAmount, side);
+            if (insert != 0)
+                markDirty();
+            return insert;
         }
 
-        public <T> StorageView<T> listen(StorageView<T> view) {
-            return new ListeningStorageView<>(view, this::keepAlive);
+        @Override
+        public int extract(FluidStack stack, int maxAmount, @Nullable Direction side) {
+            if (!canTransfer())
+                return 0;
+            int extract = wrapped.extract(stack, maxAmount, side);
+            if (extract != 0)
+                markDirty();
+            return extract;
+        }
+
+        @Override
+        public void markDirty() {
+            keepAlive();
         }
 
         public void keepAlive() {
             onContentTransferred();
         }
 
-        private void setWrapped(Storage<FluidVariant> wrapped) {
-            this.wrapped = wrapped;
+        @Override
+        public java.util.Iterator<FluidStack> iterator(@Nullable Direction side) {
+            return wrapped.iterator(side);
         }
     }
 }

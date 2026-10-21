@@ -36,20 +36,26 @@ import com.zurrtum.create.AllItems;
 import com.tterrag.registrate.util.entry.ItemProviderEntry;
 import com.zurrtum.create.catnip.data.Pair;
 import com.zurrtum.create.catnip.platform.CatnipServices;
-import net.minecraft.advancements.criterion.ItemPredicate;
+import net.minecraft.advancements.predicates.ItemPredicate;
+import net.minecraft.advancements.triggers.InventoryChangeTrigger;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderGetter;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.HolderSet;
+import java.util.Optional;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.data.recipes.ShapedRecipeBuilder;
 import net.minecraft.data.recipes.ShapelessRecipeBuilder;
-import net.minecraft.data.recipes.SimpleCookingRecipeBuilder;
 import net.minecraft.data.recipes.SingleItemRecipeBuilder;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.item.crafting.RecipeSerializer;
-import net.minecraft.world.item.crafting.SimpleCookingSerializer;
 import net.minecraft.world.level.ItemLike;
 import org.jetbrains.annotations.NotNull;
 
@@ -58,6 +64,24 @@ import java.util.function.UnaryOperator;
 
 @SuppressWarnings("unused")
 public class RailwaysStandardRecipeGen extends RailwaysRecipeProvider {
+
+    public static final HolderGetter<Item> ITEM_HOLDER_GETTER = new HolderGetter<Item>() {
+        private final HolderLookup.RegistryLookup<Item> delegate = BuiltInRegistries.ITEM;
+
+        @Override
+        public Optional<Holder.Reference<Item>> get(ResourceKey<Item> key) {
+            return delegate.get(key);
+        }
+
+        @Override
+        public Optional<HolderSet.Named<Item>> get(TagKey<Item> key) {
+            Optional<HolderSet.Named<Item>> opt = delegate.get(key);
+            if (opt.isPresent()) {
+                return opt;
+            }
+            return Optional.of(HolderSet.emptyNamed(delegate, key));
+        }
+    };
 
     GeneratedRecipe TRACK_COUPLER = create(CRBlocks.TRACK_COUPLER)
         .unlockedBy(Ingredients::railwayCasing)
@@ -378,7 +402,7 @@ public class RailwaysStandardRecipeGen extends RailwaysRecipeProvider {
         .unlockedBy(AllBlocks.FLUID_TANK)
         .viaShaped(b -> b
             .define('S', Ingredients.sturdySheet())
-            .define('F', AllBlocks.FLUID_TANK.get())
+            .define('F', AllBlocks.FLUID_TANK)
             .pattern("S")
             .pattern("F")
             .pattern("S")
@@ -412,7 +436,7 @@ public class RailwaysStandardRecipeGen extends RailwaysRecipeProvider {
             .pattern("|")
         );
 
-    GeneratedRecipeBuilder create(Supplier<ItemLike> result) {
+    GeneratedRecipeBuilder create(Supplier<? extends ItemLike> result) {
         return new GeneratedRecipeBuilder("/", result);
     }
 
@@ -463,16 +487,20 @@ public class RailwaysStandardRecipeGen extends RailwaysRecipeProvider {
             return this;
         }
 
+        GeneratedRecipeBuilder unlockedBy(ItemLike item) {
+            return unlockedBy(() -> item);
+        }
+
         GeneratedRecipeBuilder unlockedBy(Supplier<? extends ItemLike> item) {
             this.unlockedBy = () -> ItemPredicate.Builder.item()
-                .of(item.get())
+                .of(ITEM_HOLDER_GETTER, item.get())
                 .build();
             return this;
         }
 
         GeneratedRecipeBuilder unlockedByTag(Supplier<TagKey<Item>> tag) {
             this.unlockedBy = () -> ItemPredicate.Builder.item()
-                .of(tag.get())
+                .of(ITEM_HOLDER_GETTER, tag.get())
                 .build();
             return this;
         }
@@ -493,19 +521,27 @@ public class RailwaysStandardRecipeGen extends RailwaysRecipeProvider {
 
         GeneratedRecipe viaShaped(UnaryOperator<ShapedRecipeBuilder> builder) {
             return register(consumer -> {
-                ShapedRecipeBuilder b = builder.apply(ShapedRecipeBuilder.shaped(RecipeCategory.MISC, result.get(), amount));
+                if (result == null || result.get() == null || result.get().asItem() == Items.AIR) {
+                    Railways.LOGGER.warn("Skipping shaped recipe with missing result: path={} suffix={}", path, suffix);
+                    return;
+                }
+                ShapedRecipeBuilder b = builder.apply(ShapedRecipeBuilder.shaped(ITEM_HOLDER_GETTER, RecipeCategory.MISC, result.get(), amount));
                 if (unlockedBy != null)
-                    b.unlockedBy("has_item", inventoryTrigger(unlockedBy.get()));
-                b.save(consumer, createLocation("crafting"));
+                    b.unlockedBy("has_item", InventoryChangeTrigger.TriggerInstance.hasItems(unlockedBy.get()));
+                b.save(consumer, ResourceKey.create(Registries.RECIPE, createLocation("crafting")));
             });
         }
 
         GeneratedRecipe viaShapeless(UnaryOperator<ShapelessRecipeBuilder> builder) {
             return register(consumer -> {
-                ShapelessRecipeBuilder b = builder.apply(ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, result.get(), amount));
+                if (result == null || result.get() == null || result.get().asItem() == Items.AIR) {
+                    Railways.LOGGER.warn("Skipping shapeless recipe with missing result: path={} suffix={}", path, suffix);
+                    return;
+                }
+                ShapelessRecipeBuilder b = builder.apply(ShapelessRecipeBuilder.shapeless(ITEM_HOLDER_GETTER, RecipeCategory.MISC, result.get(), amount));
                 if (unlockedBy != null)
-                    b.unlockedBy("has_item", inventoryTrigger(unlockedBy.get()));
-                b.save(consumer, createLocation("crafting"));
+                    b.unlockedBy("has_item", InventoryChangeTrigger.TriggerInstance.hasItems(unlockedBy.get()));
+                b.save(consumer, ResourceKey.create(Registries.RECIPE, createLocation("crafting")));
             });
         }
 
@@ -513,7 +549,7 @@ public class RailwaysStandardRecipeGen extends RailwaysRecipeProvider {
             String path = loc.getPath();
             while (path.contains("//"))
                 path = path.replaceAll("//", "/");
-            return new Identifier(loc.getNamespace(), path);
+            return Identifier.fromNamespaceAndPath(loc.getNamespace(), path);
         }
 
         private Identifier createSimpleLocation(String recipeType) {
@@ -537,24 +573,12 @@ public class RailwaysStandardRecipeGen extends RailwaysRecipeProvider {
                 .asItem()) : compatDatagenOutput;
         }
 
-        GeneratedRecipeBuilder.GeneratedCookingRecipeBuilder viaCooking(Supplier<? extends ItemLike> item) {
-            return unlockedBy(item).viaCookingIngredient(() -> Ingredient.of(item.get()));
-        }
-
-        GeneratedRecipeBuilder.GeneratedCookingRecipeBuilder viaCookingTag(Supplier<TagKey<Item>> tag) {
-            return unlockedByTag(tag).viaCookingIngredient(() -> Ingredient.of(tag.get()));
-        }
-
-        GeneratedRecipeBuilder.GeneratedCookingRecipeBuilder viaCookingIngredient(Supplier<Ingredient> ingredient) {
-            return new GeneratedRecipeBuilder.GeneratedCookingRecipeBuilder(ingredient);
-        }
-
         GeneratedStonecuttingRecipeBuilder viaStonecutting(Supplier<? extends ItemLike> item) {
             return unlockedBy(item).viaStonecuttingIngrdient(() -> Ingredient.of(item.get()));
         }
 
         GeneratedStonecuttingRecipeBuilder viaStonecuttingTag(Supplier<TagKey<Item>> tag) {
-            return unlockedByTag(tag).viaStonecuttingIngrdient(() -> Ingredient.of(tag.get()));
+            return unlockedByTag(tag).viaStonecuttingIngrdient(() -> Ingredient.of(ITEM_HOLDER_GETTER.getOrThrow(tag.get())));
         }
 
         GeneratedStonecuttingRecipeBuilder viaStonecuttingIngrdient(Supplier<Ingredient> ingredient) {
@@ -571,88 +595,20 @@ public class RailwaysStandardRecipeGen extends RailwaysRecipeProvider {
 
             private GeneratedRecipe create(UnaryOperator<SingleItemRecipeBuilder> builder) {
                 return register(consumer -> {
-                    SingleItemRecipeBuilder b = builder.apply(SingleItemRecipeBuilder.stonecutting(ingredient.get(), RecipeCategory.MISC, result.get(), amount));
+                    ItemLike res = result == null ? null : result.get();
+                    if (res == null || res.asItem() == Items.AIR) {
+                        Railways.LOGGER.warn("Skipping stonecutting recipe with missing result: path={} suffix={}", path, suffix);
+                        return;
+                    }
+                    SingleItemRecipeBuilder b = builder.apply(SingleItemRecipeBuilder.stonecutting(ingredient.get(), RecipeCategory.MISC, res, amount));
                     if (unlockedBy != null)
-                        b.unlockedBy("has_item", inventoryTrigger(unlockedBy.get()));
-                    b.save(consumer, createLocation("stonecutting"));
+                        b.unlockedBy("has_item", InventoryChangeTrigger.TriggerInstance.hasItems(unlockedBy.get()));
+                    b.save(consumer, ResourceKey.create(Registries.RECIPE, createLocation("stonecutting")));
                 });
             }
 
             private GeneratedRecipe create() {
                 return create(b -> b);
-            }
-        }
-
-        class GeneratedCookingRecipeBuilder {
-
-            private final Supplier<Ingredient> ingredient;
-            private float exp;
-            private int cookingTime;
-
-            private final SimpleCookingSerializer<?>
-                FURNACE = (SimpleCookingSerializer<?>) RecipeSerializer.SMELTING_RECIPE,
-                SMOKER = (SimpleCookingSerializer<?>) RecipeSerializer.SMOKING_RECIPE,
-                BLAST = (SimpleCookingSerializer<?>) RecipeSerializer.BLASTING_RECIPE,
-                CAMPFIRE = (SimpleCookingSerializer<?>) RecipeSerializer.CAMPFIRE_COOKING_RECIPE;
-
-            GeneratedCookingRecipeBuilder(Supplier<Ingredient> ingredient) {
-                this.ingredient = ingredient;
-                cookingTime = 200;
-                exp = 0;
-            }
-
-            GeneratedRecipeBuilder.GeneratedCookingRecipeBuilder forDuration(int duration) {
-                cookingTime = duration;
-                return this;
-            }
-
-            GeneratedRecipeBuilder.GeneratedCookingRecipeBuilder rewardXP(float xp) {
-                exp = xp;
-                return this;
-            }
-
-            GeneratedRecipe inFurnace() {
-                return inFurnace(b -> b);
-            }
-
-            GeneratedRecipe inFurnace(UnaryOperator<SimpleCookingRecipeBuilder> builder) {
-                return create(FURNACE, builder, 1);
-            }
-
-            GeneratedRecipe inSmoker() {
-                return inSmoker(b -> b);
-            }
-
-            GeneratedRecipe inSmoker(UnaryOperator<SimpleCookingRecipeBuilder> builder) {
-                create(FURNACE, builder, 1);
-                create(CAMPFIRE, builder, 3);
-                return create(SMOKER, builder, .5f);
-            }
-
-            GeneratedRecipe inBlastFurnace() {
-                return inBlastFurnace(b -> b);
-            }
-
-            GeneratedRecipe inBlastFurnace(UnaryOperator<SimpleCookingRecipeBuilder> builder) {
-                create(FURNACE, builder, 1);
-                return create(BLAST, builder, .5f);
-            }
-
-            private GeneratedRecipe create(SimpleCookingSerializer<?> serializer,
-                                           UnaryOperator<SimpleCookingRecipeBuilder> builder, float cookingTimeModifier) {
-                return register(consumer -> {
-                    boolean isOtherMod = compatDatagenOutput != null;
-
-                    // fix|me removed serializer from the cooking time + refactored with whatever intellij said
-                    // can't really test this 'cause we don't have any cooking recipes yet, just assume it's fine for now
-                    SimpleCookingRecipeBuilder b = builder.apply(
-                        SimpleCookingRecipeBuilder.campfireCooking(ingredient.get(), RecipeCategory.MISC, isOtherMod ? Items.DIRT : result.get(),
-                            exp, (int) (cookingTime * cookingTimeModifier)));
-                    if (unlockedBy != null)
-                        b.unlockedBy("has_item", inventoryTrigger(unlockedBy.get()));
-                    b.save(consumer, createSimpleLocation(CatnipServices.REGISTRIES.getKeyOrThrow(serializer)
-                        .getPath()));
-                });
             }
         }
     }

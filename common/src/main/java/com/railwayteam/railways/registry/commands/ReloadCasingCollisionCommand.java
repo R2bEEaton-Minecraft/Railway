@@ -27,7 +27,7 @@ import net.minecraft.network.chat.Component;
 public class ReloadCasingCollisionCommand {
     public static ArgumentBuilder<CommandSourceStack, ?> register() {
         return Commands.literal("reload_casing_collision")
-            .requires(cs -> cs.hasPermission(2))
+            .requires(cs -> net.minecraft.commands.Commands.hasPermission(net.minecraft.commands.Commands.LEVEL_GAMEMASTERS).test(cs))
             .executes(ctx -> {
                 CasingCollisionUtils.register();
                 ctx.getSource().sendSuccess(() -> Component.literal("Reloaded Casing Collisions"), true);

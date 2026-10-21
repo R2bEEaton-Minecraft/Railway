@@ -20,7 +20,6 @@ package com.railwayteam.railways.util;
 
 import com.google.gson.JsonObject;
 import com.railwayteam.railways.multiloader.fluid.FluidUnits;
-import com.zurrtum.create.content.processing.recipe.ProcessingRecipe;
 import com.zurrtum.create.content.processing.recipe.ProcessingRecipeBuilder;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.minecraft.nbt.CompoundTag;
@@ -45,7 +44,7 @@ public class FluidUtils {
     }
 
     @ExpectPlatform
-    public static void addFluidOutput(ProcessingRecipeBuilder<ProcessingRecipe<?>> b, Fluid fluid, long amount, @Nullable CompoundTag nbt) {
+    public static void addFluidOutput(ProcessingRecipeBuilder<?> b, Fluid fluid, long amount, @Nullable CompoundTag nbt) {
         throw new AssertionError();
     }
 

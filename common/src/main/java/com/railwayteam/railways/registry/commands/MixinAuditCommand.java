@@ -29,7 +29,7 @@ import static com.railwayteam.railways.multiloader.ClientCommands.sendSuccess;
 public class MixinAuditCommand {
     public static ArgumentBuilder<SharedSuggestionProvider, ?> register() {
         return literal("mixin_audit")
-            .requires(cs -> cs.hasPermission(0))
+            .requires(cs -> net.minecraft.commands.Commands.hasPermission(net.minecraft.commands.Commands.LEVEL_ALL).test(cs))
             .executes(ctx -> {
                 MixinEnvironment.getCurrentEnvironment().audit();
                 sendSuccess(ctx.getSource(), Component.literal("Audited mixins (see log for details)"));

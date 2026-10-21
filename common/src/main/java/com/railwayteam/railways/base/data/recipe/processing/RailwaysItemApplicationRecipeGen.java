@@ -23,15 +23,20 @@ import com.railwayteam.railways.base.data.compat.emi.EmiRecipeDefaultsGen;
 import com.railwayteam.railways.base.data.recipe.EnumRecipeList.PalettesRecipeList;
 import com.railwayteam.railways.registry.CRPalettes.Styles;
 import com.zurrtum.create.AllRecipeTypes;
+import com.zurrtum.create.content.kinetics.deployer.ManualApplicationRecipe;
+import com.zurrtum.create.content.processing.recipe.ProcessingRecipeBuilder;
 import net.minecraft.data.PackOutput;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.RecipeType;
+import org.jetbrains.annotations.NotNull;
 
 public class RailwaysItemApplicationRecipeGen extends RailwaysProcessingRecipeGen {
     @SuppressWarnings("unused")
     PalettesRecipeList FLYWHEELS = new PalettesRecipeList(color -> createWithDeferredId(
         () -> {
             Identifier loc = Railways.asResource("palettes/flywheels/" + color.getSerializedName());
-            EmiRecipeDefaultsGen.DEFAULT_RECIPES.add(Railways.asResource(getRecipeType().getId().getPath() + "/" + loc.getPath()));
+            EmiRecipeDefaultsGen.DEFAULT_RECIPES.add(Railways.asResource(getRecipeTypeId().getPath() + "/" + loc.getPath()));
             return loc;
         },
         b -> b
@@ -43,7 +48,29 @@ public class RailwaysItemApplicationRecipeGen extends RailwaysProcessingRecipeGe
     public RailwaysItemApplicationRecipeGen(PackOutput generator) {
         super(generator);
     }
-    protected AllRecipeTypes getRecipeType() {
+
+    @Override
+    public @NotNull String getName() {
+        return "Railways' Item Application Recipes";
+    }
+
+    @Override
+    protected RecipeType<?> getRecipeType() {
         return AllRecipeTypes.ITEM_APPLICATION;
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    protected <T> ProcessingRecipeBuilder.ProcessingRecipeFactory<T> getFactory() {
+        return params -> {
+            Ingredient target = params.ingredients().isEmpty() ? Ingredient.of() : params.ingredients().get(0).getIngredient();
+            Ingredient ingredient = params.ingredients().size() > 1 ? params.ingredients().get(1).getIngredient() : Ingredient.of();
+            return (T) new ManualApplicationRecipe(
+                params.results(),
+                params.keepHeldItem(),
+                target,
+                ingredient
+            );
+        };
     }
 }
