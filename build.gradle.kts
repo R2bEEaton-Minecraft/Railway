@@ -299,6 +299,28 @@ subprojects {
         shadowCommon(project(":common", "transformProduction${capitalizedName}")) { isTransitive = false }
     }
 
+    // Unobfuscated (26.x) builds have no remapJar, so Loom never injects the access widener or the
+    // jar-in-jar entries into fabric.mod.json. Build the distributable jar from the shadow jar ourselves.
+    val releaseJarFile = layout.buildDirectory.file("libs/railways-${project.version}.jar")
+    if (isUnobfuscated) {
+        val shadowJarTask = tasks.named<ShadowJar>("shadowJar")
+        val releaseJarTask = tasks.register("railwaysReleaseJar") {
+            group = "build"
+            description = "Assembles the distributable jar for unobfuscated Minecraft versions."
+            dependsOn(shadowJarTask, tasks.named("jar"))
+            inputs.file(shadowJarTask.flatMap { it.archiveFile })
+            outputs.file(releaseJarFile)
+            doLast {
+                val out = releaseJarFile.get().asFile
+                out.parentFile.mkdirs()
+                shadowJarTask.get().archiveFile.get().asFile.copyTo(out, overwrite = true)
+                patchModJson(out, "railways.accesswidener", tasks.named<Jar>("jar").get().archiveFile.get().asFile)
+                transformJar(out)
+            }
+        }
+        tasks.named("assemble") { dependsOn(releaseJarTask) }
+    }
+
     tasks.named<ShadowJar>("shadowJar") {
         archiveClassifier = "dev-shadow"
         configurations = listOf(shadowCommon)
@@ -364,7 +386,9 @@ subprojects {
             ReleaseType.STABLE;
         }
     configure<ModPublishExtension> {
-        if (remapJar is TaskProvider<*>) {
+        if (isUnobfuscated) {
+            file.set(releaseJarFile)
+        } else if (remapJar is TaskProvider<*>) {
             val task = remapJar.get()
             if (task is org.gradle.api.tasks.bundling.AbstractArchiveTask) {
                 file.set(task.archiveFile)
@@ -401,6 +425,45 @@ subprojects {
             }
 
             requires("fabric-api")
+        }
+    }
+}
+
+/** Adds the accessWidener and jar-in-jar entries to fabric.mod.json, which remapJar would normally inject. */
+@Suppress("UNCHECKED_CAST")
+fun patchModJson(jar: File, accessWidener: String, nestedJarSource: File) {
+    val contents = linkedMapOf<String, ByteArray>()
+    JarFile(jar).use {
+        it.entries().asIterator().forEach { entry ->
+            if (!entry.isDirectory) {
+                contents[entry.name] = it.getInputStream(entry).readAllBytes()
+            }
+        }
+    }
+
+    // The shadow jar drops Loom's jar-in-jar entries; take them from the plain jar.
+    JarFile(nestedJarSource).use {
+        it.entries().asIterator().forEach { entry ->
+            if (!entry.isDirectory && entry.name.startsWith("META-INF/jars/") && entry.name.endsWith(".jar")) {
+                contents[entry.name] = it.getInputStream(entry).readAllBytes()
+            }
+        }
+    }
+
+    val modJson = JsonSlurper().parse(contents.getValue("fabric.mod.json")) as MutableMap<String, Any?>
+    modJson["accessWidener"] = accessWidener
+    modJson["jars"] = contents.keys
+        .filter { it.startsWith("META-INF/jars/") && it.endsWith(".jar") }
+        .sorted()
+        .map { mapOf("file" to it) }
+    contents["fabric.mod.json"] = JsonOutput.toJson(modJson).toByteArray()
+
+    jar.delete()
+    JarOutputStream(jar.outputStream()).use { out ->
+        contents.forEach { (name, data) ->
+            out.putNextEntry(JarEntry(name))
+            out.write(data)
+            out.closeEntry()
         }
     }
 }
