@@ -24,15 +24,19 @@ import com.railwayteam.railways.RailwaysClient;
 import com.railwayteam.railways.base.reload.ClientResourceReloadListener;
 import com.railwayteam.railways.content.buffer.headstock.fabric.CopycatHeadstockModelRegistration;
 import com.railwayteam.railways.content.conductor.fabric.ConductorCapItemRenderer;
+import com.railwayteam.railways.content.conductor.vent.CopycatVentModel;
 import com.railwayteam.railways.events.ClientEvents;
 import com.railwayteam.railways.registry.CRParticleTypes;
 import com.railwayteam.railways.registry.CRBlocks;
+import com.zurrtum.create.client.AllExtensions;
+import com.zurrtum.create.client.infrastructure.model.CopycatModel;
 import com.zurrtum.create.content.trains.track.TrackMaterial;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientWorldEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.BlockRenderLayerMap;
+import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.fabric.api.resource.ResourcePackActivationType;
@@ -77,6 +81,11 @@ public class RailwaysClientImpl implements ClientModInitializer {
 		BlockRenderLayerMap.putBlocks(ChunkSectionLayer.CUTOUT_MIPPED,
 				CRBlocks.DIESEL_STACK.get(), CRBlocks.COPYCAT_HEADSTOCK_BARS.get());
 
+		// Copied quads retain their tint indices; resolve them against the stored material.
+		ColorProviderRegistry.BLOCK.register(CopycatModel::getColor,
+				CRBlocks.CONDUCTOR_VENT.get(), CRBlocks.COPYCAT_HEADSTOCK.get());
+		AllExtensions.LAYER.put(CRBlocks.CONDUCTOR_VENT.get(), CopycatVentModel::getLayer);
+		AllExtensions.LAYER.put(CRBlocks.COPYCAT_HEADSTOCK.get(), CopycatModel::getLayer);
 	}
 
 	private static void registerJeiCompat() {

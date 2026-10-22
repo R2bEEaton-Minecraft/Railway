@@ -24,6 +24,7 @@ import com.zurrtum.create.client.infrastructure.model.CopycatModel;
 import com.zurrtum.create.content.decoration.copycat.CopycatBlock;
 import net.minecraft.client.renderer.block.model.BlockModelPart;
 import net.minecraft.client.renderer.block.model.BlockStateModel;
+import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.core.BlockPos;
@@ -35,6 +36,14 @@ public class CopycatVentModel extends CopycatModel {
 
     public CopycatVentModel(BlockState state, BlockStateModel.UnbakedRoot unbaked) {
         super(state, unbaked);
+    }
+
+    public static ChunkSectionLayer getLayer(BlockAndTintGetter world, BlockPos pos) {
+        if (ClientHandler.isPlayerMountedOnCamera() || world.getBlockState(pos).getValue(VentBlock.CONDUCTOR_VISIBLE)
+            || CopycatBlock.getMaterial(world, pos).is(AllBlocks.COPYCAT_BASE)) {
+            return ChunkSectionLayer.CUTOUT;
+        }
+        return CopycatModel.getLayer(world, pos);
     }
 
     @Override
