@@ -12,7 +12,7 @@ import com.zurrtum.create.content.trains.bogey.AllBogeySizes;
 import com.zurrtum.create.content.trains.bogey.BogeySize;
 import com.zurrtum.create.content.trains.bogey.BogeyStyle;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,7 +28,7 @@ public class CRBogeyStyles {
 	public static final String QUINTUPLEAXLE_CYCLE_GROUP = "quintupleaxles";
 	public static final String SEXTUPLEAXLE_CYCLE_GROUP = "sextupleaxles";
 
-	private static final Map<Pair<BogeyStyle, Identifier>, BogeyStyle> STYLES_FOR_GAUGES = new HashMap<>();
+	private static final Map<Pair<BogeyStyle, ResourceLocation>, BogeyStyle> STYLES_FOR_GAUGES = new HashMap<>();
 	private static final Map<BogeyStyle, BogeyStyle> STYLES_TO_STANDARD_GAUGE = new HashMap<>();
 	private static final Map<BogeyStyle, List<BogeyStyle>> SUB_STYLES = new HashMap<>();
 
@@ -142,7 +142,7 @@ public class CRBogeyStyles {
 		return create(name, Railways.asResource(cycleGroup));
 	}
 
-	private static BogeyStyle.Builder create(String name, Identifier cycleGroup) {
+	private static BogeyStyle.Builder create(String name, ResourceLocation cycleGroup) {
 		return new BogeyStyle.Builder(Railways.asResource(name), cycleGroup)
 			.displayName(Component.translatable("railways.bogeys.styles." + name));
 	}
@@ -203,7 +203,7 @@ public class CRBogeyStyles {
 	private static CategoryEntry registerCategory(String modId, String name) {
 		return BogeyMenuManager.INSTANCE.registerCategory(
 			Component.translatable(modId + ".gui.bogey_menu.category." + name),
-			Identifier.fromNamespaceAndPath(modId, "bogey_menu/category/" + name)
+			ResourceLocation.fromNamespaceAndPath(modId, "bogey_menu/category/" + name)
 		);
 	}
 
@@ -213,11 +213,11 @@ public class CRBogeyStyles {
 
 	private static void addToCategory(CategoryEntry category, BogeyStyle style, float scale) {
 		String path = style == AllBogeyStyles.STANDARD ? "default" : style.id.getPath();
-		Identifier icon = Railways.asResource("textures/gui/bogey_icons/" + path + "_icon.png");
+		ResourceLocation icon = Railways.asResource("textures/gui/bogey_icons/" + path + "_icon.png");
 		BogeyMenuManager.INSTANCE.addToCategory(category, style, icon, scale);
 	}
 
-	public static void map(BogeyStyle from, Identifier toType, BogeyStyle toStyle) {
+	public static void map(BogeyStyle from, ResourceLocation toType, BogeyStyle toStyle) {
 		STYLES_FOR_GAUGES.put(Pair.of(from, toType), toStyle);
 	}
 
@@ -233,7 +233,7 @@ public class CRBogeyStyles {
 		SUB_STYLES.computeIfAbsent(parent, style -> new ArrayList<>()).add(target);
 	}
 
-	public static boolean styleFitsTrack(BogeyStyle style, Identifier trackType) {
+	public static boolean styleFitsTrack(BogeyStyle style, ResourceLocation trackType) {
 		for (BogeySize size : style.validSizes()) {
 			if (style.getBlockForSize(size) instanceof AbstractBogeyBlock<?> bogeyBlock) {
 				boolean validType = bogeyBlock.getValidPathfindingTypes(style).contains(trackType)
@@ -246,7 +246,7 @@ public class CRBogeyStyles {
 		return false;
 	}
 
-	public static Optional<BogeyStyle> getMapped(BogeyStyle style, Identifier trackType, boolean fallback) {
+	public static Optional<BogeyStyle> getMapped(BogeyStyle style, ResourceLocation trackType, boolean fallback) {
 		if (styleFitsTrack(style, trackType))
 			return Optional.of(style);
 

@@ -1,17 +1,16 @@
 package com.tterrag.registrate.util.entry;
 
 import com.tterrag.registrate.util.nullness.NonNullSupplier;
-import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceLocation;
 
 public class RegistryEntry<T> implements NonNullSupplier<T> {
-    protected final Identifier identifier;
+    protected final ResourceLocation identifier;
     protected final ResourceLocation id;
     protected final T value;
 
-    public RegistryEntry(Identifier id, T value) {
+    public RegistryEntry(ResourceLocation id, T value) {
         this.identifier = id;
-        this.id = new ResourceLocation(id.getNamespace(), id.getPath());
+        this.id = id;
         this.value = value;
     }
 
@@ -19,7 +18,7 @@ public class RegistryEntry<T> implements NonNullSupplier<T> {
         return id;
     }
 
-    public Identifier getIdentifier() {
+    public ResourceLocation getIdentifier() {
         return identifier;
     }
 
@@ -33,6 +32,6 @@ public class RegistryEntry<T> implements NonNullSupplier<T> {
     }
 
     public static <T> RegistryEntry<T> empty() {
-        return new RegistryEntry<>(Identifier.fromNamespaceAndPath("railways", "empty"), null);
+        return new RegistryEntry<>(ResourceLocation.fromNamespaceAndPath("railways", "empty"), null);
     }
 }

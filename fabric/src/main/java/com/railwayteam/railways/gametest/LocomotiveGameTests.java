@@ -27,6 +27,7 @@ import com.zurrtum.create.content.trains.track.TrackBlock;
 import com.zurrtum.create.content.trains.track.TrackPropagator;
 import com.zurrtum.create.content.trains.track.TrackShape;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
+import net.minecraft.network.chat.Component;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTestHelper;
@@ -98,7 +99,7 @@ public class LocomotiveGameTests {
         UseOnContext context = new UseOnContext(player, InteractionHand.MAIN_HAND, hitResult);
 
         InteractionResult placeResult = handcarStack.useOn(context);
-        helper.assertTrue(placeResult.consumesAction(), "Handcar should be successfully placed on the track");
+        helper.assertTrue(placeResult.consumesAction(), Component.literal("Handcar should be successfully placed on the track"));
 
         Train train = null;
         for (Train t : Create.RAILWAYS.trains.values()) {
@@ -107,7 +108,7 @@ public class LocomotiveGameTests {
                 break;
             }
         }
-        helper.assertFalse(train == null, "A train should be registered for the player");
+        helper.assertFalse(train == null, Component.literal("A train should be registered for the player"));
 
         CarriageBogey bogey = train.carriages.get(0).bogeys.getFirst();
         double initialPos = bogey.leading().position;
@@ -117,7 +118,7 @@ public class LocomotiveGameTests {
         helper.succeedWhen(() -> {
             finalTrain.tick(helper.getLevel());
             double currentPos = bogey.leading().position;
-            helper.assertTrue(currentPos != initialPos, "Train travelling point position should advance as train moves");
+            helper.assertTrue(currentPos != initialPos, Component.literal("Train travelling point position should advance as train moves"));
             Create.RAILWAYS.removeTrain(finalTrain.id);
         });
     }

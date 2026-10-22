@@ -23,6 +23,7 @@ import com.railwayteam.railways.content.semaphore.SemaphoreBlockEntity;
 import com.railwayteam.railways.registry.CRBlocks;
 import com.zurrtum.create.AllBlocks;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
+import net.minecraft.network.chat.Component;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTestHelper;
@@ -81,7 +82,7 @@ public class SemaphoreGameTests {
         SemaphoreBlockEntity semaphoreBe = RailwaysGameTestHelper.assertBlockEntity(helper, semaphorePos, SemaphoreBlockEntity.class);
         semaphoreBe.lazyTick();
 
-        helper.assertTrue(semaphoreBe.isValid, "Semaphore should successfully link to SignalBlockEntity down the mast");
+        helper.assertTrue(semaphoreBe.isValid, Component.literal("Semaphore should successfully link to SignalBlockEntity down the mast"));
         helper.succeed();
     }
 }

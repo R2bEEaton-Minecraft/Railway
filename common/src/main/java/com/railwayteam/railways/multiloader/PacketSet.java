@@ -32,7 +32,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ServerGamePacketListener;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.ApiStatus.Internal;
 
@@ -51,8 +51,8 @@ public abstract class PacketSet {
 	public final String id;
 	public final int version;
 
-	public final Identifier c2sPacket;
-	public final Identifier s2cPacket;
+	public final ResourceLocation c2sPacket;
+	public final ResourceLocation s2cPacket;
 
 	private final List<Function<FriendlyByteBuf, S2CPacket>> s2cPackets;
 	private final Object2IntMap<Class<? extends S2CPacket>> s2cTypes;
@@ -73,8 +73,8 @@ public abstract class PacketSet {
 		this.c2sPackets = c2sPackets;
 		this.c2sTypes = c2sTypes;
 
-		c2sPacket = Identifier.fromNamespaceAndPath(id, "c2s");
-		s2cPacket = Identifier.fromNamespaceAndPath(id, "s2c");
+		c2sPacket = ResourceLocation.fromNamespaceAndPath(id, "c2s");
+		s2cPacket = ResourceLocation.fromNamespaceAndPath(id, "s2c");
 	}
 
 	/**

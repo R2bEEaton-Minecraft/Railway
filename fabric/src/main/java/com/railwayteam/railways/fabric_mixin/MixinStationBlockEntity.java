@@ -9,7 +9,7 @@ import com.zurrtum.create.content.trains.bogey.BogeyStyle;
 import com.zurrtum.create.content.trains.station.StationBlockEntity;
 import com.zurrtum.create.content.trains.track.ITrackBlock;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -68,7 +68,7 @@ public class MixinStationBlockEntity {
 		if (level == null)
 			return;
 
-		Identifier trackType = CRTrackMaterials.getType(track.getMaterial());
+		ResourceLocation trackType = CRTrackMaterials.getType(track.getMaterial());
 		if (trackType.equals(CRTrackMaterials.CRTrackType.MONORAIL))
 			return;
 

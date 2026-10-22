@@ -23,6 +23,7 @@ import com.railwayteam.railways.content.minecarts.MinecartWorkbench;
 import com.railwayteam.railways.registry.CREntities;
 import com.railwayteam.railways.registry.CRItems;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
+import net.minecraft.network.chat.Component;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
 
@@ -33,8 +34,8 @@ public class MinecartGameTests {
         BlockPos pos = new BlockPos(2, 1, 2);
         MinecartWorkbench cart = helper.spawn(CREntities.CART_BLOCK.get(), pos);
         helper.assertEntityPresent(CREntities.CART_BLOCK.get(), pos);
-        helper.assertTrue(cart != null, "Workbench cart must not be null");
-        helper.assertTrue(CRItems.ITEM_BENCHCART.get() != null, "Workbench cart item must be registered");
+        helper.assertTrue(cart != null, Component.literal("Workbench cart must not be null"));
+        helper.assertTrue(CRItems.ITEM_BENCHCART.get() != null, Component.literal("Workbench cart item must be registered"));
         helper.succeed();
     }
 
@@ -43,8 +44,8 @@ public class MinecartGameTests {
         BlockPos pos = new BlockPos(4, 1, 4);
         MinecartJukebox cart = helper.spawn(CREntities.CART_JUKEBOX.get(), pos);
         helper.assertEntityPresent(CREntities.CART_JUKEBOX.get(), pos);
-        helper.assertTrue(cart != null, "Jukebox cart must not be null");
-        helper.assertTrue(CRItems.ITEM_JUKEBOXCART.get() != null, "Jukebox cart item must be registered");
+        helper.assertTrue(cart != null, Component.literal("Jukebox cart must not be null"));
+        helper.assertTrue(CRItems.ITEM_JUKEBOXCART.get() != null, Component.literal("Jukebox cart item must be registered"));
         helper.succeed();
     }
 }

@@ -29,7 +29,7 @@ import com.zurrtum.create.content.trains.entity.CarriageBogey;
 import com.zurrtum.create.content.trains.entity.TravellingPoint;
 import com.zurrtum.create.content.trains.track.TrackMaterial;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
@@ -62,7 +62,7 @@ public class InvisibleMonoBogeyBlock extends AbstractMonoBogeyBlock<InvisibleMon
             && CRTrackMaterials.getType(point.edge.getTrackMaterial()) != CRTrackType.NARROW_GAUGE
             && CRTrackMaterials.getType(point.edge.getTrackMaterial()) != CRTrackMaterials.CRTrackType.STANDARD;
     }
-    public Set<Identifier> getValidPathfindingTypes(BogeyStyle style) {
+    public Set<ResourceLocation> getValidPathfindingTypes(BogeyStyle style) {
         return ImmutableSet.of(getTrackType(style), CRTrackType.WIDE_GAUGE, CRTrackType.NARROW_GAUGE, CRTrackMaterials.CRTrackType.STANDARD);
     }
     @SuppressWarnings("deprecation")

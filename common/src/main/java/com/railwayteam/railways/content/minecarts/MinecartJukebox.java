@@ -25,7 +25,7 @@ import net.minecraft.world.item.JukeboxSong;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
-import net.minecraft.world.level.gamerules.GameRules;
+import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.JukeboxBlock;
 import org.jetbrains.annotations.NotNull;
@@ -61,7 +61,7 @@ public class MinecartJukebox extends MinecartBlock {
     }
 
     @Override
-    public void activateMinecart(ServerLevel level, int x, int y, int z, boolean active) {
+    public void activateMinecart(int x, int y, int z, boolean active) {
         if (active && cooldownCount <= 0) {
             cooldownCount = COOLDOWN;
             PacketSender.updateJukeboxClientside(this, this.disc);
@@ -190,7 +190,7 @@ public class MinecartJukebox extends MinecartBlock {
         ItemStack droppedDisc = disc.copy();
         super.destroy(level, source);
         if (!source.is(DamageTypeTags.IS_EXPLOSION)
-            && level.getGameRules().get(GameRules.ENTITY_DROPS)
+            && level.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)
             && !droppedDisc.isEmpty()) {
             spawnAtLocation(level, droppedDisc);
             disc = ItemStack.EMPTY;

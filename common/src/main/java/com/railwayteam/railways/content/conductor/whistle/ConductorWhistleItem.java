@@ -57,7 +57,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
@@ -524,8 +524,8 @@ public class ConductorWhistleItem extends TrackTargetingBlockItem {
 			TrackNode stationNode1 = train.graph.locateNode(station.edgeLocation.getFirst());
 			TrackNode stationNode2 = train.graph.locateNode(station.edgeLocation.getSecond());
 			TrackEdge stationEdge = stationNode1 == null || stationNode2 == null ? null : train.graph.getConnectionsFrom(stationNode1).get(stationNode2);
-			Set<Identifier> validTypes = getValidPathfindingTypes(train);
-			Identifier stationTrackType = stationEdge == null ? null : CRTrackMaterials.getType(stationEdge.getTrackMaterial());
+			Set<ResourceLocation> validTypes = getValidPathfindingTypes(train);
+			ResourceLocation stationTrackType = stationEdge == null ? null : CRTrackMaterials.getType(stationEdge.getTrackMaterial());
 			boolean stationMaterialAllowed = stationEdge != null && (validTypes.contains(stationEdge.getTrackMaterial().getId())
 				|| validTypes.contains(stationTrackType)
 				|| CRTrackMaterials.CRTrackType.UNIVERSAL.equals(stationTrackType));
@@ -547,8 +547,8 @@ public class ConductorWhistleItem extends TrackTargetingBlockItem {
 		}
 	}
 
-	private static Set<Identifier> getValidPathfindingTypes(Train train) {
-		Set<Identifier> validTypes = new HashSet<>();
+	private static Set<ResourceLocation> getValidPathfindingTypes(Train train) {
+		Set<ResourceLocation> validTypes = new HashSet<>();
 		for (int i = 0; i < train.carriages.size(); i++) {
 			Carriage carriage = train.carriages.get(i);
 			if (i == 0) {

@@ -5,7 +5,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.railwayteam.railways.registry.CRTrackMaterials;
 import com.zurrtum.create.content.trains.entity.Navigation;
 import com.zurrtum.create.content.trains.track.TrackMaterial;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
@@ -17,17 +17,17 @@ public class MixinNavigation {
 		method = "search(DDZLjava/util/ArrayList;Lcom/zurrtum/create/content/trains/entity/Navigation$StationTest;)V",
 		at = @At(value = "INVOKE", target = "Ljava/util/Set;contains(Ljava/lang/Object;)Z")
 	)
-	private boolean railways$acceptMappedTrackType(Set<Identifier> validTypes, Object materialId, Operation<Boolean> original) {
+	private boolean railways$acceptMappedTrackType(Set<ResourceLocation> validTypes, Object materialId, Operation<Boolean> original) {
 		if (original.call(validTypes, materialId))
 			return true;
-		if (!(materialId instanceof Identifier id))
+		if (!(materialId instanceof ResourceLocation id))
 			return false;
 
 		TrackMaterial material = TrackMaterial.fromId(id);
 		if (material == null)
 			return false;
 
-		Identifier trackType = CRTrackMaterials.getType(material);
+		ResourceLocation trackType = CRTrackMaterials.getType(material);
 		return validTypes.contains(trackType) || CRTrackMaterials.CRTrackType.UNIVERSAL.equals(trackType);
 	}
 }

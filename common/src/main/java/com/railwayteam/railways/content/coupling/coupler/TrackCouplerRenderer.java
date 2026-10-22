@@ -30,7 +30,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider.Context;
 import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
-import net.minecraft.client.renderer.rendertype.RenderTypes;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.state.CameraRenderState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -109,7 +109,7 @@ public class TrackCouplerRenderer extends SmartBlockEntityRenderer<TrackCouplerB
 
     @Override
     public void submit(CouplerRenderState state, PoseStack matrices, SubmitNodeCollector queue, CameraRenderState cameraState) {
-        super.submit(state, matrices, queue, cameraState);
+
         submitEdgePoint(state.first, matrices, queue);
         submitEdgePoint(state.second, matrices, queue);
     }
@@ -118,7 +118,7 @@ public class TrackCouplerRenderer extends SmartBlockEntityRenderer<TrackCouplerB
         if (state.overlayModel == null || state.level == null || state.targetPosition == null || state.trackState == null)
             return;
 
-        queue.submitCustomGeometry(matrices, RenderTypes.cutoutMovingBlock(), (pose, consumer) -> {
+        queue.submitCustomGeometry(matrices, RenderType.cutout(), (pose, consumer) -> {
             PoseStack overlayMatrices = new PoseStack();
             overlayMatrices.translate(state.trackOffset.getX(), state.trackOffset.getY(), state.trackOffset.getZ());
             CustomTrackOverlayRendering.renderOverlayInto(state.level, state.targetPosition, state.trackState,

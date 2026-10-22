@@ -11,9 +11,8 @@ import com.tterrag.registrate.util.nullness.NonNullBiFunction;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.Identifier;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
@@ -95,8 +94,8 @@ public class Registrate extends AbstractRegistrate<Registrate> {
         return new MenuBuilder<T, Registrate>(this, name, factory).screen(screenFactory);
     }
 
-    public Identifier id(String name) {
-        return Identifier.fromNamespaceAndPath(modid, name);
+    public ResourceLocation id(String name) {
+        return ResourceLocation.fromNamespaceAndPath(modid, name);
     }
 
     public <V, T extends V> T registerVanilla(Registry<V> registry, String name, T value) {
@@ -116,7 +115,7 @@ public class Registrate extends AbstractRegistrate<Registrate> {
 
     @SuppressWarnings("unchecked")
     public <T> T get(String name, Registry<T> registry) {
-        Identifier id = id(name);
+        ResourceLocation id = id(name);
         if (registry == BuiltInRegistries.BLOCK || registry == BuiltInRegistries.ITEM || registry == BuiltInRegistries.ENTITY_TYPE || registry == BuiltInRegistries.SOUND_EVENT)
             return registry.getValue(id);
         RegistryEntry<?> entry = entries.get(name);

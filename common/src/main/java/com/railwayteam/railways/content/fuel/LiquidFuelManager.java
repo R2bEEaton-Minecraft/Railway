@@ -4,7 +4,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import net.minecraft.resources.FileToIdConverter;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import net.minecraft.tags.TagKey;
@@ -18,7 +18,7 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 public class LiquidFuelManager {
-    private static final Map<Identifier, LiquidFuelType> CUSTOM_TYPE_MAP = new HashMap<>();
+    private static final Map<ResourceLocation, LiquidFuelType> CUSTOM_TYPE_MAP = new HashMap<>();
     private static final Map<Fluid, LiquidFuelType> FLUID_TO_TYPE_MAP = new IdentityHashMap<>();
     private static final Map<TagKey<Fluid>, LiquidFuelType> TAG_TO_TYPE_MAP = new IdentityHashMap<>();
 
@@ -65,7 +65,7 @@ public class LiquidFuelManager {
             clear();
 
             LISTER.listMatchingResources(resourceManager).forEach((fileId, resource) -> {
-                Identifier id = LISTER.fileToId(fileId);
+                ResourceLocation id = LISTER.fileToId(fileId);
                 try (var reader = resource.openAsReader()) {
                     JsonElement element = JsonParser.parseReader(reader);
                     if (!element.isJsonObject())

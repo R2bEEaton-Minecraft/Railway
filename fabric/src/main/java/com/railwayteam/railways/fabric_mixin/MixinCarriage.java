@@ -8,7 +8,7 @@ import com.zurrtum.create.content.trains.entity.CarriageBogey;
 import com.zurrtum.create.content.trains.entity.Train;
 import com.zurrtum.create.content.trains.entity.TravellingPoint;
 import com.zurrtum.create.content.trains.graph.TrackGraph;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -61,9 +61,9 @@ public abstract class MixinCarriage {
 		if (point.edge == null)
 			return false;
 
-		Identifier trackType = CRTrackMaterials.getType(point.edge.getTrackMaterial());
+		ResourceLocation trackType = CRTrackMaterials.getType(point.edge.getTrackMaterial());
 		AbstractBogeyBlock<?> bogeyBlock = bogey.type;
-		Identifier bogeyTrackType = bogeyBlock.getTrackType(bogey.getStyle());
+		ResourceLocation bogeyTrackType = bogeyBlock.getTrackType(bogey.getStyle());
 
 		if (trackType.equals(CRTrackMaterials.CRTrackType.UNIVERSAL))
 			return false;

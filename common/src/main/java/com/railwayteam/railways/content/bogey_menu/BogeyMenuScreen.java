@@ -52,7 +52,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
@@ -182,7 +182,7 @@ public class BogeyMenuScreen extends AbstractSimiScreen {
 			if (bogeyEntry == null)
 				continue;
 
-			Identifier icon = bogeyEntry.iconLocation();
+			ResourceLocation icon = bogeyEntry.iconLocation();
 			if (icon != null)
 				renderIcon(guiGraphics, icon, x + 20, y + 42 + (i * 18));
 
@@ -268,7 +268,7 @@ public class BogeyMenuScreen extends AbstractSimiScreen {
 		};
 	}
 
-	private void renderIcon(GuiGraphics guiGraphics, Identifier icon, int x, int y) {
+	private void renderIcon(GuiGraphics guiGraphics, ResourceLocation icon, int x, int y) {
 		guiGraphics.blit(RenderPipelines.GUI_TEXTURED, icon, x, y, 0, 0, 16, 16, 16, 16);
 	}
 

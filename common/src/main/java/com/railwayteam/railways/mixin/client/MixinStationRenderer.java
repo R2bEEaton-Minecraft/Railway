@@ -48,7 +48,7 @@ public class MixinStationRenderer {
             && be.getLevel().getBlockEntity(currentPos) instanceof IHasTrackCasing casing && casing.railways$getTrackCasing() != null) {
             TrackShape shape = trackState.getValue(TrackBlock.SHAPE);
             CRBlockPartials.TrackCasingSpec spec = CRBlockPartials.TRACK_CASINGS.get(shape);
-            Identifier trackType = CRTrackMaterials.getType(trackBlock.getMaterial());
+            ResourceLocation trackType = CRTrackMaterials.getType(trackBlock.getMaterial());
             if (spec != null)
                 TransformStack.of(ms)
                     .translate(

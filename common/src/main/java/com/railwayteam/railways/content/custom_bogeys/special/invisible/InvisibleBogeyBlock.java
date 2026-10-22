@@ -31,7 +31,7 @@ import com.zurrtum.create.content.trains.bogey.BogeyStyle;
 import com.zurrtum.create.content.trains.entity.Carriage;
 import com.zurrtum.create.content.trains.entity.CarriageBogey;
 import com.zurrtum.create.content.trains.entity.TravellingPoint;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import com.zurrtum.create.foundation.block.IBE;
 import com.zurrtum.create.foundation.block.ProperWaterloggedBlock;
 import net.minecraft.core.BlockPos;
@@ -53,22 +53,22 @@ public class InvisibleBogeyBlock extends AbstractBogeyBlock<InvisibleBogeyBlockE
 		super(props, AllBogeySizes.SMALL);
 		registerDefaultState(defaultBlockState().setValue(WATERLOGGED, false));
 	}
-	public Identifier getTrackType(BogeyStyle style) {
+	public ResourceLocation getTrackType(BogeyStyle style) {
 		return CRTrackMaterials.CRTrackType.STANDARD;
 	}
 	public boolean isOnIncompatibleTrack(Carriage carriage, boolean leading) {
 		TravellingPoint point = leading ? carriage.getLeadingPoint() : carriage.getTrailingPoint();
 		CarriageBogey bogey = leading ? carriage.leadingBogey() : carriage.trailingBogey();
-		
+
 		if (point.edge == null)
 			return false;
-		
+
 		return CRTrackMaterials.getType(point.edge.getTrackMaterial()) != getTrackType(bogey.getStyle())
 			&& CRTrackMaterials.getType(point.edge.getTrackMaterial()) != CRTrackType.WIDE_GAUGE
 			&& CRTrackMaterials.getType(point.edge.getTrackMaterial()) != CRTrackType.NARROW_GAUGE
 			&& CRTrackMaterials.getType(point.edge.getTrackMaterial()) != CRTrackType.MONORAIL;
 	}
-	public Set<Identifier> getValidPathfindingTypes(BogeyStyle style) {
+	public Set<ResourceLocation> getValidPathfindingTypes(BogeyStyle style) {
 		return ImmutableSet.of(getTrackType(style), CRTrackType.WIDE_GAUGE, CRTrackType.NARROW_GAUGE, CRTrackType.MONORAIL);
 	}
 	public double getWheelPointSpacing() {

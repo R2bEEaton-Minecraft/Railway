@@ -35,7 +35,7 @@ import com.zurrtum.create.content.trains.track.TrackShape;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -147,7 +147,7 @@ public abstract class MixinTrackVisual extends AbstractVisual implements BlockEn
             }
         }
 
-        Identifier trackType = null;
+        ResourceLocation trackType = null;
         if (state.getBlock() instanceof TrackBlock trackBlock)
             trackType = CRTrackMaterials.getType(trackBlock.getMaterial());
 
@@ -220,7 +220,7 @@ public abstract class MixinTrackVisual extends AbstractVisual implements BlockEn
     @Unique
     private void railways$makeCurveRailCasings(PoseStack ms, BezierConnection bc, Block casingBlock, PartialModel casingModel,
                                                SegmentAngles segments, int segment, double shiftDown) {
-        Identifier trackType = CRTrackMaterials.getType(bc.getMaterial());
+        ResourceLocation trackType = CRTrackMaterials.getType(bc.getMaterial());
         if (trackType == WIDE_GAUGE) {
             for (boolean first : Iterate.trueAndFalse) {
                 for (boolean inner : Iterate.trueAndFalse) {

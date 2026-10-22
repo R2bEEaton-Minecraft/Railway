@@ -22,22 +22,15 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.railwayteam.railways.registry.CRBlockPartials;
 import com.zurrtum.create.client.catnip.render.CachedBuffers;
 import com.zurrtum.create.client.catnip.render.SuperByteBuffer;
-import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
-import net.minecraft.client.renderer.rendertype.RenderSetup;
-import net.minecraft.client.renderer.rendertype.RenderType;
-import net.minecraft.resources.Identifier;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.world.level.block.Blocks;
 
 public class ConductorFlagLayer extends RenderLayer<ConductorRenderState, ConductorRenderModel> {
 
-    private static final RenderType CUTOUT_BLOCKS = RenderType.create("railways_conductor_flag",
-            RenderSetup.builder(RenderPipelines.CUTOUT_BLOCK)
-                    .withTexture("Sampler0", Identifier.withDefaultNamespace("textures/atlas/blocks.png"))
-                    .useLightmap()
-                    .createRenderSetup());
+    private static final RenderType CUTOUT_BLOCKS = RenderType.cutout();
 
     public ConductorFlagLayer(RenderLayerParent<ConductorRenderState, ConductorRenderModel> pRenderer) {
         super(pRenderer);

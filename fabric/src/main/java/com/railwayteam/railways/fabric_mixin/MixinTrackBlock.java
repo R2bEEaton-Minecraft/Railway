@@ -16,7 +16,7 @@ import com.zurrtum.create.content.trains.track.TrackBlockEntity;
 import com.zurrtum.create.content.trains.track.TrackShape;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -67,7 +67,7 @@ public class MixinTrackBlock {
 
         var styleData = BogeyMenuHandlerServer.getStyle(BogeyMenuHandlerServer.getCurrentPlayer());
         BogeyStyle style = styleData.getFirst();
-        Identifier trackType = CRTrackMaterials.getType(((TrackBlock) (Object) this).getMaterial());
+        ResourceLocation trackType = CRTrackMaterials.getType(((TrackBlock) (Object) this).getMaterial());
 
         Optional<BogeyStyle> mappedStyleOptional = CRBogeyStyles.getMapped(style, trackType, true);
         if (mappedStyleOptional.isPresent())

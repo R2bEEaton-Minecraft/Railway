@@ -22,7 +22,7 @@ import com.google.gson.Gson;
 import com.railwayteam.railways.Railways;
 import com.railwayteam.railways.content.fuel.LiquidFuelManager;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import org.spongepowered.asm.mixin.Mixin;
 
@@ -34,7 +34,7 @@ public abstract class LiquidFuelManagerReloadListenerMixin extends SimpleJsonRes
     public LiquidFuelManagerReloadListenerMixin(Gson gson, String directory) {
         super(gson, directory);
     }
-    public Identifier getFabricId() {
+    public ResourceLocation getFabricId() {
         return Railways.asResource(LiquidFuelManager.ReloadListener.ID);
     }
 }

@@ -7,7 +7,7 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -48,7 +48,7 @@ public class PlayerSelectionImpl extends PlayerSelection {
     }
 
     @Override
-    public void accept(Identifier id, FriendlyByteBuf buffer) {
+    public void accept(ResourceLocation id, FriendlyByteBuf buffer) {
         byte[] data = new byte[buffer.readableBytes()];
         buffer.getBytes(buffer.readerIndex(), data);
         CustomPacketPayload.Type<PacketSetImpl.RailwaysPayload> type = new CustomPacketPayload.Type<>(id);

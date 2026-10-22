@@ -11,9 +11,14 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(targets = "net.minecraft.client.renderer.block.model.BlockElement$Deserializer")
 public class BlockElementDeserializerMixin {
-    @Inject(method = "getPosition", at = @At("HEAD"), cancellable = true)
-    private static void railways$allowExtendedBlockModelBounds(JsonObject object, String key, CallbackInfoReturnable<Vector3f> cir) {
-        cir.setReturnValue(railways$getVector3f(object, key));
+    @Inject(method = "getFrom", at = @At("HEAD"), cancellable = true)
+    private void railways$allowExtendedFrom(JsonObject object, CallbackInfoReturnable<Vector3f> cir) {
+        cir.setReturnValue(railways$getVector3f(object, "from"));
+    }
+
+    @Inject(method = "getTo", at = @At("HEAD"), cancellable = true)
+    private void railways$allowExtendedTo(JsonObject object, CallbackInfoReturnable<Vector3f> cir) {
+        cir.setReturnValue(railways$getVector3f(object, "to"));
     }
 
     @Unique

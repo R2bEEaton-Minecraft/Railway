@@ -24,6 +24,7 @@ import com.railwayteam.railways.content.buffer.TrackBufferBlockEntity;
 import com.railwayteam.railways.content.buffer.headstock.CopycatHeadstockBlockEntity;
 import com.railwayteam.railways.registry.CRBlocks;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
+import net.minecraft.network.chat.Component;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTestHelper;
@@ -83,7 +84,7 @@ public class TrackBufferGameTests {
                 .setValue(StandardTrackBufferBlock.FACING, Direction.NORTH));
         helper.assertBlockPresent(CRBlocks.BIG_BUFFER.get(), pos);
         DyeableBlockEntity be = RailwaysGameTestHelper.assertBlockEntity(helper, pos, DyeableBlockEntity.class);
-        helper.assertTrue(be.getColor() == null, "Initial buffer dye color should be null");
+        helper.assertTrue(be.getColor() == null, Component.literal("Initial buffer dye color should be null"));
         helper.succeed();
     }
 
@@ -109,7 +110,7 @@ public class TrackBufferGameTests {
         helper.assertBlockPresent(CRBlocks.COPYCAT_HEADSTOCK.get(), pos);
 
         CopycatHeadstockBlockEntity be = RailwaysGameTestHelper.assertBlockEntity(helper, pos, CopycatHeadstockBlockEntity.class);
-        helper.assertFalse(be.hasCustomMaterial(), "Freshly placed copycat headstock should not have a custom material");
+        helper.assertFalse(be.hasCustomMaterial(), Component.literal("Freshly placed copycat headstock should not have a custom material"));
         helper.succeed();
     }
 
@@ -123,8 +124,8 @@ public class TrackBufferGameTests {
         CopycatHeadstockBlockEntity be = RailwaysGameTestHelper.assertBlockEntity(helper, pos, CopycatHeadstockBlockEntity.class);
         BlockState material = Blocks.BRICKS.defaultBlockState();
         be.setMaterial(material);
-        helper.assertTrue(be.hasCustomMaterial(), "Copycat headstock should report a custom material after being set");
-        helper.assertTrue(be.getMaterial() == material, "Copycat headstock material should match the applied texture");
+        helper.assertTrue(be.hasCustomMaterial(), Component.literal("Copycat headstock should report a custom material after being set"));
+        helper.assertTrue(be.getMaterial() == material, Component.literal("Copycat headstock material should match the applied texture"));
         helper.succeed();
     }
 
@@ -138,12 +139,12 @@ public class TrackBufferGameTests {
         CopycatHeadstockBlockEntity be = RailwaysGameTestHelper.assertBlockEntity(helper, pos, CopycatHeadstockBlockEntity.class);
         // CopycatBlockEntity#cycleMaterial() only cycles a trapdoor's HALF when it is also open
         be.setMaterial(Blocks.OAK_TRAPDOOR.defaultBlockState().setValue(TrapDoorBlock.OPEN, true));
-        helper.assertTrue(be.hasCustomMaterial(), "Copycat headstock should have a custom material set before cycling");
+        helper.assertTrue(be.hasCustomMaterial(), Component.literal("Copycat headstock should have a custom material set before cycling"));
 
         BlockState beforeCycle = be.getMaterial();
         boolean cycled = be.cycleMaterial();
-        helper.assertTrue(cycled, "Cycling the copycat headstock's material variant should succeed for an open trapdoor material");
-        helper.assertTrue(be.getMaterial() != beforeCycle, "Cycling should change the stored material variant");
+        helper.assertTrue(cycled, Component.literal("Cycling the copycat headstock's material variant should succeed for an open trapdoor material"));
+        helper.assertTrue(be.getMaterial() != beforeCycle, Component.literal("Cycling should change the stored material variant"));
         helper.succeed();
     }
 }

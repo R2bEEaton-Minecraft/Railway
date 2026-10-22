@@ -26,6 +26,7 @@ import com.zurrtum.create.content.trains.track.TrackBlock;
 import com.zurrtum.create.content.trains.track.TrackMaterial;
 import com.zurrtum.create.content.trains.track.TrackShape;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
+import net.minecraft.network.chat.Component;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.world.level.block.Blocks;
@@ -41,7 +42,7 @@ public class TrackGameTests {
         helper.setBlock(pos, CRBlocks.OAK_TRACK.get().defaultBlockState());
         helper.assertBlockPresent(CRBlocks.OAK_TRACK.get(), pos);
         helper.assertBlockProperty(pos, TrackBlock.SHAPE, TrackShape.ZO);
-        helper.assertTrue(AllTags.AllBlockTags.TRACKS.matches(helper.getBlockState(pos)), "Oak track must match TRACKS tag");
+        helper.assertTrue(AllTags.AllBlockTags.TRACKS.matches(helper.getBlockState(pos)), Component.literal("Oak track must match TRACKS tag"));
         helper.succeed();
     }
 
@@ -51,7 +52,7 @@ public class TrackGameTests {
         helper.setBlock(pos, CRBlocks.MONORAIL_TRACK.get().defaultBlockState());
         helper.assertBlockPresent(CRBlocks.MONORAIL_TRACK.get(), pos);
         helper.assertBlockProperty(pos, TrackBlock.SHAPE, TrackShape.ZO);
-        helper.assertTrue(AllTags.AllBlockTags.TRACKS.matches(helper.getBlockState(pos)), "Monorail track must match TRACKS tag");
+        helper.assertTrue(AllTags.AllBlockTags.TRACKS.matches(helper.getBlockState(pos)), Component.literal("Monorail track must match TRACKS tag"));
         helper.succeed();
     }
 
@@ -60,7 +61,7 @@ public class TrackGameTests {
         BlockPos pos = new BlockPos(4, 1, 4);
         helper.setBlock(pos, CRBlocks.PHANTOM_TRACK.get().defaultBlockState());
         helper.assertBlockPresent(CRBlocks.PHANTOM_TRACK.get(), pos);
-        helper.assertTrue(AllTags.AllBlockTags.TRACKS.matches(helper.getBlockState(pos)), "Phantom track must match TRACKS tag");
+        helper.assertTrue(AllTags.AllBlockTags.TRACKS.matches(helper.getBlockState(pos)), Component.literal("Phantom track must match TRACKS tag"));
         helper.succeed();
     }
 
@@ -81,7 +82,7 @@ public class TrackGameTests {
             BlockPos pos = new BlockPos(index % 6 + 1, 1, (index / 6) + 1);
             helper.setBlock(pos, block.defaultBlockState());
             helper.assertBlockPresent(block, pos);
-            helper.assertTrue(AllTags.AllBlockTags.TRACKS.matches(helper.getBlockState(pos)), "Narrow track " + block + " must match TRACKS tag");
+            helper.assertTrue(AllTags.AllBlockTags.TRACKS.matches(helper.getBlockState(pos)), Component.literal("Narrow track " + block + " must match TRACKS tag"));
             index++;
             if (index > 10) break; // test representative sample
         }
@@ -96,7 +97,7 @@ public class TrackGameTests {
             BlockPos pos = new BlockPos(index % 6 + 1, 1, (index / 6) + 1);
             helper.setBlock(pos, block.defaultBlockState());
             helper.assertBlockPresent(block, pos);
-            helper.assertTrue(AllTags.AllBlockTags.TRACKS.matches(helper.getBlockState(pos)), "Wide track " + block + " must match TRACKS tag");
+            helper.assertTrue(AllTags.AllBlockTags.TRACKS.matches(helper.getBlockState(pos)), Component.literal("Wide track " + block + " must match TRACKS tag"));
             index++;
             if (index > 10) break; // test representative sample
         }

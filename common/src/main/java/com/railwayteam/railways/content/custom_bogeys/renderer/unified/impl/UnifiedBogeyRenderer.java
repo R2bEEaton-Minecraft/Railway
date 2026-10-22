@@ -28,7 +28,7 @@ import com.zurrtum.create.client.catnip.render.CachedBuffers;
 import com.zurrtum.create.client.catnip.render.SuperByteBuffer;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.renderer.SubmitNodeCollector;
-import net.minecraft.client.renderer.rendertype.RenderTypes;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.Mth;
@@ -87,7 +87,7 @@ public class UnifiedBogeyRenderer implements BogeyRenderer, BogeyDisplayHolder {
         @Override
         public void render(PoseStack poseStack, SubmitNodeCollector queue) {
             poseStack.translate(0, -1.5 - 1 / 128f, 0);
-            queue.submitCustomGeometry(poseStack, RenderTypes.cutoutMovingBlock(), this);
+            queue.submitCustomGeometry(poseStack, RenderType.cutout(), this);
             if (customState != null)
                 customState.render(poseStack, queue);
         }

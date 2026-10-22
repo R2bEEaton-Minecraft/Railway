@@ -1,7 +1,7 @@
 package com.zurrtum.create.content.trains.track;
 
 import com.railwayteam.railways.registry.CRTrackMaterials;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
@@ -10,20 +10,20 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import java.util.function.Supplier;
 
 public class TrackMaterialFactory {
-    private final Identifier id;
+    private final ResourceLocation id;
     private Supplier<? extends TrackBlock> block;
     private TrackBlockFactory blockFactory = TrackBlock::new;
-    private Identifier particle;
+    private ResourceLocation particle;
     private String langName;
-    private Identifier trackType = CRTrackMaterials.CRTrackType.STANDARD;
+    private ResourceLocation trackType = CRTrackMaterials.CRTrackType.STANDARD;
 
-    private TrackMaterialFactory(Identifier id) {
+    private TrackMaterialFactory(ResourceLocation id) {
         this.id = id;
         this.particle = id.withPrefix("block/track/");
         this.langName = id.getPath();
     }
 
-    public static TrackMaterialFactory make(Identifier id) {
+    public static TrackMaterialFactory make(ResourceLocation id) {
         return new TrackMaterialFactory(id);
     }
 
@@ -50,7 +50,7 @@ public class TrackMaterialFactory {
         return this;
     }
 
-    public TrackMaterialFactory particle(Identifier particle) {
+    public TrackMaterialFactory particle(ResourceLocation particle) {
         this.particle = particle;
         return this;
     }
@@ -75,7 +75,7 @@ public class TrackMaterialFactory {
         return this;
     }
 
-    public TrackMaterialFactory trackType(Identifier trackType) {
+    public TrackMaterialFactory trackType(ResourceLocation trackType) {
         this.trackType = trackType;
         return this;
     }
@@ -90,7 +90,7 @@ public class TrackMaterialFactory {
         return material[0];
     }
 
-    public Identifier getId() {
+    public ResourceLocation getId() {
         return id;
     }
 

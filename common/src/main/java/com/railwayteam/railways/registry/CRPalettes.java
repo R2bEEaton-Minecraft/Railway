@@ -240,11 +240,11 @@ public class CRPalettes {
             blocks.put(palettesColor, registered);
 
             if (palettesColor.isNetherite()) {
-                EmiRecipeDefaultsGen.TAG_DEFAULTS.put(dyeGroupTag, blocks.get(PalettesColor.NETHERITE).getId().toIdentifier());
+                EmiRecipeDefaultsGen.TAG_DEFAULTS.put(dyeGroupTag, blocks.get(PalettesColor.NETHERITE).getId());
             }
 
             if (cycleGroupCategory != null && cycleGroupCategory.baseStyle.get() == this) {
-                EmiRecipeDefaultsGen.TAG_DEFAULTS.put(CYCLE_GROUPS.get(Pair.of(palettesColor, cycleGroupCategory)), registered.getId().toIdentifier());
+                EmiRecipeDefaultsGen.TAG_DEFAULTS.put(CYCLE_GROUPS.get(Pair.of(palettesColor, cycleGroupCategory)), registered.getId());
             }
         }
 

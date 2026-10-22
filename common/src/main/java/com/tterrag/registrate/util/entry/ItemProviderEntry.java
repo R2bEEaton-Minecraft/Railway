@@ -1,12 +1,12 @@
 package com.tterrag.registrate.util.entry;
 
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
 public class ItemProviderEntry<T extends Item> extends RegistryEntry<T> implements ItemLike {
-    public ItemProviderEntry(Identifier id, T value) {
+    public ItemProviderEntry(ResourceLocation id, T value) {
         super(id, value);
     }
 

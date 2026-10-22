@@ -15,7 +15,7 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
@@ -105,7 +105,7 @@ public class BogeyMenuHandlerClient {
 			for (Tag favoriteTag : favoritesList) {
 				if (!(favoriteTag instanceof StringTag stringTag))
 					continue;
-				Identifier loc = Identifier.tryParse(stringTag.value());
+				ResourceLocation loc = ResourceLocation.tryParse(stringTag.value());
 				if (loc == null)
 					continue;
 				BogeyStyle style = AllBogeyStyles.BOGEY_STYLES.get(loc);
@@ -161,7 +161,7 @@ public class BogeyMenuHandlerClient {
 		});
 	}
 
-	private static Indicator.State styleFits(BogeyEntry bogeyEntry, Identifier trackType) {
+	private static Indicator.State styleFits(BogeyEntry bogeyEntry, ResourceLocation trackType) {
 		if (CRBogeyStyles.styleFitsTrack(bogeyEntry.bogeyStyle(), trackType))
 			return Indicator.State.GREEN;
 

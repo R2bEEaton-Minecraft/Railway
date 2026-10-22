@@ -38,7 +38,7 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ServerGamePacketListener;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.ApiStatus.Internal;
 
@@ -87,7 +87,7 @@ public class PacketSetImpl extends PacketSet {
 		}
 	}
 
-	private static CustomPacketPayload.Type<RailwaysPayload> payloadType(Identifier id) {
+	private static CustomPacketPayload.Type<RailwaysPayload> payloadType(ResourceLocation id) {
 		return new CustomPacketPayload.Type<>(id);
 	}
 
@@ -109,7 +109,7 @@ public class PacketSetImpl extends PacketSet {
 		private static RailwaysPayload decode(RegistryFriendlyByteBuf buf) {
 			int readableBefore = buf.readableBytes();
 			try {
-				Identifier id = buf.readIdentifier();
+				ResourceLocation id = buf.readResourceLocation();
 				byte[] data = buf.readByteArray();
 				return new RailwaysPayload(payloadType(id), data);
 			} catch (Throwable t) {
@@ -119,11 +119,11 @@ public class PacketSetImpl extends PacketSet {
 		}
 
 		private RailwaysPayload(RegistryFriendlyByteBuf buf) {
-			this(payloadType(buf.readIdentifier()), buf.readByteArray());
+			this(payloadType(buf.readResourceLocation()), buf.readByteArray());
 		}
 
 		private void write(RegistryFriendlyByteBuf buf) {
-			buf.writeIdentifier(type.id());
+			buf.writeResourceLocation(type.id());
 			buf.writeByteArray(data);
 		}
 

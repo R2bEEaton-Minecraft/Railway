@@ -26,12 +26,12 @@ import com.railwayteam.railways.registry.CRItems;
 import com.zurrtum.create.AllBlocks;
 import com.zurrtum.create.client.ponder.api.registration.PonderSceneRegistrationHelper;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 
 
 public class CRPonderIndex {
-    public static void register(PonderSceneRegistrationHelper<Identifier> helper) {
+    public static void register(PonderSceneRegistrationHelper<ResourceLocation> helper) {
         PonderSceneRegistrationHelper<Item> HELPER = helper.withKeyFunction(BuiltInRegistries.ITEM::getKey);
 
         HELPER.forComponents(CRBlocks.SEMAPHORE.asItem())

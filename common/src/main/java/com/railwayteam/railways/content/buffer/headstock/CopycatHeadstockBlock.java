@@ -58,7 +58,6 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
-import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -172,7 +171,7 @@ public class CopycatHeadstockBlock extends WaterloggedCopycatBlock implements Bl
                     && state.getValue(UPSIDE_DOWN) == neighborState.getValue(UPSIDE_DOWN);
             if (material.skipRendering(otherMaterial, dir.getOpposite()))
                 return isOccluded(state, neighborState, dir.getOpposite());
-            
+
             OcclusionTestLevel occlusionTestLevel = new OcclusionTestLevel(level);
             occlusionTestLevel.setBlock(pos, material);
             occlusionTestLevel.setBlock(otherPos, otherMaterial);
@@ -181,7 +180,7 @@ public class CopycatHeadstockBlock extends WaterloggedCopycatBlock implements Bl
                     occlusionTestLevel.clear();
                     return isOccluded(state, neighborState, dir.getOpposite());
                 }
-            
+
             occlusionTestLevel.clear();
         }
 

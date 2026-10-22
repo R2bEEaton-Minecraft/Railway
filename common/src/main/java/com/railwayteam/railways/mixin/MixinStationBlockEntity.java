@@ -92,7 +92,7 @@ public abstract class MixinStationBlockEntity extends SmartBlockEntity {
         Pair<BogeyStyle, BogeySize> styleData = BogeyMenuHandlerServer.getStyle(player.getUUID());
         BogeyStyle style = styleData.getFirst();
 
-        Identifier trackType = CRTrackMaterials.getType(track.getMaterial());
+        ResourceLocation trackType = CRTrackMaterials.getType(track.getMaterial());
 
         Optional<BogeyStyle> mappedStyleOptional = CRBogeyStyles.getMapped(style, trackType, true);
         if (mappedStyleOptional.isPresent())
@@ -118,7 +118,7 @@ public abstract class MixinStationBlockEntity extends SmartBlockEntity {
     private void clearDropTrain(ServerPlayer sender, CallbackInfoReturnable<Boolean> cir) {
         dropScheduleTrain = null;
     }
-    
+
     // TODO - Checkover
     @ModifyReceiver(method = "dropSchedule", at = @At(value = "FIELD", target = "Lcom/simibubi/create/content/trains/entity/Train;runtime:Lcom/simibubi/create/content/trains/schedule/ScheduleRuntime;"), require = 0)
     private Train returnOverridenTrain(Train instance) {

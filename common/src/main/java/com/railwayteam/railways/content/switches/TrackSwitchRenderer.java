@@ -13,7 +13,7 @@ import com.zurrtum.create.content.trains.track.TrackTargetingBehaviour;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
-import net.minecraft.client.renderer.rendertype.RenderTypes;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.state.CameraRenderState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -97,10 +97,10 @@ public class TrackSwitchRenderer
 
     @Override
     public void submit(SwitchRenderState state, PoseStack matrices, SubmitNodeCollector queue, CameraRenderState cameraState) {
-        super.submit(state, matrices, queue, cameraState);
+
 
         if (state.flag != null) {
-            queue.submitCustomGeometry(matrices, RenderTypes.cutoutMovingBlock(), (pose, consumer) -> {
+            queue.submitCustomGeometry(matrices, RenderType.cutout(), (pose, consumer) -> {
                 SuperByteBuffer flag = state.flag
                     .rotateCenteredDegrees(state.yRot, Direction.Axis.Y)
                     .light(state.lightCoords);
@@ -121,7 +121,7 @@ public class TrackSwitchRenderer
         }
 
         if (state.handle != null) {
-            queue.submitCustomGeometry(matrices, RenderTypes.cutoutMovingBlock(), (pose, consumer) ->
+            queue.submitCustomGeometry(matrices, RenderType.cutout(), (pose, consumer) ->
                 state.handle
                     .rotateCenteredDegrees(state.yRot, Direction.Axis.Y)
                     .rotateCentered(-1.5708f, Direction.UP)
@@ -130,7 +130,7 @@ public class TrackSwitchRenderer
         }
 
         if (state.overlayModel != null && state.level != null && state.targetPosition != null && state.trackState != null) {
-            queue.submitCustomGeometry(matrices, RenderTypes.cutoutMovingBlock(), (pose, consumer) -> {
+            queue.submitCustomGeometry(matrices, RenderType.cutout(), (pose, consumer) -> {
                 PoseStack overlayMatrices = new PoseStack();
                 overlayMatrices.translate(state.trackOffset.getX(), state.trackOffset.getY(), state.trackOffset.getZ());
                 CustomTrackOverlayRendering.renderOverlayInto(state.level, state.targetPosition, state.trackState,

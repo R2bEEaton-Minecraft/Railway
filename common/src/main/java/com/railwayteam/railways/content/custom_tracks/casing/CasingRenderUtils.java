@@ -27,7 +27,6 @@ import com.zurrtum.create.client.flywheel.lib.model.baked.BakedModelBuilder;
 import com.zurrtum.create.client.flywheel.lib.model.baked.PartialModel;
 import com.zurrtum.create.content.trains.track.BezierConnection;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.model.geom.builders.UVPair;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.BlockModelPart;
 import net.minecraft.client.renderer.block.model.BlockStateModel;
@@ -35,7 +34,7 @@ import net.minecraft.client.renderer.block.model.SimpleModelWrapper;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.QuadCollection;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -72,7 +71,7 @@ public abstract class CasingRenderUtils {
     public static List<Vec3> casingPositions(BezierConnection bc) {
         List<Vec3> positions = new ArrayList<>();
         List<int[]> takenPositions = new ArrayList<>();
-        Identifier trackType = CRTrackMaterials.getType(bc.getMaterial());
+        ResourceLocation trackType = CRTrackMaterials.getType(bc.getMaterial());
 
         for (BezierConnection.Segment segment : bc) {
             double factor = 1.3;
@@ -163,29 +162,16 @@ public abstract class CasingRenderUtils {
 
         TextureAtlasSprite baseSprite = baseQuad.sprite();
         TextureAtlasSprite targetSprite = sourceQuad.sprite();
-        return new BakedQuad(
-            baseQuad.position0(),
-            baseQuad.position1(),
-            baseQuad.position2(),
-            baseQuad.position3(),
-            transformUv(baseQuad.packedUV0(), baseSprite, targetSprite),
-            transformUv(baseQuad.packedUV1(), baseSprite, targetSprite),
-            transformUv(baseQuad.packedUV2(), baseSprite, targetSprite),
-            transformUv(baseQuad.packedUV3(), baseSprite, targetSprite),
-            baseQuad.tintIndex(),
-            baseQuad.direction(),
-            targetSprite,
-            baseQuad.shade(),
-            baseQuad.lightEmission()
-        );
-    }
-
-    private static long transformUv(long packedUv, TextureAtlasSprite baseSprite, TextureAtlasSprite targetSprite) {
-        float u = UVPair.unpackU(packedUv);
-        float v = UVPair.unpackV(packedUv);
-        return UVPair.pack(
-            targetSprite.getU(getUnInterpolatedU(baseSprite, u)),
-            targetSprite.getV(getUnInterpolatedV(baseSprite, v))
-        );
+        int[] vertices = baseQuad.vertices().clone();
+        int stride = vertices.length / 4;
+        for (int vertex = 0; vertex < 4; vertex++) {
+            int uv = vertex * stride + 4;
+            float u = Float.intBitsToFloat(vertices[uv]);
+            float v = Float.intBitsToFloat(vertices[uv + 1]);
+            vertices[uv] = Float.floatToRawIntBits(targetSprite.getU(getUnInterpolatedU(baseSprite, u)));
+            vertices[uv + 1] = Float.floatToRawIntBits(targetSprite.getV(getUnInterpolatedV(baseSprite, v)));
+        }
+        return new BakedQuad(vertices, baseQuad.tintIndex(), baseQuad.direction(), targetSprite,
+            baseQuad.shade(), baseQuad.lightEmission());
     }
 }

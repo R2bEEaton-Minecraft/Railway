@@ -22,6 +22,7 @@ import com.railwayteam.railways.content.switches.TrackSwitchBlock;
 import com.railwayteam.railways.content.switches.TrackSwitchBlockEntity;
 import com.railwayteam.railways.registry.CRBlocks;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
+import net.minecraft.network.chat.Component;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTestHelper;
@@ -38,7 +39,7 @@ public class TrackSwitchGameTests {
         helper.assertBlockProperty(pos, TrackSwitchBlock.LOCKED, false);
 
         TrackSwitchBlockEntity be = RailwaysGameTestHelper.assertBlockEntity(helper, pos, TrackSwitchBlockEntity.class);
-        helper.assertFalse(be.isAutomatic(), "Andesite switch should be manual");
+        helper.assertFalse(be.isAutomatic(), Component.literal("Andesite switch should be manual"));
         helper.succeed();
     }
 
@@ -51,7 +52,7 @@ public class TrackSwitchGameTests {
         helper.assertBlockPresent(CRBlocks.BRASS_SWITCH.get(), pos);
 
         TrackSwitchBlockEntity be = RailwaysGameTestHelper.assertBlockEntity(helper, pos, TrackSwitchBlockEntity.class);
-        helper.assertTrue(be.isAutomatic(), "Brass switch should be automatic");
+        helper.assertTrue(be.isAutomatic(), Component.literal("Brass switch should be automatic"));
         helper.succeed();
     }
 

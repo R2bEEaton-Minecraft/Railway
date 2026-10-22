@@ -39,7 +39,7 @@ import com.zurrtum.create.content.trains.signal.SignalBoundary;
 import com.zurrtum.create.content.trains.signal.SignalEdgeGroup;
 import com.zurrtum.create.content.trains.signal.TrackEdgePoint;
 import com.zurrtum.create.content.trains.station.GlobalStation;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.spongepowered.asm.mixin.Mixin;
@@ -64,7 +64,7 @@ public abstract class MixinNavigationSearchable implements IGenerallySearchableN
         if (graph == null) return;
 
         boolean skipValidCheck = false;
-        Set<Identifier> validTypes = new HashSet<>();
+        Set<ResourceLocation> validTypes = new HashSet<>();
         for (int i = 0; i < train.carriages.size(); i++) {
             Carriage carriage = train.carriages.get(i);
             // CarriageBogey.type is public; getStyle() is public

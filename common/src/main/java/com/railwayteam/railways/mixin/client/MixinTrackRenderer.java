@@ -33,7 +33,7 @@ import com.zurrtum.create.client.flywheel.lib.model.baked.PartialModel;
 import com.zurrtum.create.client.flywheel.lib.transform.TransformStack;
 import com.zurrtum.create.client.catnip.render.CachedBuffers;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -66,7 +66,7 @@ public class MixinTrackRenderer {
                     }
                 }
 
-                Identifier trackType = null;
+                ResourceLocation trackType = null;
                 if (te.getBlockState().getBlock() instanceof TrackBlock trackBlock)
                     trackType = CRTrackMaterials.getType(trackBlock.getMaterial());
 

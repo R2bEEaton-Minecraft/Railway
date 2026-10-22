@@ -66,7 +66,7 @@ import net.minecraft.client.renderer.entity.MinecartRenderer;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.vehicle.minecart.AbstractMinecart;
+import net.minecraft.world.entity.vehicle.AbstractMinecart;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;

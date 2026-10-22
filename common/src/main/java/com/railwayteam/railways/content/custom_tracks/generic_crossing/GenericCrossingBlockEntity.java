@@ -30,7 +30,7 @@ import com.zurrtum.create.catnip.data.Couple;
 import com.zurrtum.create.catnip.data.Pair;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
@@ -68,11 +68,11 @@ public class GenericCrossingBlockEntity extends SmartBlockEntity implements IMer
     public void addBehaviours(List<BlockEntityBehaviour<?>> behaviours) {}
 
         protected void read(CompoundTag tag, boolean clientPacket) {
-        
+
 
         boolean updateMesh = false;
-        TrackMaterial primary = TrackMaterial.fromId(Identifier.parse(tag.getString("PrimaryMaterial").orElse(AllTrackMaterials.ANDESITE.getId().toString())));
-        TrackMaterial secondary = TrackMaterial.fromId(Identifier.parse(tag.getString("SecondaryMaterial").orElse(AllTrackMaterials.ANDESITE.getId().toString())));
+        TrackMaterial primary = TrackMaterial.fromId(ResourceLocation.parse(tag.getString("PrimaryMaterial").orElse(AllTrackMaterials.ANDESITE.getId().toString())));
+        TrackMaterial secondary = TrackMaterial.fromId(ResourceLocation.parse(tag.getString("SecondaryMaterial").orElse(AllTrackMaterials.ANDESITE.getId().toString())));
 
         if (primary != getPrimary() || secondary != getSecondary()) updateMesh = true;
 
@@ -88,7 +88,7 @@ public class GenericCrossingBlockEntity extends SmartBlockEntity implements IMer
     }
 
         protected void write(CompoundTag tag, boolean clientPacket) {
-        
+
 
         tag.putString("PrimaryMaterial", getPrimary().getId().toString());
         tag.putString("SecondaryMaterial", getSecondary().getId().toString());

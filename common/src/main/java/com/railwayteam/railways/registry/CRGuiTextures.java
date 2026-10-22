@@ -6,7 +6,7 @@ import com.zurrtum.create.client.catnip.gui.element.ScreenElement;
 import com.zurrtum.create.catnip.theme.Color;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.RenderPipelines;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 
 public enum CRGuiTextures implements ScreenElement {
     TRAIN_HUD_SWITCH_BRASS("widgets", 0, 0, 42, 16),
@@ -23,7 +23,7 @@ public enum CRGuiTextures implements ScreenElement {
     BOGEY_MENU_SCROLL_BAR_DISABLED("bogeymenu", 288, 0, 8, 15);
 
     public static final int FONT_COLOR = 0x575F7A;
-    public final Identifier location;
+    public final ResourceLocation location;
     public final int width;
     public final int height;
     public final int startX;

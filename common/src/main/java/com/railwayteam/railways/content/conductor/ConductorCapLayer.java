@@ -3,14 +3,12 @@ package com.railwayteam.railways.content.conductor;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.model.geom.EntityModelSet;
-import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
-import net.minecraft.client.renderer.rendertype.RenderSetup;
-import net.minecraft.client.renderer.rendertype.RenderType;
-import net.minecraft.resources.Identifier;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 
 public class ConductorCapLayer extends RenderLayer<ConductorRenderState, ConductorRenderModel> {
@@ -34,16 +32,13 @@ public class ConductorCapLayer extends RenderLayer<ConductorRenderState, Conduct
         getParentModel().getHead().translateAndRotate(poseStack);
         // Clear the conductor's 0.2-pixel outer head layer so the crown does not intersect the forehead.
         poseStack.translate(0.0F, 0.0F, -0.25F / 16.0F);
+        // The short overload takes an outline color, not a tint. Keep the cap textured.
         submitter.submitModel((Model) capModel, state, poseStack, entityCutoutNoCull(cap.textureId),
-            packedLight, LivingEntityRenderer.getOverlayCoords(state, 0), -1, null);
+            packedLight, LivingEntityRenderer.getOverlayCoords(state, 0), -1, null, state.outlineColor, null);
         poseStack.popPose();
     }
 
-    public static RenderType entityCutoutNoCull(Identifier texture) {
-        return RenderType.create("railways_conductor_cap", RenderSetup.builder(RenderPipelines.ENTITY_CUTOUT_NO_CULL)
-            .withTexture("Sampler0", texture)
-            .useLightmap()
-            .useOverlay()
-            .createRenderSetup());
+    public static RenderType entityCutoutNoCull(ResourceLocation texture) {
+        return RenderType.entityCutoutNoCull(texture);
     }
 }

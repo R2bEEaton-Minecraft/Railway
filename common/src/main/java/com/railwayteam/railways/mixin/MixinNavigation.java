@@ -44,7 +44,7 @@ import com.zurrtum.create.content.trains.signal.SignalBoundary;
 import com.zurrtum.create.content.trains.signal.SignalEdgeGroup;
 import com.zurrtum.create.content.trains.signal.TrackEdgePoint;
 import com.zurrtum.create.content.trains.station.GlobalStation;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import com.zurrtum.create.catnip.data.Couple;
 import com.zurrtum.create.catnip.data.Iterate;
 import com.zurrtum.create.catnip.data.Pair;
@@ -116,7 +116,7 @@ public abstract class MixinNavigation implements IWaypointableNavigation, IGener
             return 10;
         return original.call(instance);
     }
-    
+
     @WrapOperation(method = "search(DDZLjava/util/ArrayList;Lcom/simibubi/create/content/trains/entity/Navigation$StationTest;)V", at = @At(value = "INVOKE", target = "Lcom/simibubi/create/content/trains/station/GlobalStation;getPresentTrain()Lcom/simibubi/create/content/trains/entity/Train;"))
     private Train replacePresentTrain(GlobalStation instance, Operation<Train> original) {
         return ((ILimitedGlobalStation) instance).orDisablingTrain(original.call(instance), train);
@@ -148,7 +148,7 @@ public abstract class MixinNavigation implements IWaypointableNavigation, IGener
 
         // Cache the list of track types that the train can travel on
         boolean skipValidCheck = false;
-        Set<Identifier> validTypes = new HashSet<>();
+        Set<ResourceLocation> validTypes = new HashSet<>();
         for (int i = 0; i < train.carriages.size(); i++) {
             Carriage carriage = train.carriages.get(i);
             AbstractBogeyBlock<?> leadingType = ((AccessorCarriageBogey) carriage.leadingBogey()).getType();

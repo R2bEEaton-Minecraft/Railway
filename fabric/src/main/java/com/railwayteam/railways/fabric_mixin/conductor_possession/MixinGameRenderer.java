@@ -7,7 +7,7 @@ import com.railwayteam.railways.content.conductor.ClientHandler;
 import com.railwayteam.railways.content.conductor.ConductorEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.BlockHitResult;
@@ -27,7 +27,7 @@ public abstract class MixinGameRenderer {
     private Minecraft minecraft;
 
     @Shadow
-    public abstract void setPostEffect(Identifier postEffectId);
+    public abstract void setPostEffect(ResourceLocation postEffectId);
 
     @Inject(method = "bobView", at = @At("HEAD"), cancellable = true)
     private void railways$bobView(PoseStack poseStack, float partialTicks, CallbackInfo ci) {
@@ -46,7 +46,7 @@ public abstract class MixinGameRenderer {
     @Inject(method = "checkEntityPostEffect", at = @At("RETURN"))
     private void railways$checkEntityPostEffect(Entity entity, CallbackInfo ci) {
         if (entity instanceof ConductorEntity && CRConfigs.client().useConductorSpyShader.get())
-            setPostEffect(Identifier.fromNamespaceAndPath("railways", "scan_pincushion"));
+            setPostEffect(ResourceLocation.fromNamespaceAndPath("railways", "scan_pincushion"));
     }
 
     @Inject(method = "shouldRenderBlockOutline", at = @At("HEAD"), cancellable = true)

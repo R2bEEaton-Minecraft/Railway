@@ -24,7 +24,7 @@ import com.google.gson.JsonPrimitive;
 import net.minecraft.ResourceLocationException;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.material.Fluid;
 
@@ -72,12 +72,12 @@ public class LiquidFuelType {
                                 String string = primitive.getAsString();
 
                                 if (string.startsWith("#")) {
-                                    TagKey<Fluid> tag = TagKey.create(Registries.FLUID, Identifier.parse(primitive.getAsString().substring(1)));
+                                    TagKey<Fluid> tag = TagKey.create(Registries.FLUID, ResourceLocation.parse(primitive.getAsString().substring(1)));
                                     if (tag != null) {
                                         type.fluidTags.add(() -> tag);
                                     }
                                 } else {
-                                    Fluid fluid = BuiltInRegistries.FLUID.get(Identifier.parse(primitive.getAsString()))
+                                    Fluid fluid = BuiltInRegistries.FLUID.get(ResourceLocation.parse(primitive.getAsString()))
                                         .map(reference -> reference.value())
                                         .orElse(null);
                                     if (fluid != null) {

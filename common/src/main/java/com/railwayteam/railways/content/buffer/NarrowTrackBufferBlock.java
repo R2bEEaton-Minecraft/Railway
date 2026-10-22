@@ -21,7 +21,7 @@ package com.railwayteam.railways.content.buffer;
 import com.railwayteam.railways.Railways;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
@@ -56,7 +56,7 @@ public class NarrowTrackBufferBlock extends WoodVariantTrackBufferBlock {
             this.model = model;
         }
 
-        public Identifier getModel() {
+        public ResourceLocation getModel() {
             return Railways.asResource("block/buffer/" + model);
         }
         public String getSerializedName() {

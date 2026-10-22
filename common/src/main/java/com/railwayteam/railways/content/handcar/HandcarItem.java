@@ -40,7 +40,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.Direction.Axis;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -201,7 +201,7 @@ public class HandcarItem extends BlockItem implements IDeployAnywayBlockItem {
         contraption.expandBoundsAroundAxis(Axis.Y);
 
         CompoundTag bogeyData = new CompoundTag();
-        bogeyData.store(BOGEY_STYLE_KEY, Identifier.CODEC, CRBogeyStyles.HANDCAR.id);
+        bogeyData.store(BOGEY_STYLE_KEY, ResourceLocation.CODEC, CRBogeyStyles.HANDCAR.id);
         CarriageBogey bogey = new CarriageBogey(getBogeyBlock(), false, bogeyData, tp1, tp2);
         Carriage carriage = new Carriage(bogey, null, 0);
         Train train = new Train(UUID.randomUUID(), owner, graph, List.of(carriage), new ArrayList<>(), true, 0);

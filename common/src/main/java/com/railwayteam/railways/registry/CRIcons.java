@@ -4,10 +4,10 @@ import com.railwayteam.railways.Railways;
 import com.zurrtum.create.client.foundation.gui.AllIcons;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.RenderPipelines;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 
 public class CRIcons extends AllIcons {
-    public static final Identifier ICON_ATLAS = Railways.asResource("textures/gui/icons.png");
+    public static final ResourceLocation ICON_ATLAS = Railways.asResource("textures/gui/icons.png");
 
     private static int x = 0;
     private static int y = -1;

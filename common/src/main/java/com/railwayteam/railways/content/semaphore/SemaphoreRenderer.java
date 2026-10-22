@@ -26,14 +26,13 @@ import com.zurrtum.create.client.catnip.render.CachedBuffers;
 import com.zurrtum.create.client.catnip.render.SuperByteBuffer;
 import com.zurrtum.create.client.flywheel.lib.model.baked.PartialModel;
 import com.zurrtum.create.client.foundation.blockEntity.renderer.SmartBlockEntityRenderer;
-import com.zurrtum.create.client.foundation.render.CreateRenderTypes;
+import com.zurrtum.create.client.foundation.render.RenderTypes;
 import com.zurrtum.create.catnip.math.AngleHelper;
 import net.minecraft.client.renderer.OrderedSubmitNodeCollector;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
-import net.minecraft.client.renderer.rendertype.RenderType;
-import net.minecraft.client.renderer.rendertype.RenderTypes;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.state.CameraRenderState;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.state.BlockState;
@@ -127,18 +126,18 @@ public class SemaphoreRenderer extends SmartBlockEntityRenderer<SemaphoreBlockEn
                 : (yellow ? CRBlockPartials.SEMAPHORE_LAMP_YELLOW : CRBlockPartials.SEMAPHORE_LAMP_RED);
             state.lampColorBuf = CachedBuffers.partial(lamp, blockState);
 
-            state.translucentType = CreateRenderTypes.translucent();
-            state.additiveType = CreateRenderTypes.additive();
+            state.translucentType = RenderTypes.translucent();
+            state.additiveType = RenderTypes.additive();
         }
     }
 
     @Override
     public void submit(SemaphoreRenderState state, PoseStack matrices,
                        SubmitNodeCollector queue, CameraRenderState cameraState) {
-        super.submit(state, matrices, queue, cameraState);
+
 
         if (state.armBuf != null) {
-            queue.submitCustomGeometry(matrices, RenderTypes.cutoutMovingBlock(), (pose, consumer) ->
+            queue.submitCustomGeometry(matrices, RenderType.cutout(), (pose, consumer) ->
                 state.armBuf
                     .rotateCenteredDegrees(state.yRot, Direction.Axis.Y)
                     .rotateCentered(state.armAngle, Direction.EAST)

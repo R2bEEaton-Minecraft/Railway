@@ -8,7 +8,7 @@ import com.zurrtum.create.content.trains.bogey.AllBogeySizes;
 import com.zurrtum.create.content.trains.bogey.BogeySize;
 import com.zurrtum.create.content.trains.bogey.BogeyStyle;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -28,17 +28,17 @@ public class BogeyStyleSelectionPacket implements C2SPacket {
     }
 
     public BogeyStyleSelectionPacket(FriendlyByteBuf buf) {
-        Identifier styleId = buf.readIdentifier();
+        ResourceLocation styleId = buf.readResourceLocation();
         style = AllBogeyStyles.BOGEY_STYLES.getOrDefault(styleId, AllBogeyStyles.STANDARD);
-        Identifier sizeId = buf.readBoolean() ? buf.readIdentifier() : null;
+        ResourceLocation sizeId = buf.readBoolean() ? buf.readResourceLocation() : null;
         size = sizeId == null ? null : AllBogeySizes.all().get(sizeId);
     }
 
     public void write(FriendlyByteBuf buffer) {
-        buffer.writeIdentifier(style.id);
+        buffer.writeResourceLocation(style.id);
         buffer.writeBoolean(size != null);
         if (size != null)
-            buffer.writeIdentifier(size.id());
+            buffer.writeResourceLocation(size.id());
     }
 
     public void handle(ServerPlayer sender) {

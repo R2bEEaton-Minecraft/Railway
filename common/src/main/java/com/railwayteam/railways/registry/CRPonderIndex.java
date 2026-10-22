@@ -19,10 +19,10 @@
 package com.railwayteam.railways.registry;
 
 import com.zurrtum.create.client.ponder.api.registration.PonderSceneRegistrationHelper;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 
 public class CRPonderIndex {
-    public static void register(PonderSceneRegistrationHelper<Identifier> helper) {
+    public static void register(PonderSceneRegistrationHelper<ResourceLocation> helper) {
         com.railwayteam.railways.ponder.CRPonderIndex.register(helper);
     }
 }

@@ -105,12 +105,10 @@ public class MixinToolboxHandlerClient {
 
     @ModifyVariable(
         method = "renderOverlay",
-        require = 0,
         remap = false,
         at = @At(
-            value = "INVOKE_ASSIGN",
-            target = "Lnet/minecraft/nbt/NbtUtils;readBlockPos(Lnet/minecraft/nbt/CompoundTag;)Lnet/minecraft/core/BlockPos;",
-            remap = true
+            value = "INVOKE",
+            target = "Lcom/zurrtum/create/content/equipment/toolbox/ToolboxHandler;getMaxRange(Lnet/minecraft/world/entity/player/Player;)D"
         )
     )
     @SuppressWarnings("InvalidInjectorMethodSignature")

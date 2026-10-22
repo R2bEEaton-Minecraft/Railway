@@ -4,13 +4,13 @@ import com.railwayteam.railways.Railways;
 import com.railwayteam.railways.registry.CRBlockPartials;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 
 public class ConductorRenderer extends MobRenderer<ConductorEntity, ConductorRenderState, ConductorRenderModel> {
-    public static final Identifier TEXTURE = Railways.asResource("textures/entity/conductor.png");
+    public static final ResourceLocation TEXTURE = Railways.asResource("textures/entity/conductor.png");
 
     public ConductorRenderer(EntityRendererProvider.Context ctx) {
         super(ctx, new ConductorRenderModel(ctx.bakeLayer(ConductorEntityModel.LAYER_LOCATION)), 0.2f);
@@ -49,11 +49,11 @@ public class ConductorRenderer extends MobRenderer<ConductorEntity, ConductorRen
     }
 
     @Override
-    public Identifier getTextureLocation(ConductorRenderState state) {
+    public ResourceLocation getTextureLocation(ConductorRenderState state) {
         return state.texture;
     }
 
-    private static Identifier textureFor(ConductorEntity conductor, ItemStack headItem) {
+    private static ResourceLocation textureFor(ConductorEntity conductor, ItemStack headItem) {
         String name = headItem.getHoverName().getString();
         if (name.startsWith("[sus]"))
             name = name.substring(5);
@@ -65,7 +65,7 @@ public class ConductorRenderer extends MobRenderer<ConductorEntity, ConductorRen
         }
 
         if (conductor.getCustomName() != null) {
-            Identifier texture = CRBlockPartials.CUSTOM_CONDUCTOR_SKINS_FOR_NAME.get(conductor.getCustomName().getString());
+            ResourceLocation texture = CRBlockPartials.CUSTOM_CONDUCTOR_SKINS_FOR_NAME.get(conductor.getCustomName().getString());
             if (texture != null)
                 return ensurePng(texture);
         }
@@ -73,9 +73,9 @@ public class ConductorRenderer extends MobRenderer<ConductorEntity, ConductorRen
         return TEXTURE;
     }
 
-    private static Identifier ensurePng(Identifier id) {
+    private static ResourceLocation ensurePng(ResourceLocation id) {
         if (id.getPath().endsWith(".png"))
             return id;
-        return Identifier.fromNamespaceAndPath(id.getNamespace(), id.getPath() + ".png");
+        return ResourceLocation.fromNamespaceAndPath(id.getNamespace(), id.getPath() + ".png");
     }
 }

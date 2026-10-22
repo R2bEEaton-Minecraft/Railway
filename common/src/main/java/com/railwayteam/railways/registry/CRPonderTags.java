@@ -22,11 +22,11 @@ import com.zurrtum.create.AllBlocks;
 import com.zurrtum.create.client.infrastructure.ponder.AllCreatePonderTags;
 import com.zurrtum.create.client.ponder.api.registration.PonderTagRegistrationHelper;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 
 public class CRPonderTags {
-    public static void register(PonderTagRegistrationHelper<Identifier> helper) {
+    public static void register(PonderTagRegistrationHelper<ResourceLocation> helper) {
         PonderTagRegistrationHelper<Item> HELPER = helper.withKeyFunction(BuiltInRegistries.ITEM::getKey);
 
         HELPER.addToTag(AllCreatePonderTags.DISPLAY_SOURCES)

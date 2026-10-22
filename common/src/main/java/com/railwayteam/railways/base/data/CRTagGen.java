@@ -24,7 +24,7 @@ import com.railwayteam.railways.registry.CRTags.AllItemTags;
 import com.zurrtum.create.foundation.data.TagGen;
 import com.tterrag.registrate.providers.RegistrateTagsProvider;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
@@ -38,10 +38,10 @@ import java.util.Map;
  * Based on {@link TagGen}
  */
 public class CRTagGen {
-	private static final Map<TagKey<Block>, List<Identifier>> OPTIONAL_TAGS = new HashMap<>();
+	private static final Map<TagKey<Block>, List<ResourceLocation>> OPTIONAL_TAGS = new HashMap<>();
 
 	@SafeVarargs
-	public static void addOptionalTag(Identifier id, TagKey<Block>... tags) {
+	public static void addOptionalTag(ResourceLocation id, TagKey<Block>... tags) {
 		for (TagKey<Block> tag : tags) {
 			OPTIONAL_TAGS.computeIfAbsent(tag, (e) -> new ArrayList<>()).add(id);
 		}
@@ -55,7 +55,7 @@ public class CRTagGen {
 		}
 		for (TagKey<Block> tag : OPTIONAL_TAGS.keySet()) {
 			var appender = tagAppender(prov, tag);
-			for (Identifier loc : OPTIONAL_TAGS.get(tag))
+			for (ResourceLocation loc : OPTIONAL_TAGS.get(tag))
 				appender.addOptional(loc);
 		}
 	}
@@ -93,11 +93,11 @@ public class CRTagGen {
 			return this;
 		}
 
-		public TagAppender<T> addOptional(Identifier id) {
+		public TagAppender<T> addOptional(ResourceLocation id) {
 			return this;
 		}
 
-		public TagAppender<T> addOptionalTag(Identifier id) {
+		public TagAppender<T> addOptionalTag(ResourceLocation id) {
 			return this;
 		}
 

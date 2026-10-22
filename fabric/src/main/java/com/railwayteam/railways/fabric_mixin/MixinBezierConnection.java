@@ -8,7 +8,7 @@ import com.zurrtum.create.content.trains.track.BezierConnection;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -74,7 +74,7 @@ public abstract class MixinBezierConnection implements IHasTrackCasing {
         Block casing = railways$getTrackCasing();
         buffer.writeBoolean(casing != null);
         if (casing != null) {
-            buffer.writeIdentifier(BuiltInRegistries.BLOCK.getKey(casing));
+            buffer.writeResourceLocation(BuiltInRegistries.BLOCK.getKey(casing));
             buffer.writeBoolean(railways$isAlternate());
         }
     }
@@ -84,7 +84,7 @@ public abstract class MixinBezierConnection implements IHasTrackCasing {
         input.getString("Casing").ifPresent(casingId -> {
             if (casingId.equals("minecraft:block"))
                 Railways.LOGGER.error("NBTCtor trackCasing was minecraft:block!!! for BezierConnection: primary={}, secondary={}", bePositions.getFirst(), bePositions.getSecond());
-            BuiltInRegistries.BLOCK.get(Identifier.parse(casingId))
+            BuiltInRegistries.BLOCK.get(ResourceLocation.parse(casingId))
                 .ifPresent(holder -> railways$setTrackCasing(holder.value()));
         });
         railways$setAlternate(input.getBooleanOr("ShiftDown", false));
@@ -93,7 +93,7 @@ public abstract class MixinBezierConnection implements IHasTrackCasing {
     @Inject(method = "<init>(Lnet/minecraft/network/FriendlyByteBuf;)V", at = @At("RETURN"), remap = false)
     private void byteBufConstructor(FriendlyByteBuf buffer, CallbackInfo ci) {
         if (buffer.readBoolean()) {
-            BuiltInRegistries.BLOCK.get(buffer.readIdentifier())
+            BuiltInRegistries.BLOCK.get(buffer.readResourceLocation())
                 .ifPresent(holder -> railways$setTrackCasing(holder.value()));
             railways$setAlternate(buffer.readBoolean());
         } else {

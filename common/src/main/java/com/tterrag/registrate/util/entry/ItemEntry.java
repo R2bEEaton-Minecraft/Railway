@@ -1,10 +1,10 @@
 package com.tterrag.registrate.util.entry;
 
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 
 public class ItemEntry<T extends Item> extends ItemProviderEntry<T> {
-    public ItemEntry(Identifier id, T value) {
+    public ItemEntry(ResourceLocation id, T value) {
         super(id, value);
     }
 

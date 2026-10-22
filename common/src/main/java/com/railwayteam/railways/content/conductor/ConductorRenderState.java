@@ -2,7 +2,7 @@ package com.railwayteam.railways.content.conductor;
 
 import com.railwayteam.railways.Railways;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
@@ -11,7 +11,7 @@ public class ConductorRenderState extends LivingEntityRenderState {
     public DyeColor color = ConductorEntity.defaultColor();
     public ItemStack headStack = ItemStack.EMPTY;
     public ConductorEntity.Job job = ConductorEntity.Job.DEFAULT;
-    public Identifier texture = Railways.asResource("textures/entity/conductor.png");
+    public ResourceLocation texture = Railways.asResource("textures/entity/conductor.png");
 
     // riding/sitting pose
     public boolean isRiding = false;

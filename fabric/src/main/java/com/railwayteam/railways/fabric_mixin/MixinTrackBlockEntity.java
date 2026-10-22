@@ -14,7 +14,7 @@ import com.zurrtum.create.content.trains.track.TrackShape;
 import com.zurrtum.create.foundation.blockEntity.SmartBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
@@ -28,7 +28,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import net.minecraft.world.level.storage.ValueInput;
 
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -102,7 +101,7 @@ public abstract class MixinTrackBlockEntity extends SmartBlockEntity implements 
         railways$setAlternate(tag.getBooleanOr("AlternateModel", false));
 
         if (tag.getString("TrackCasing").isPresent()) {
-            Identifier casingName = Identifier.parse(tag.getStringOr("TrackCasing", ""));
+            ResourceLocation casingName = ResourceLocation.parse(tag.getStringOr("TrackCasing", ""));
             if (BuiltInRegistries.BLOCK.containsKey(casingName)) {
                 BuiltInRegistries.BLOCK.get(casingName)
                     .ifPresent(holder -> railways$setTrackCasing(holder.value()));

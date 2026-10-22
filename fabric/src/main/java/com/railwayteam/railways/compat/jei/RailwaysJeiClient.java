@@ -34,7 +34,7 @@ import mezz.jei.api.runtime.IJeiRuntime;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import org.joml.Matrix3x2f;
 import org.joml.Matrix3x2fStack;
@@ -48,7 +48,7 @@ public class RailwaysJeiClient implements IModPlugin {
 	}
 
 	@Override
-	public Identifier getPluginUid() {
+	public ResourceLocation getPluginUid() {
 		return Railways.asResource("jei_plugin");
 	}
 
@@ -71,7 +71,7 @@ public class RailwaysJeiClient implements IModPlugin {
 	}
 
 	private static boolean isSequencedAssemblyTrackPressing(RecipeHolder<PressingRecipe> recipeHolder) {
-		Identifier recipeId = recipeHolder.id().identifier();
+		ResourceLocation recipeId = recipeHolder.id().location();
 		return "create".equals(recipeId.getNamespace())
 			&& recipeId.getPath().startsWith("sequenced_assembly_")
 			&& recipeHolder.value().results().stream()
@@ -79,7 +79,7 @@ public class RailwaysJeiClient implements IModPlugin {
 			.anyMatch(RailwaysJeiClient::isRailwaysTrack);
 	}
 
-	private static boolean isRailwaysTrack(Identifier id) {
+	private static boolean isRailwaysTrack(ResourceLocation id) {
 		if (!Railways.MOD_ID.equals(id.getNamespace()))
 			return false;
 

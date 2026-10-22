@@ -45,7 +45,7 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.EntityRenderers;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.entity.Entity;
@@ -97,7 +97,7 @@ public class RailwaysClientImpl implements ClientModInitializer {
 		ClientWorldEvents.AFTER_CLIENT_WORLD_CHANGE.register((mc, level) -> ClientEvents.onClientWorldLoad(level));
 		ResourceManagerHelper.get(PackType.SERVER_DATA).registerReloadListener(new SimpleSynchronousResourceReloadListener() {
 			@Override
-			public Identifier getFabricId() {
+			public ResourceLocation getFabricId() {
 				return Railways.asResource("client_events");
 			}
 
@@ -108,7 +108,7 @@ public class RailwaysClientImpl implements ClientModInitializer {
 		});
 		ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(new SimpleSynchronousResourceReloadListener() {
 			@Override
-			public Identifier getFabricId() {
+			public ResourceLocation getFabricId() {
 				return Railways.asResource("client_resource_reload");
 			}
 

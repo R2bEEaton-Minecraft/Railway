@@ -24,10 +24,10 @@ import com.zurrtum.create.content.trains.track.TrackTargetingBehaviour;
 import com.zurrtum.create.infrastructure.component.BezierTrackPointLocation;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.rendertype.RenderTypes;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
@@ -85,7 +85,7 @@ public class CustomTrackOverlayRendering {
                 .scale(scale)
                 .translate(offsetToSide ? .5 : -.5, 0, -.5)
                 .light(LevelRenderer.getLightColor(level, pos))
-                .renderInto(ms.last(), buffer.getBuffer(RenderTypes.cutoutMovingBlock()));
+                .renderInto(ms.last(), buffer.getBuffer(RenderType.cutout()));
             rendered = true;
         }
         ms.popPose();
@@ -182,7 +182,7 @@ public class CustomTrackOverlayRendering {
             TrackShape shape = state.getValue(TrackBlock.SHAPE);
             if (casingTE.railways$getTrackCasing() != null) {
                 TrackCasingSpec spec = CRBlockPartials.TRACK_CASINGS.get(shape);
-                Identifier trackType = CRTrackMaterials.getType(trackBlock.getMaterial());
+                ResourceLocation trackType = CRTrackMaterials.getType(trackBlock.getMaterial());
                 if (spec != null)
                     msr.translate(
                         spec.getXShift(trackType),

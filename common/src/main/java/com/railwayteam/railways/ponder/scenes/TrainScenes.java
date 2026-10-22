@@ -46,7 +46,7 @@ import com.zurrtum.create.client.ponder.foundation.PonderScene;
 import com.zurrtum.create.client.ponder.foundation.instruction.PonderInstruction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.world.entity.projectile.arrow.Arrow;
+import net.minecraft.world.entity.projectile.Arrow;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.ButtonBlock;
@@ -613,7 +613,7 @@ public class TrainScenes {
             }
 
             private Optional<TrackSwitchBlockEntity> getSwitch(PonderScene scene) {
-                if (scene.getLevel().getBlockEntity(switchPos) instanceof TrackSwitchBlockEntity switchBE)
+                if (scene.getWorld().getBlockEntity(switchPos) instanceof TrackSwitchBlockEntity switchBE)
                     return Optional.of(switchBE);
                 return Optional.empty();
             }
@@ -634,7 +634,7 @@ public class TrainScenes {
             }
 
             private Optional<TrackSwitchBlockEntity> getSwitch(PonderScene scene) {
-                if (scene.getLevel().getBlockEntity(switchPos) instanceof TrackSwitchBlockEntity switchBE)
+                if (scene.getWorld().getBlockEntity(switchPos) instanceof TrackSwitchBlockEntity switchBE)
                     return Optional.of(switchBE);
                 return Optional.empty();
             }
@@ -655,7 +655,7 @@ public class TrainScenes {
             }
 
             private Optional<TrackSwitchBlockEntity> getSwitch(PonderScene scene) {
-                if (scene.getLevel().getBlockEntity(switchPos) instanceof TrackSwitchBlockEntity switchBE)
+                if (scene.getWorld().getBlockEntity(switchPos) instanceof TrackSwitchBlockEntity switchBE)
                     return Optional.of(switchBE);
                 return Optional.empty();
             }
@@ -1003,7 +1003,7 @@ public class TrainScenes {
 
     public static void coupleTrain(SceneBuilder scene, BlockPos pos, double distance, Direction direction) {
         scene.addInstruction(PonderInstruction.simple(ponderScene -> {
-            PonderLevel world = ponderScene.getLevel();
+            PonderLevel world = ponderScene.getWorld();
             world.getBlockEntity(pos, AllBlockEntityTypes.BOGEY).ifPresent(sbte -> {
                 if (sbte instanceof IStandardBogeyTEVirtualCoupling virtualCoupling) {
                     virtualCoupling.setCouplingDistance(distance);
@@ -1015,7 +1015,7 @@ public class TrainScenes {
 
     public static void decoupleTrain(SceneBuilder scene, BlockPos pos) {
         scene.addInstruction(PonderInstruction.simple(ponderScene -> {
-            PonderLevel world = ponderScene.getLevel();
+            PonderLevel world = ponderScene.getWorld();
             world.getBlockEntity(pos, AllBlockEntityTypes.BOGEY).ifPresent(sbte -> {
                 if (sbte instanceof IStandardBogeyTEVirtualCoupling virtualCoupling) {
                     virtualCoupling.setCouplingDistance(-1);

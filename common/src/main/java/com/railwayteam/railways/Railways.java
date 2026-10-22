@@ -37,7 +37,7 @@ import com.zurrtum.create.foundation.data.CreateRegistrate;
 import com.tterrag.registrate.providers.ProviderType;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.minecraft.data.DataGenerator;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spongepowered.asm.mixin.MixinEnvironment;
@@ -114,8 +114,8 @@ public class Railways {
     ModSetupLate.registerPostRegistration();
   }
 
-  public static Identifier asResource(String name) {
-    return Identifier.fromNamespaceAndPath(MOD_ID, name);
+  public static ResourceLocation asResource(String name) {
+    return ResourceLocation.fromNamespaceAndPath(MOD_ID, name);
   }
 
   public static void gatherData(DataGenerator.PackGenerator gen) {

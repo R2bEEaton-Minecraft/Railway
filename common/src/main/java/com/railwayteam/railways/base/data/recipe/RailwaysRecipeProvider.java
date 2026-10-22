@@ -35,7 +35,7 @@ import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.PackOutput;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.DyeColor;
@@ -105,7 +105,7 @@ public abstract class RailwaysRecipeProvider implements DataProvider {
         }
 
         public static TagKey<Item> fence() {
-            return TagKey.create(Registries.ITEM, Identifier.parse("minecraft:fences"));
+            return TagKey.create(Registries.ITEM, ResourceLocation.parse("minecraft:fences"));
         }
 
         public static ItemLike campfire() {

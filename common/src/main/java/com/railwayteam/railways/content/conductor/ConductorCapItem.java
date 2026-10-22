@@ -22,7 +22,7 @@ import com.railwayteam.railways.Railways;
 import com.zurrtum.create.AllBlocks;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.InteractionResult;
@@ -43,7 +43,7 @@ import java.util.Locale;
 
 public abstract class ConductorCapItem extends ArmorItem {
   public final DyeColor color;
-  public final Identifier textureId;
+  public final ResourceLocation textureId;
   public final String textureStr;
 
   protected ConductorCapItem(Properties props, DyeColor color) {

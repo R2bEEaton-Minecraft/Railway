@@ -31,7 +31,7 @@ import com.zurrtum.create.content.trains.bogey.BogeySize;
 import com.zurrtum.create.content.trains.bogey.BogeyStyle;
 import com.zurrtum.create.content.trains.track.TrackBlock;
 import com.zurrtum.create.content.trains.track.TrackBlockEntity;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import com.zurrtum.create.content.trains.track.TrackShape;
 import com.zurrtum.create.catnip.data.Pair;
 import net.minecraft.core.BlockPos;
@@ -76,7 +76,7 @@ public class MixinTrackBlock {
     Pair<BogeyStyle, BogeySize> styleData = BogeyMenuHandlerServer.getStyle(BogeyMenuHandlerServer.getCurrentPlayer());
     BogeyStyle style = styleData.getFirst();
 
-    Identifier trackType = CRTrackMaterials.getType(((TrackBlock) (Object) this).getMaterial());
+    ResourceLocation trackType = CRTrackMaterials.getType(((TrackBlock) (Object) this).getMaterial());
 
     Optional<BogeyStyle> mappedStyleOptional = CRBogeyStyles.getMapped(style, trackType, true);
     if (mappedStyleOptional.isPresent())

@@ -26,7 +26,7 @@ import com.zurrtum.create.content.trains.bogey.BogeySize;
 import com.zurrtum.create.content.trains.bogey.BogeyStyle;
 import com.zurrtum.create.catnip.data.Pair;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -48,23 +48,23 @@ public class BogeyMenuManagerImpl implements BogeyMenuManager {
     }
 
     public static final float defaultScale = 23;
-    public CategoryEntry registerCategory(@NotNull Component name, @NotNull Identifier id) {
+    public CategoryEntry registerCategory(@NotNull Component name, @NotNull ResourceLocation id) {
         CategoryEntry entry = new CategoryEntry(name, id);
         // maintain favorites category at the end
         CATEGORIES.add(CATEGORIES.size() - 1, entry);
         return entry;
     }
-    public @Nullable CategoryEntry getCategoryById(@NotNull Identifier id) {
+    public @Nullable CategoryEntry getCategoryById(@NotNull ResourceLocation id) {
         for (CategoryEntry categoryEntry : CATEGORIES) {
             if (categoryEntry.getId().equals(id))
                 return categoryEntry;
         }
         return null;
     }
-    public BogeyEntry addToCategory(@NotNull CategoryEntry categoryEntry, @NotNull BogeyStyle bogeyStyle, @Nullable Identifier iconLocation) {
+    public BogeyEntry addToCategory(@NotNull CategoryEntry categoryEntry, @NotNull BogeyStyle bogeyStyle, @Nullable ResourceLocation iconLocation) {
         return addToCategory(categoryEntry, bogeyStyle, iconLocation, defaultScale);
     }
-    public BogeyEntry addToCategory(@NotNull CategoryEntry categoryEntry, @NotNull BogeyStyle bogeyStyle, @Nullable Identifier iconLocation, float scale) {
+    public BogeyEntry addToCategory(@NotNull CategoryEntry categoryEntry, @NotNull BogeyStyle bogeyStyle, @Nullable ResourceLocation iconLocation, float scale) {
         return BogeyEntry.getOrCreate(categoryEntry, bogeyStyle, iconLocation, scale);
     }
     public void setScalesForBogeySizes(BogeyStyle style, BogeySize size, float scale) {

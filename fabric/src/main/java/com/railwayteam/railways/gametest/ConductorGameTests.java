@@ -27,6 +27,7 @@ import com.railwayteam.railways.registry.CRTags;
 import com.zurrtum.create.AllBlocks;
 import com.zurrtum.create.AllItems;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
+import net.minecraft.network.chat.Component;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.component.DataComponents;
@@ -55,8 +56,8 @@ public class ConductorGameTests {
         ItemStack blueCap = CRItems.ITEM_CONDUCTOR_CAP.get(DyeColor.BLUE).asStack();
         conductor.setItemSlot(EquipmentSlot.HEAD, blueCap);
         ItemStack equipped = conductor.getItemBySlot(EquipmentSlot.HEAD);
-        helper.assertFalse(equipped.isEmpty(), "Conductor head slot should not be empty");
-        helper.assertTrue(CRTags.AllItemTags.CONDUCTOR_CAPS.matches(equipped), "Equipped item must match CONDUCTOR_CAPS tag");
+        helper.assertFalse(equipped.isEmpty(), Component.literal("Conductor head slot should not be empty"));
+        helper.assertTrue(CRTags.AllItemTags.CONDUCTOR_CAPS.matches(equipped), Component.literal("Equipped item must match CONDUCTOR_CAPS tag"));
         helper.succeed();
     }
 
@@ -64,10 +65,10 @@ public class ConductorGameTests {
     public void testConductorScheduleHolding(GameTestHelper helper) {
         BlockPos pos = new BlockPos(3, 1, 3);
         ConductorEntity conductor = helper.spawn(CREntities.CONDUCTOR.get(), pos);
-        helper.assertFalse(conductor.isHoldingSchedules(), "Initial conductor should not hold schedules");
+        helper.assertFalse(conductor.isHoldingSchedules(), Component.literal("Initial conductor should not hold schedules"));
 
         conductor.addSchedule(new ItemStack(AllItems.SCHEDULE));
-        helper.assertTrue(conductor.isHoldingSchedules(), "Conductor should be holding schedule after adding one");
+        helper.assertTrue(conductor.isHoldingSchedules(), Component.literal("Conductor should be holding schedule after adding one"));
         helper.succeed();
     }
 
@@ -85,16 +86,16 @@ public class ConductorGameTests {
         BlockPos pos = new BlockPos(4, 1, 4);
         helper.setBlock(pos, CRBlocks.CONDUCTOR_VENT.get().defaultBlockState());
         helper.assertBlockPresent(CRBlocks.CONDUCTOR_VENT.get(), pos);
-        helper.assertTrue(ConductorEntity.canSpyInteract(helper.getBlockState(pos)), "Conductor should be able to spy-interact with vent block");
+        helper.assertTrue(ConductorEntity.canSpyInteract(helper.getBlockState(pos)), Component.literal("Conductor should be able to spy-interact with vent block"));
         helper.succeed();
     }
 
     @GameTest(structure = RailwaysGameTestHelper.PLATFORM_8X8)
     public void testAllConductorCapColorsExist(GameTestHelper helper) {
         for (DyeColor color : DyeColor.values()) {
-            helper.assertTrue(CRItems.ITEM_CONDUCTOR_CAP.containsKey(color), "Cap missing for color " + color);
+            helper.assertTrue(CRItems.ITEM_CONDUCTOR_CAP.containsKey(color), Component.literal("Cap missing for color " + color));
             ItemStack cap = CRItems.ITEM_CONDUCTOR_CAP.get(color).asStack();
-            helper.assertTrue(CRTags.AllItemTags.CONDUCTOR_CAPS.matches(cap), "Cap item for " + color + " must match tag");
+            helper.assertTrue(CRTags.AllItemTags.CONDUCTOR_CAPS.matches(cap), Component.literal("Cap item for " + color + " must match tag"));
         }
         helper.succeed();
     }
@@ -114,7 +115,7 @@ public class ConductorGameTests {
         UseOnContext context = new UseOnContext(player, InteractionHand.MAIN_HAND, hitResult);
         InteractionResult result = redCap.useOn(context);
 
-        helper.assertTrue(result.consumesAction(), "Cap use on casing should consume action");
+        helper.assertTrue(result.consumesAction(), Component.literal("Cap use on casing should consume action"));
         helper.assertBlockNotPresent(AllBlocks.ANDESITE_CASING, localPos);
         helper.assertEntityPresent(CREntities.CONDUCTOR.get(), localPos);
         helper.succeed();
@@ -124,22 +125,22 @@ public class ConductorGameTests {
     public void testConductorGogglesSpyJob(GameTestHelper helper) {
         BlockPos pos = new BlockPos(3, 1, 3);
         ConductorEntity conductor = helper.spawn(CREntities.CONDUCTOR.get(), pos);
-        helper.assertTrue(conductor.getJob() == ConductorEntity.Job.DEFAULT, "Initial conductor job should be DEFAULT");
+        helper.assertTrue(conductor.getJob() == ConductorEntity.Job.DEFAULT, Component.literal("Initial conductor job should be DEFAULT"));
 
         Player player = helper.makeMockPlayer(GameType.SURVIVAL);
         player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(AllItems.GOGGLES));
 
         InteractionResult result = player.interactOn(conductor, InteractionHand.MAIN_HAND);
-        helper.assertTrue(result.consumesAction(), "Giving goggles to conductor should succeed");
-        helper.assertTrue(conductor.getJob() == ConductorEntity.Job.SPY, "Conductor job should become SPY");
-        helper.assertTrue(conductor.getSecondaryHeadStack().is(AllItems.GOGGLES), "Conductor secondary head stack should match AllItems.GOGGLES");
+        helper.assertTrue(result.consumesAction(), Component.literal("Giving goggles to conductor should succeed"));
+        helper.assertTrue(conductor.getJob() == ConductorEntity.Job.SPY, Component.literal("Conductor job should become SPY"));
+        helper.assertTrue(conductor.getSecondaryHeadStack().is(AllItems.GOGGLES), Component.literal("Conductor secondary head stack should match AllItems.GOGGLES"));
 
         // Shift-interact with empty hand retrieves goggles
         player.setShiftKeyDown(true);
         player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
         player.interactOn(conductor, InteractionHand.MAIN_HAND);
-        helper.assertTrue(conductor.getJob() == ConductorEntity.Job.DEFAULT, "Conductor job should revert to DEFAULT");
-        helper.assertTrue(player.getItemInHand(InteractionHand.MAIN_HAND).is(AllItems.GOGGLES), "Player should have retrieved the goggles");
+        helper.assertTrue(conductor.getJob() == ConductorEntity.Job.DEFAULT, Component.literal("Conductor job should revert to DEFAULT"));
+        helper.assertTrue(player.getItemInHand(InteractionHand.MAIN_HAND).is(AllItems.GOGGLES), Component.literal("Player should have retrieved the goggles"));
         helper.succeed();
     }
 
@@ -147,21 +148,21 @@ public class ConductorGameTests {
     public void testConductorRedstoneLinkJob(GameTestHelper helper) {
         BlockPos pos = new BlockPos(3, 1, 3);
         ConductorEntity conductor = helper.spawn(CREntities.CONDUCTOR.get(), pos);
-        helper.assertTrue(conductor.getJob() == ConductorEntity.Job.DEFAULT, "Initial conductor job should be DEFAULT");
+        helper.assertTrue(conductor.getJob() == ConductorEntity.Job.DEFAULT, Component.literal("Initial conductor job should be DEFAULT"));
 
         Player player = helper.makeMockPlayer(GameType.SURVIVAL);
         player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(AllBlocks.REDSTONE_LINK));
 
         InteractionResult result = player.interactOn(conductor, InteractionHand.MAIN_HAND);
-        helper.assertTrue(result.consumesAction(), "Giving redstone link to conductor should succeed");
-        helper.assertTrue(conductor.getJob() == ConductorEntity.Job.REMOTE_CONTROL, "Conductor job should become REMOTE_CONTROL");
+        helper.assertTrue(result.consumesAction(), Component.literal("Giving redstone link to conductor should succeed"));
+        helper.assertTrue(conductor.getJob() == ConductorEntity.Job.REMOTE_CONTROL, Component.literal("Conductor job should become REMOTE_CONTROL"));
 
         // Shift-interact with empty hand retrieves redstone link
         player.setShiftKeyDown(true);
         player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
         player.interactOn(conductor, InteractionHand.MAIN_HAND);
-        helper.assertTrue(conductor.getJob() == ConductorEntity.Job.DEFAULT, "Conductor job should revert to DEFAULT");
-        helper.assertTrue(player.getItemInHand(InteractionHand.MAIN_HAND).is(AllBlocks.REDSTONE_LINK.asItem()), "Player should have retrieved redstone link");
+        helper.assertTrue(conductor.getJob() == ConductorEntity.Job.DEFAULT, Component.literal("Conductor job should revert to DEFAULT"));
+        helper.assertTrue(player.getItemInHand(InteractionHand.MAIN_HAND).is(AllBlocks.REDSTONE_LINK.asItem()), Component.literal("Player should have retrieved redstone link"));
         helper.succeed();
     }
 
@@ -176,11 +177,11 @@ public class ConductorGameTests {
         player.setItemInHand(InteractionHand.MAIN_HAND, lensStack);
 
         InteractionResult result = CRItems.REMOTE_LENS.get().interactLivingEntity(lensStack, player, conductor, InteractionHand.MAIN_HAND);
-        helper.assertTrue(result == InteractionResult.SUCCESS, "Remote lens should successfully bind to SPY conductor");
+        helper.assertTrue(result == InteractionResult.SUCCESS, Component.literal("Remote lens should successfully bind to SPY conductor"));
 
         CompoundTag tag = player.getItemInHand(InteractionHand.MAIN_HAND).getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
-        helper.assertTrue(tag.contains("SelectedConductor"), "Custom data should contain SelectedConductor");
-        helper.assertTrue(tag.getStringOr("SelectedConductor", "").equals(conductor.getUUID().toString()), "SelectedConductor must match conductor UUID");
+        helper.assertTrue(tag.contains("SelectedConductor"), Component.literal("Custom data should contain SelectedConductor"));
+        helper.assertTrue(tag.getStringOr("SelectedConductor", "").equals(conductor.getUUID().toString()), Component.literal("SelectedConductor must match conductor UUID"));
         helper.succeed();
     }
 }

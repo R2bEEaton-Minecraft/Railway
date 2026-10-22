@@ -25,7 +25,7 @@ import com.zurrtum.create.client.catnip.render.SuperByteBuffer;
 import com.zurrtum.create.client.foundation.blockEntity.renderer.SmartBlockEntityRenderer;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
-import net.minecraft.client.renderer.rendertype.RenderTypes;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.state.CameraRenderState;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
@@ -58,10 +58,10 @@ public class ConductorWhistleFlagRenderer
 	@Override
 	public void submit(FlagRenderState state, PoseStack matrices, SubmitNodeCollector queue,
 					   CameraRenderState cameraState) {
-		super.submit(state, matrices, queue, cameraState);
+
 
 		if (state.flag != null) {
-			queue.submitCustomGeometry(matrices, RenderTypes.cutoutMovingBlock(),
+			queue.submitCustomGeometry(matrices, RenderType.cutout(),
 				(pose, consumer) -> state.flag
 					.light(state.lightCoords)
 					.renderInto(pose, consumer));

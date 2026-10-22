@@ -42,7 +42,7 @@ import com.tterrag.registrate.util.nullness.NonNullUnaryOperator;
 import com.zurrtum.create.content.decoration.MetalLadderBlock;
 import com.zurrtum.create.content.kinetics.flywheel.FlywheelBlock;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.DyeColor;
@@ -92,7 +92,7 @@ public class BuilderTransformersImpl {
     public static <B extends Block, P> NonNullUnaryOperator<BlockBuilder<B, P>> variantBuffer() { return b -> b; }
     public static <I extends Item, P> NonNullUnaryOperator<ItemBuilder<I, P>> variantBufferItem() { return b -> b; }
     public static <B extends CopycatHeadstockBarsBlock, P> NonNullUnaryOperator<BlockBuilder<B, P>> copycatHeadstockBars() { return b -> b; }
-    public static <B extends TrackBufferBlock<?>, P> NonNullUnaryOperator<BlockBuilder<B, P>> bufferBlockState(Function<BlockState, Identifier> modelFunc, Function<BlockState, Direction> facingFunc) { return b -> b; }
+    public static <B extends TrackBufferBlock<?>, P> NonNullUnaryOperator<BlockBuilder<B, P>> bufferBlockState(Function<BlockState, ResourceLocation> modelFunc, Function<BlockState, Direction> facingFunc) { return b -> b; }
     public static <B extends MonoTrackBufferBlock, P> NonNullUnaryOperator<BlockBuilder<B, P>> monoBuffer() { return b -> b; }
     public static <B extends LinkPinBlock, P> NonNullUnaryOperator<BlockBuilder<B, P>> linkAndPin() { return b -> b; }
     public static <B extends HeadstockBlock, P> NonNullUnaryOperator<BlockBuilder<B, P>> headstock() { return b -> b; }
