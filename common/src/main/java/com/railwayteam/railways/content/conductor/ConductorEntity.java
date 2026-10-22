@@ -324,7 +324,7 @@ public class ConductorEntity extends AbstractGolem {
     public float oBob;
     public float bob;
 
-    // visualBaseModel/visualBaseEntity are not used in the 1.21.11 port since
+    // visualBaseModel/visualBaseEntity are not used by the render-state renderer since
     // setupAnim uses render-state (ConductorRenderState) instead of entity fields.
 
     private boolean rotateAnyway = false;
@@ -360,7 +360,7 @@ public class ConductorEntity extends AbstractGolem {
 
     @Override
     public boolean canSimulateMovement() {
-        // 1.21.11: travel() is only called when canSimulateMovement() AND isEffectiveAi() are both true.
+        // travel() is only called when canSimulateMovement() AND isEffectiveAi() are both true.
         // isLocalInstanceAuthoritative() (which the default delegates to) returns false for server-
         // controlled mobs on the client, so we must override this separately from isEffectiveAi().
         return isPossessedAndClient() || super.canSimulateMovement();

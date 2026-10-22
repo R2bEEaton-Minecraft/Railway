@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(value = ServerPlayer.class, priority = 1200)
 public class ServerPlayerMixin {
-    // snapTo redirect removed — ServerPlayer.tick does not call snapTo in 1.21.11,
+    // snapTo redirect removed — ServerPlayer.tick does not call snapTo in the target API,
     // so the redirect matched 0 targets and crashed at bootstrap.
 
     @Inject(method = "setCamera", at = @At("HEAD"), cancellable = true)

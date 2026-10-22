@@ -310,6 +310,6 @@ public class CRTrackMaterials {
     public static void register() {}
 
     public static void addToBlockEntityType(TrackBlock block) {
-        // Create Fly handles its track block entity registration internally on 1.21.11.
+        // Create Fly handles its track block entity registration internally.
     }
 }

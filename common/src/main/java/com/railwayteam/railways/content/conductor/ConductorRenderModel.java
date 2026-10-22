@@ -27,7 +27,7 @@ public class ConductorRenderModel extends EntityModel<ConductorRenderState> impl
         this.leftLeg = root.getChild("left_leg");
         // The outer hat overlay (hat) is not rendered in the main pass —
         // it was explicitly excluded in the original renderToBuffer. Since
-        // renderToBuffer is final in 1.21.11, we hide it here instead.
+        // renderToBuffer is final in the target API, we hide it here instead.
         this.hat.visible = false;
     }
 

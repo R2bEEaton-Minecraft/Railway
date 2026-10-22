@@ -64,7 +64,7 @@ dependencies {
     compileOnly("com.tterrag.registrate:Registrate:MC1.20-1.3.11")
     compileOnly("com.google.code.findbugs:jsr305:3.0.2")
 
-    // EMI has no release for Minecraft 1.21.11 yet. Keep the EMI compatibility
+    // Keep the EMI compatibility
     // sources excluded until a matching API is available.
     modCompileOnly("maven.modrinth:jei:${"jei_fabric_version"()}")
 
