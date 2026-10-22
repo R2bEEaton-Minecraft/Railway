@@ -2,6 +2,7 @@
 	"credit": "By Slimeist",
 	"texture_size": [64, 32],
 	"textures": {
+		"particle": "#2",
 		"2": "entity/slime/slime"
 	},
 	"elements": [

@@ -1,6 +1,7 @@
 {
 	"credit": "Made with Blockbench",
 	"textures": {
+		"particle": "#2",
 		"2": "railways:item/dev_caps/headphones"
 	},
 	"elements": [
