@@ -304,6 +304,7 @@ subprojects {
         val properties = mapOf(
                 "version" to version,
                 "minecraft_version" to "minecraft_version"(),
+                "minecraft_version_range" to "minecraft_version_range"(),
                 "fabric_api_version" to "fabric_api_version"(),
                 "fabric_loader_version" to "fabric_loader_version"(),
                 "voicechat_api_version" to "voicechat_api_version"(),
@@ -437,7 +438,7 @@ fun patchCreateFlyMixinDescriptors(entryName: String, bytes: ByteArray): ByteArr
             "method_5873" to "method_5873(Lnet/minecraft/class_1297;ZZ)Z"
         )
         "com/zurrtum/create/client/mixin/MinecraftClientMixin.class" -> mapOf(
-            "method_18096" to "method_18096(Lnet/minecraft/class_437;ZZ)V"
+            "method_18096" to "method_18096(Lnet/minecraft/class_437;Z)V"
         )
         else -> return bytes
     }
