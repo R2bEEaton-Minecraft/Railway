@@ -26,6 +26,7 @@ import com.railwayteam.railways.content.buffer.headstock.fabric.CopycatHeadstock
 import com.railwayteam.railways.content.conductor.fabric.ConductorCapItemRenderer;
 import com.railwayteam.railways.events.ClientEvents;
 import com.railwayteam.railways.registry.CRParticleTypes;
+import com.railwayteam.railways.registry.CRBlocks;
 import com.zurrtum.create.content.trains.track.TrackMaterial;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
@@ -71,6 +72,11 @@ public class RailwaysClientImpl implements ClientModInitializer {
 		BlockRenderLayerMap.putBlock(
 				com.railwayteam.railways.registry.CRBlocks.CONDUCTOR_VENT.get(),
 				ChunkSectionLayer.CUTOUT);
+
+		// The fan lattice and headstock bars use textures with transparent cells.
+		BlockRenderLayerMap.putBlocks(ChunkSectionLayer.CUTOUT_MIPPED,
+				CRBlocks.DIESEL_STACK.get(), CRBlocks.COPYCAT_HEADSTOCK_BARS.get());
+
 	}
 
 	private static void registerJeiCompat() {
