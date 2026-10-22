@@ -22,6 +22,7 @@ import com.railwayteam.railways.content.buffer.headstock.CopycatHeadstockBlock;
 import com.zurrtum.create.catnip.data.Iterate;
 import com.zurrtum.create.client.foundation.model.BakedModelHelper;
 import com.zurrtum.create.client.infrastructure.model.CopycatModel;
+import com.zurrtum.create.client.model.NormalsBakedQuad;
 import com.zurrtum.create.content.decoration.copycat.CopycatBlock;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.BlockModelPart;
@@ -143,9 +144,12 @@ public class CopycatHeadstockBlockStateModel extends CopycatModel {
 					if (!top && direction == Direction.UP)
 						continue;
 
-					consumer.accept(new BakedQuad(
+					BakedQuad cropped = new BakedQuad(
 						BakedModelHelper.cropAndMove(quad.vertices(), quad.sprite(), bb, offset),
-						quad.tintIndex(), quad.direction(), quad.sprite(), quad.shade(), quad.lightEmission()));
+						quad.tintIndex(), quad.direction(), quad.sprite(), quad.shade(), quad.lightEmission());
+					if (NormalsBakedQuad.hasNormals(quad))
+						NormalsBakedQuad.markNormals(cropped);
+					consumer.accept(cropped);
 				}
 			}
 		}
