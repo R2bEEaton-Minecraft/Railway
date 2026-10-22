@@ -11,6 +11,7 @@
     "client.MixinKeyboardHandler",
     "client.MixinObjGeometryModelMesh",
     "client.MixinSectionCompiler",
+    "client.MixinWrapperBlockStateModel",
     "client.MixinSegmentAngles",
     "client.MixinTrackVisual",
     "client.MixinTrackTargetingClient",
