@@ -123,7 +123,7 @@ public class BuilderTransformers {
     }
 
     @ApiStatus.Internal
-    public static <B extends CRBogeyBlock, P> NonNullUnaryOperator<BlockBuilder<B, P>> sharedBogey() {
+    public static <B extends Block, P> NonNullUnaryOperator<BlockBuilder<B, P>> sharedBogey() {
         return b -> b.initialProperties(SharedProperties::softMetal)
             .properties(p -> p.sound(SoundType.NETHERITE_BLOCK))
             .properties(BlockBehaviour.Properties::noOcclusion)

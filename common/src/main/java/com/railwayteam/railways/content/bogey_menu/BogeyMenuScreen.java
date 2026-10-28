@@ -54,6 +54,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
@@ -241,6 +242,20 @@ public class BogeyMenuScreen extends AbstractSimiScreen {
 			@Override
 			public float getVirtualAngle(float ignoredPartialTicks) {
 				return wheelAngle;
+			}
+
+			@Override
+			public @Nullable Level getLevel() {
+				return null;
+			}
+
+			@Override
+			public boolean hasLevel() {
+				return false;
+			}
+
+			@Override
+			public void setLevel(Level level) {
 			}
 		};
 
